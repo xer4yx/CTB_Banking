@@ -1,11 +1,15 @@
 package com.ctb.classes;
 
 
+import java.util.LinkedList;
+import java.util.List;
+
 class Admin extends User{
     private String adminID;
     private String name;
     private String username;
     private String password;
+    private final List<User> users = new LinkedList<>();
 
     /*----------------------Setter Methods----------------------*/
     public void setAdminID(String adminID) {
@@ -13,30 +17,21 @@ class Admin extends User{
     }
 
     /*----------------------Getter Methods----------------------*/
-    public String getAdminID() {
-        return adminID;
-    }
+    public String getAdminID() {return adminID;}
 
     /*----------------------Class Methods----------------------*/
     public boolean deleteUserByUsername(String username) {
-        using namespace std; // Add this line to use the std namespace
-
-        auto userToDelete = std::remove_if(users.begin(), users.end(),
-                                       [usernameToDelete](const User &user)
-        { return user.username == usernameToDelete; });
+        var userToDelete = users.removeIf(users.begin(), users.end(),
+                [usernameToDelete](final User user){ return user.username == usernameToDelete; });
 
         if (userToDelete != users.end())
         {
             users.erase(userToDelete, users.end());
-
-            saveDataToFile(); // Save data after deletion
+            BankSystem.saveDataToFile(); // Save data after deletion
             return true;
         }
-        else
-        {
 
-            return false;
-        }
+        return false;
     }
 
     public void handleManageUsers(String username) {

@@ -1,7 +1,5 @@
 package com.ctb.classes;
 
-import com.ctb.interfaces.ProfileInterface;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -10,7 +8,7 @@ public class Profile{
     private String email;
     private String phoneNumber;
     private boolean is2FAEnabled;
-    private List<User> users = new LinkedList<>();
+    private final List<User> users = new LinkedList<>();
 
     /*----------------------Setter Methods----------------------*/
     public void setEmail(String email) {this.email = email;}
