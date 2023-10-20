@@ -1,7 +1,7 @@
 package com.ctb.interfaces;
 
 public interface GUIInterface {
-    static void displayMainMenu();
+    void displayMainMenu();
     boolean loginUser(String loggedInUsername);
     void logout(final String username);
     void forgotPassword();
