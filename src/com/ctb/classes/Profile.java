@@ -23,6 +23,7 @@ public class Profile{
     /*----------------------Class Methods----------------------*/
     public void displayProfile(String username) {
         users.add(new User("Angelo M. Bicomong", "Xerayx", "Savings Account"));
+        users.add(new User("Jenine R. Ruado", "lil_j9", "Credit Account"));
         for (final User user : users)
         {
             if (Objects.equals(user.getUsername(), username))

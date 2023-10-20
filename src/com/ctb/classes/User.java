@@ -309,7 +309,7 @@ public class User {
         cin.get();
     }
 
-    public void applyProduct() {
+    public static void applyProduct() {
         String name, username, password, email, phone, accounttype;
         int acctype;
         char enable2FA;
@@ -572,5 +572,53 @@ public class User {
         getline(cin, message);
 
         HelpAndResources.saveHelpAndResources(username, "Help", message, "");
+    }
+
+    protected void setUserProfile(List<Profile> userProfile) {
+        this.userProfile = userProfile;
+    }
+
+    protected void setUserTransaction(List<Transaction> userTransaction) {
+        this.userTransaction = userTransaction;
+    }
+
+    protected void setUserProductApplications(List<ProductApplication> userProductApplications) {
+        this.userProductApplications = userProductApplications;
+    }
+
+    protected void setUserSessions(List<Session> userSessions) {
+        this.userSessions = userSessions;
+    }
+
+    protected void setUserHelpAndResources(List<HelpAndResources> userHelpAndResources) {
+        this.userHelpAndResources = userHelpAndResources;
+    }
+
+    protected void setUserDashboard(List<Dashboard> userDashboard) {
+        this.userDashboard = userDashboard;
+    }
+
+    protected List<Profile> getUserProfile() {
+        return userProfile;
+    }
+
+    protected List<Transaction> getUserTransaction() {
+        return userTransaction;
+    }
+
+    protected List<ProductApplication> getUserProductApplications() {
+        return userProductApplications;
+    }
+
+    protected List<Session> getUserSessions() {
+        return userSessions;
+    }
+
+    protected List<HelpAndResources> getUserHelpAndResources() {
+        return userHelpAndResources;
+    }
+
+    protected List<Dashboard> getUserDashboard() {
+        return userDashboard;
     }
 }

@@ -1,35 +1,40 @@
 package com.ctb.classes;
 
 import java.time.Instant;
+import java.util.Objects;
 
-public class Session{
+public class Session extends User{
     private String sessionID;
-    private String username;
+    private String sessionType;
     private final long timeStamp = Instant.now().getEpochSecond();
 
+    protected void setSessionID(String sessionID) {this.sessionID = sessionID;}
+    protected void setSessionType(String sessionType) {this.sessionType = sessionType;}
+
+    protected long getTimeStamp() {return timeStamp;}
+    protected String getSessionID() {return sessionID;}
+
+
     /*----------------------Class Methods----------------------*/
-    protected static void generateSessionID(final String username) {
-        if (sessiontype == "Login")
-        {
-            return "LGN" + to_string(time(nullptr)) + to_string(rand());
+    protected String generateSessionID() {
+        if (Objects.equals(sessionType, "Login")) {
+            return "LGN" + Instant.now().getEpochSecond();
         }
-        if (sessiontype == "Logout")
-        {
-            return "LGT" + to_string(time(nullptr)) + to_string(rand());
+
+        if (Objects.equals(sessionType, "Logout")) {
+            return "LGT" + Instant.now().getEpochSecond();
         }
-        else
-        {
-            return "SSN" + to_string(time(nullptr)) + to_string(rand());
-        }
+
+        return "SSN" + Instant.now().getEpochSecond();
     }
-    protected static void setCurrentSessionID(final String sessionID) {currentSessionID = sessionID;}
+
     protected static void saveSession(final String username, final String sessionType) {
-        for (User &user : users)
+        for (User user : users)
         {
             if (user.username == username)
             {
                 Session session;
-                session.sessionID = generateSessionID(sessiontype);
+                session.sessionID = generateSessionID(sessionType);
                 session.username = username;
                 session.timestamp = time(nullptr);
                 user.sessions.push_back(session);

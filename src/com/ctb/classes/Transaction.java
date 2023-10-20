@@ -22,8 +22,10 @@ class Transaction {
     public String getTransactionType() {return transactionType;}
     public String getDescription() {return description;}
     public double getAmount() {return amount;}
+    protected long getTimeStamp() {return timeStamp;}
 
     /*----------------------Class Methods----------------------*/
+
     protected void generateTransactionID() {
         {
             // Implement your logic to generate a unique transaction ID

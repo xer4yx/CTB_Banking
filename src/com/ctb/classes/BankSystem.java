@@ -11,12 +11,25 @@ public class BankSystem {
     private String currentProductType;
     private String currentSessionID;
     private String dataFilePath;
-    private List<UserInterface> users = new LinkedList<>();
-    private List<Profile> profiles = new LinkedList<>();
-    private List<Transaction> transactionHistory = new LinkedList<>();
-    private List<ProductApplication> productApplications = new LinkedList<>();
-    private List<Session> sessions = new LinkedList<>();
-    private List<Dashboard> dashboards = new LinkedList<>();
+    private final List<User> users = new LinkedList<>();
+    private final List<Profile> profiles = new LinkedList<>();
+    private final List<Transaction> transactionHistory = new LinkedList<>();
+    private final List<ProductApplication> productApplications = new LinkedList<>();
+    private final List<Session> sessions = new LinkedList<>();
+    private final List<Dashboard> dashboards = new LinkedList<>();
+
+    public static List<User> getUsers() {
+        return users;
+    }
+
+    public List<Profile> getProfiles() {
+        return profiles;
+    }
+
+    protected static void clearConsole() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+    }
 
     public double calculateEarnedInterest(String username) {
         double interestRate = 0.05; // Annual interest rate
@@ -153,7 +166,7 @@ public class BankSystem {
         return -1.0; // Choose a different indicator if needed
     }
 
-    public boolean isAdmin(String username) {
+    public static boolean isAdmin(String username) {
         for (const User &user : users)
         {
             if (user.username == username)
@@ -164,7 +177,7 @@ public class BankSystem {
         return false;
     }
 
-    public boolean isCustomerService(String username) {
+    public static boolean isCustomerService(String username) {
         for (const User &user : users)
         {
             if (user.username == username)

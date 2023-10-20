@@ -1,15 +1,14 @@
 package com.ctb.classes;
 
-
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Objects;
+import java.util.Scanner;
 
 class Admin extends User{
     private String adminID;
     private String name;
     private String username;
     private String password;
-    private final List<User> users = new LinkedList<>();
+    private final Scanner input = new Scanner(System.in);
 
     /*----------------------Setter Methods----------------------*/
     public void setAdminID(String adminID) {
@@ -20,44 +19,42 @@ class Admin extends User{
     public String getAdminID() {return adminID;}
 
     /*----------------------Class Methods----------------------*/
-    public boolean deleteUserByUsername(String username) {
-        var userToDelete = users.removeIf(users.begin(), users.end(),
-                [usernameToDelete](final User user){ return user.username == usernameToDelete; });
-
-        if (userToDelete != users.end())
-        {
-            users.erase(userToDelete, users.end());
-            BankSystem.saveDataToFile(); // Save data after deletion
-            return true;
+    public boolean deleteUserByUsername(String userToDelete) {
+        var userIterator = BankSystem.getUsers().iterator();
+        while(userIterator.hasNext()) {
+            User user = userIterator.next();
+            if (user.getUsername().equals(userToDelete)) {
+                userIterator.remove();
+                BankSystem.saveDataToFile(); // Save data after deletion
+                return true;
+            }
         }
-
         return false;
     }
 
     public void handleManageUsers(String username) {
-        ::system("cls");
-        cout << " " << endl;
-        cout << "╔═══════════════════════════════╗    " << endl;
-        cout << "║          Manage Users         ║        " << endl;
-        cout << "╠═══════════════════════════════╣    " << endl;
-        cout << "║  1. View Users Data           ║     " << endl;
-        cout << "║  2. Add Users                 ║   " << endl;
-        cout << "║  3. Delete Users              ║     " << endl;
-        cout << "║  4. Update Users              ║      " << endl;
-        cout << "║  5. Exit                      ║      " << endl;
-        cout << "╚═══════════════════════════════╝    " << endl;
-        cout << " " << endl;
-        cout << "Enter your choice: ";
-        int choice;
-        cin >> choice;
-        cin.ignore();
-        switch (choice)
-        {
+        BankSystem.clearConsole();
+        System.out.println(
+                "\n╔═══════════════════════════════╗" +
+                "\n║          Manage Users         ║" +
+                "\n╠═══════════════════════════════╣" +
+                "\n║  1. View Users Data           ║" +
+                "\n║  2. Add Users                 ║" +
+                "\n║  3. Delete Users              ║" +
+                "\n║  4. Update Users              ║" +
+                "\n║  5. Exit                      ║" +
+                "\n╚═══════════════════════════════╝"
+        );
+
+        System.out.print("Enter your choice: ");
+        int choice = input.nextInt();
+        input.nextLine();
+        switch (choice) {
             case 1:
                 displayAllUserData();
                 break;
             case 2:
-                applyForProduct();
+                User.applyProduct();
                 break;
             case 3:
                 deleteUser();
@@ -68,101 +65,128 @@ class Admin extends User{
             case 5:
                 return;
             default:
-                cout << "Invalid choice. Please try again." << endl;
+                System.out.println("Invalid choice. Please try again.");
                 break;
         }
     }
 
     public void updateUser() {
-        ::system("cls");
-        cout << " " << endl;
-        cout << "╭────────────────────────────────────────────────────────────────╮" << endl;
-        cout << "│                         Update User                            │ " << endl;
-        cout << "╰────────────────────────────────────────────────────────────────╯" << endl;
-        cout << " \nEnter the username of the user you want to update: ";
-        string pickedusername;
-        cin >> pickedusername;
-        adminhandleAccountSettings(pickedusername);
+        BankSystem.clearConsole();
+        System.out.println(
+                "\n╭────────────────────────────────────────────────────────────────╮" +
+                "\n│                         Update User                            │" +
+                "\n╰────────────────────────────────────────────────────────────────╯"
+        );
+        System.out.print("\nEnter the username of the user you want to update: ");
+        String pickedUsername = input.nextLine();
+        input.nextLine();
+        handleSettings(pickedUsername);
     }
 
     public void deleteUser() {
-        ::system("cls");
-        string user;
-        cout << " " << endl;
-        cout << "╭────────────────────────────────────────────────────────────────╮" << endl;
-        cout << "│                         Delete User                            │ " << endl;
-        cout << "╰────────────────────────────────────────────────────────────────╯" << endl;
-        cout << "\nEnter the username of the user to delete: ";
-        cin >> user;
-        cin.ignore();
-        cout << " " << endl;
-
-        if (deleteUserByUsername(user))
-        {
-            cout << "User with username '" << user << "' has been deleted." << endl;
-        }
-        else
-        {
-            cout << "User with username '" << user << "' not found." << endl;
+        BankSystem.clearConsole();
+        System.out.println(
+                "\n╭────────────────────────────────────────────────────────────────╮" +
+                "\n│                         Delete User                            │" +
+                "\n╰────────────────────────────────────────────────────────────────╯"
+        );
+        System.out.print("\nEnter the username of the user to delete: ");
+        String user = input.nextLine();
+        input.nextLine();
+        if (deleteUserByUsername(user)) {
+            System.out.printf("User with username '%s' has been deleted.", user);
+        } else {
+            System.out.printf("User with username '%s' not found.", user);
         }
     }
-    public void displayUserdata(String username) {
-        for (const User &user : users)
+    public void displayUserData(String username) {
+        for (final User user : BankSystem.getUsers())
         {
-            if (user.username == usernameToDisplay)
+            if (Objects.equals(user.getUsername(), username))
             {
-                cout << endl;
-                cout << "──────────────────────────────────────────────────────────────────" << endl;
-                cout << "                          Information:" << endl;
-                cout << "──────────────────────────────────────────────────────────────────" << endl;
-                cout << "  User ID                : " << user.userID << endl;
-                cout << "  Name                   : " << user.name << endl;
-                cout << "  Username               : " << user.username << endl;
-                cout << "  Is Admin               : " << (user.isadmin ? "Yes" : "No") << endl;
-                cout << "  Is Customer Service    : " << (user.iscustomerservice ? "Yes" : "No") << endl;
-                cout << "  Product Type           : " << user.producttype << endl;
-                cout << "  Balance                : " << user.balance << endl;
-                cout << "──────────────────────────────────────────────────────────────────" << endl;
-                cout << "                           Profiles:" << endl;
-                cout << "──────────────────────────────────────────────────────────────────" << endl;
-                for (const Profile &profile : user.profiles)
+                System.out.println(
+                        "\n──────────────────────────────────────────────────────────────────" +
+                        "\n                          Information:                            " +
+                        "\n──────────────────────────────────────────────────────────────────" +
+                        "\n  User ID                : " + user.getUserID() +
+                        "\n  Name                   : " + user.getName() +
+                        "\n  Username               : " + user.getUsername() +
+                        "\n  Is Admin               : " + (BankSystem.isAdmin(user.getUsername()) ? "Yes" : "No") +
+                        "\n  Is Customer Service    : " + (BankSystem.isCustomerService(user.getUsername()) ? "Yes" : "No") +
+                        "\n  Product Type           : " + user.getProductType() +
+                        "\n  Balance                : " + user.getBalance()
+                );
+
+                System.out.println(
+                        "\n──────────────────────────────────────────────────────────────────" +
+                        "\n                           Profiles:                              " +
+                        "\n──────────────────────────────────────────────────────────────────"
+                );
+                for (final Profile profile : user.getUserProfile())
                 {
-                    cout << "  Email                  : " << profile.email << endl;
-                    cout << "  Phone                  : " << profile.phone << endl;
-                    cout << "  Two-Factor Enabled     : " << (profile.isTwoFactorEnabled ? "Yes" : "No") << endl;
+                    System.out.println(
+                            " Email                  : " + profile.getEmail() +
+                            "\n  Phone                  : " + profile.getPhoneNumber() +
+                            "\n  Two-Factor Enabled     : " + (profile.get2FAStatus() ? "Yes" : "No")
+                    );
                 }
-                cout << "──────────────────────────────────────────────────────────────────" << endl;
-                cout << "                      Transaction History:" << endl;
-                cout << "──────────────────────────────────────────────────────────────────" << endl;
-                for (const Transaction &transaction : user.transactionhistory)
+
+                System.out.println(
+                        "\n──────────────────────────────────────────────────────────────────" +
+                        "\n                      Transaction History:                        " +
+                        "\n──────────────────────────────────────────────────────────────────"
+                );
+                for (final Transaction transaction : user.getUserTransaction())
                 {
-                    cout << "  Transaction ID         : " << transaction.transactionID << endl;
-                    cout << "  Transaction Type       : " << transaction.transactionType << endl;
-                    cout << "  Amount                 : " << transaction.amount << endl;
-                    cout << "  Timestamp              : " << transaction.timestamp << endl;
+                    System.out.println(
+                            "  Transaction ID         : " + transaction.getTransactionID() +
+                            "\n  Transaction Type       : " + transaction.getTransactionType() +
+                            "\n  Amount                 : " + transaction.getAmount() +
+                            "\n  Timestamp              : " + transaction.getTimeStamp()
+                    );
                 }
-                cout << "──────────────────────────────────────────────────────────────────" << endl;
-                cout << "                          Sessions:" << endl;
-                cout << "──────────────────────────────────────────────────────────────────" << endl;
-                for (const Session &session : user.sessions)
+
+                System.out.println(
+                        "\n──────────────────────────────────────────────────────────────────" +
+                        "\n                          Sessions:" +
+                        "\n──────────────────────────────────────────────────────────────────"
+                );
+
+                for (final Session session : user.getUserSessions())
                 {
-                    cout << "  Session ID             : " << session.sessionID << endl;
-                    cout << "  Username               : " << session.username << endl;
-                    cout << "  Timestamp              : " << session.timestamp << endl;
+                    System.out.println(
+                            "  Session ID             : " + session.getSessionID() +
+                            "\n  Username               : " + session.getUsername() +
+                            "\n  Timestamp              : " + session.getTimeStamp()
+                    );
                 }
+
+                System.out.println(
+
+                );
                 cout << "──────────────────────────────────────────────────────────────────" << endl;
                 cout << "                     Product Applications:" << endl;
                 cout << "──────────────────────────────────────────────────────────────────" << endl;
-                for (const ProductApplication &productApp : user.productapplications)
+                for (final ProductApplication productApp : user.getUserProductApplications())
                 {
+                    System.out.println(
+
+                    );
                     cout << "  Product Type           : " << productApp.producttype << endl;
                     cout << "  Product ID             : " << productApp.productID << endl;
                 }
+
+                System.out.println(
+
+                );
                 cout << "──────────────────────────────────────────────────────────────────" << endl;
                 cout << "                      Help and Resources:" << endl;
                 cout << "──────────────────────────────────────────────────────────────────" << endl;
-                for (const HelpandResources &resources : user.helpandresources)
+                for (final HelpAndResources resources : user.getUserHelpAndResources())
                 {
+                    System.out.println(
+
+                    );
                     cout << "  Help ID                : " << resources.helpID << endl;
                     cout << "  Type                   : " << resources.helpandresourcesType << endl;
                     cout << "  Description            : " << resources.helpandresourcesDescription << endl;
@@ -173,45 +197,42 @@ class Admin extends User{
                 return; // Exit the loop once the user is found and displayed
             }
         }
-
-        cout << "User with username '" << usernameToDisplay << "' not found." << endl;
-    }
-
+        System.out.printf("User with username '%s' not found.", username);
     }
 
     public void displayAllUserData() {
-        ::system("cls");
+        BankSystem.clearConsole();
         cout << "╔════════════════════════════════════════════════════════╗     " << endl;
         cout << "║                   View Users Data                      ║     " << endl;
         cout << "╚════════════════════════════════════════════════════════╝     " << endl;
         cout << " " << endl;
-        for (const User &user : users)
+        for (final User user : users)
         {
             cout << "┌────────────────────────────────────────────────────────┐" << endl;
             cout << "│                    Information:                        │" << endl;
             cout << "└────────────────────────────────────────────────────────┘" << endl;
-            cout << "      User ID              : " << user.userID << endl;
-            cout << "      Name                 : " << user.name << endl;
-            cout << "      Username             : " << user.username << endl;
-            cout << "      Is Admin             : " << (user.isadmin ? "Yes" : "No") << endl;
-            cout << "      Is Customer Service  : " << (user.iscustomerservice ? "Yes" : "No") << endl;
-            cout << "      Product Type         : " << user.producttype << endl;
-            cout << "      Balance              : " << user.balance << endl;
+            cout << "      User ID              : " << user.getUserID() << endl;
+            cout << "      Name                 : " << user.getName() << endl;
+            cout << "      Username             : " << user.getUsername() << endl;
+            cout << "      Is Admin             : " << (BankSystem.isAdmin(user.getUsername()) ? "Yes" : "No") << endl;
+            cout << "      Is Customer Service  : " << (BankSystem.isCustomerService(user.getUsername()) ? "Yes" : "No") << endl;
+            cout << "      Product Type         : " << user.getProductType() << endl;
+            cout << "      Balance              : " << user.getBalance() << endl;
             cout << " " << endl;
             cout << "────────────────────────────────────────────────────────" << endl;
             cout << "                      Profiles:                         " << endl;
             cout << "────────────────────────────────────────────────────────" << endl;
-            for (const Profile &profile : user.profiles)
+            for (final Profile profile : user.userProfile)
             {
-                cout << "  Email                    : " << profile.email << endl;
-                cout << "  Phone                    : " << profile.phone << endl;
-                cout << "  Two-Factor Enabled       : " << (profile.isTwoFactorEnabled ? "Yes" : "No") << endl;
+                cout << "  Email                    : " << profile.getEmail() << endl;
+                cout << "  Phone                    : " << profile.getPhoneNumber() << endl;
+                cout << "  Two-Factor Enabled       : " << (profile.get2FAStatus() ? "Yes" : "No") << endl;
                 cout << " " << endl;
             }
             cout << "────────────────────────────────────────────────────────" << endl;
             cout << "                 Transaction History:                   " << endl;
             cout << "────────────────────────────────────────────────────────" << endl;
-            for (const Transaction &transaction : user.transactionhistory)
+            for (final Transaction transaction : user.transactionhistory)
             {
                 cout << "  Transaction ID          : " << transaction.transactionID << endl;
                 cout << "  Transaction Type        : " << transaction.transactionType << endl;
@@ -257,25 +278,21 @@ class Admin extends User{
     }
 
     public void makeUserAdmin(String username) {
-        for (User &user : users)
-        {
-            if (user.username == username)
-            {
-                user.isadmin = true;
-                cout << "User " << user.username << " is now an admin." << endl;
-                saveDataToFile();
+        for (final User user : BankSystem.getUsers()) {
+            if (user.getUsername().equals(username)) {
+                user.setAdminStatus(true);
+                System.out.printf("User %s is now an admin.", user.getUsername());
+                BankSystem.saveDataToFile();
             }
         }
     }
 
     public void makeUserCustomerService(String username) {
-        for (User &user : users)
-        {
-            if (user.username == username)
-            {
-                user.iscustomerservice = true;
-                cout << "User " << user.username << " is now a customer service." << endl;
-                saveDataToFile();
+        for (final User user : BankSystem.getUsers()) {
+            if (user.getUsername().equals(username)) {
+                user.setCSStatus(true);
+                System.out.printf("User %s is now a customer service.", user.getUsername());
+                BankSystem.saveDataToFile();
             }
         }
     }
@@ -284,11 +301,10 @@ class Admin extends User{
     public void handleSettings(String username) {
         while (true)
         {
-            string newpass, newemail, newphone, newusername;
+            String newpass, newemail, newphone, newusername;
             char new2FA;
-            displayUserDataByUsername(username);
+            displayUserData(username);
 
-            cout << " " << endl;
             cout << "╔═════════════════════════════════════╗    " << endl;
             cout << "║           Manage Account            ║   " << endl;
             cout << "╠═════════════════════════════════════╣    " << endl;
