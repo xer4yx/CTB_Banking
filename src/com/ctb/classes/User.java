@@ -310,7 +310,7 @@ public class User {
     }
 
     public void applyProduct() {
-        string name, username, password, email, phone, accounttype;
+        String name, username, password, email, phone, accounttype;
         int acctype;
         char enable2FA;
         while (true)
@@ -371,7 +371,7 @@ public class User {
             }
 
             // Create a new user account
-            bool registrationSuccess = createUser(name, username, password, email, phone, enable2FA, accounttype);
+            bool registrationSuccess = BankSystem.createUser(name, username, password, email, phone, enable2FA, accounttype);
             if (registrationSuccess)
             {
                 cout << "Registration successful!" << endl;

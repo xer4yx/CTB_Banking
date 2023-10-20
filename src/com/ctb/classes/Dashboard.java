@@ -4,6 +4,15 @@ public class Dashboard {
     private String dashboardID;
     private String dashboardContent;
 
+    /*----------------------Setter Methods----------------------*/
+    public void setDashboardID(String dashboardID) {this.dashboardID = dashboardID;}
+    public void setDashboardContent(String dashboardContent) {this.dashboardContent = dashboardContent;}
+
+    /*----------------------Getter Methods----------------------*/
+    public String getDashboardID() {return dashboardID;}
+    public String getDashboardContent() {return dashboardContent;}
+
+    /*----------------------Class Methods----------------------*/
     public void displayDashboard(String username) {
         for (const User &user : users)
         {

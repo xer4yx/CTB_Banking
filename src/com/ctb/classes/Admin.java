@@ -7,6 +7,17 @@ class Admin extends User{
     private String username;
     private String password;
 
+    /*----------------------Setter Methods----------------------*/
+    public void setAdminID(String adminID) {
+        this.adminID = adminID;
+    }
+
+    /*----------------------Getter Methods----------------------*/
+    public String getAdminID() {
+        return adminID;
+    }
+
+    /*----------------------Class Methods----------------------*/
     public boolean deleteUserByUsername(String username) {
         using namespace std; // Add this line to use the std namespace
 
@@ -100,7 +111,6 @@ class Admin extends User{
             cout << "User with username '" << user << "' not found." << endl;
         }
     }
-
     public void displayUserdata(String username) {
         for (const User &user : users)
         {
@@ -171,6 +181,7 @@ class Admin extends User{
 
         cout << "User with username '" << usernameToDisplay << "' not found." << endl;
     }
+
     }
 
     public void displayAllUserData() {

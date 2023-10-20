@@ -5,6 +5,20 @@ class HelpAndResources {
     private String h_rType;
     private String h_rDescription;
     private String feedback;
+
+    /*----------------------Setter Methods----------------------*/
+    public void setHelpID(String helpID) {this.helpID = helpID;}
+    public void setH_rType(String h_rType) {this.h_rType = h_rType;}
+    public void setH_rDescription(String h_rDescription) {this.h_rDescription = h_rDescription;}
+    public void setFeedback(String feedback) {this.feedback = feedback;}
+
+    /*----------------------Getter Methods----------------------*/
+    public String getHelpID() {return helpID;}
+    public String getH_rType() {return h_rType;}
+    public String getH_rDescription() {return h_rDescription;}
+    public String getFeedback() {return feedback;}
+
+    /*----------------------Class Methods----------------------*/
     protected String generateHelpID(final String h_rType) {
         if (h_rType == "AI")
         {
@@ -62,6 +76,31 @@ class HelpAndResources {
     }
 
     protected static void saveHelpAndResources(final String username, final String h_rType,
-                              final String h_rDescription, final String feedback) {}
+                              final String h_rDescription, final String feedback) {
+        for (User &user : users)
+        {
+            if (user.username == username)
+            {
+                // Create a new HelpandResources object
+                HelpandResources helpandresources;
+                helpandresources.helpID = generateHelpID(helpandresourcesType);
+                helpandresources.helpandresourcesType = helpandresourcesType;
+                helpandresources.helpandresourcesDescription = helpandresourcesDescription;
+                helpandresources.feedback = feedback;
 
+                // Push the new helpandresources object into the user's vector
+                user.helpandresources.push_back(helpandresources);
+
+                // Save the updated user data to the file
+                saveDataToFile();
+
+                // Log the action as successful
+                system.auditLog(true);
+
+                return; // Exit the function once the session is saved for the user.
+            }
+        }
+        // If we've reached here, it means the user wasn't found.
+        system.auditLog(false);
+    }
 }
