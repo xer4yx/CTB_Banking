@@ -1,13 +1,11 @@
 package com.ctb.classes;
 
-import com.ctb.interfaces.UserInterface;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
-public class User implements UserInterface {
-    private Scanner choice = new Scanner(System.in);
+public class User {
+    private Scanner userInput = new Scanner(System.in);
     private String userID;
     private String name;
     private String username;
@@ -48,10 +46,12 @@ public class User implements UserInterface {
     public String getUsername() {return this.username;}
     public String getPassword() {return this.password;}
     public String getProductType() {return this.productType;}
-
+    public double getBalance() {
+        return balance;
+    }
 
     /*----------------------Class Methods----------------------*/
-    public void displaySettings(String username) {
+    public void displayUserSettings(String username) {
         while (true)
         {
             System.out.println(
@@ -62,7 +62,7 @@ public class User implements UserInterface {
                     + "│ 2. Back to Dashboard   │\n"
                     + "╰────────────────────────╯\n");
             System.out.print("Enter: ");
-            int settingChoice = choice.nextInt();
+            int settingChoice = userInput.nextInt();
             switch (settingChoice)
             {
                 case 1:
@@ -77,7 +77,6 @@ public class User implements UserInterface {
         }
     }
 
-    @Override
     public void displayActivityLog(String username) {
         cout << " " << endl;
         cout << "╭───────────────────────────╮" << endl;
@@ -112,7 +111,6 @@ public class User implements UserInterface {
         }
     }
 
-    @Override
     public void displaySessions(String username) {
         for (const User &user : users)
         {
@@ -136,75 +134,6 @@ public class User implements UserInterface {
         }
     }
 
-    @Override
-    public void displayDashboard(String username) {
-        for (const User &user : users)
-        {
-            if (user.username == username)
-            {
-                if (isadmin(username))
-                {
-                ::system("cls");
-                    cout << "╔═════════════════════════════════════╗    " << endl;
-                    cout << "║            Administrator            ║    " << endl;
-                    cout << "╚═════════════════════════════════════╝    " << endl;
-                    cout << "                                           " << endl;
-                    cout << "╔═════════════════════════════════════╗    " << endl;
-                    cout << "║         Dashboard Options:          ║     " << endl;
-                    cout << "╠═════════════════════════════════════╣    " << endl;
-                    cout << "║  1. Manage Users                    ║     " << endl;
-                    cout << "║  2. Help & Resources                ║     " << endl;
-                    cout << "║  3. Logout                          ║     " << endl;
-                    cout << "╚═════════════════════════════════════╝" << endl;
-                    cout << " " << endl;
-                    cout << "Enter your choice: ";
-                }
-                else if (iscustomerservice(username))
-                {
-                ::system("cls");
-                    cout << "╔═════════════════════════════════════╗    " << endl;
-                    cout << "║          Customer Service           ║    " << endl;
-                    cout << "╚═════════════════════════════════════╝    " << endl;
-                    cout << "                                           " << endl;
-                    cout << "╔═════════════════════════════════════╗    " << endl;
-                    cout << "║         Dashboard Options:          ║     " << endl;
-                    cout << "╠═════════════════════════════════════╣    " << endl;
-                    cout << "║  1. Messages                        ║     " << endl;
-                    cout << "║  2. Logout                          ║     " << endl;
-                    cout << "╚═════════════════════════════════════╝" << endl;
-                    cout << " " << endl;
-                    cout << "Enter your choice: ";
-                }
-                else
-                {
-                ::system("cls");
-                    SetConsoleOutputCP(CP_UTF8);
-                    cout << " " << endl;
-                    cout << "╭─────────────────────────────────────╮" << endl;
-                    cout << "│         CENTRAL TRUST BANK          │" << endl;
-                    cout << "╰─────────────────────────────────────╯" << endl;
-                    cout << " " << endl;
-                    cout << " Welcome " << user.name << "!" << endl;
-                    cout << "  " << endl;
-                    cout << " Current Balance: $" << getCurrentBalance(username) << endl;
-                    cout << "                                           " << endl;
-                    cout << "╔═════════════════════════════════════╗    " << endl;
-                    cout << "║         Dashboard Options:          ║     " << endl;
-                    cout << "╠═════════════════════════════════════╣    " << endl;
-                    cout << "║  1. Transaction Center              ║     " << endl;
-                    cout << "║  2. User Profile                    ║     " << endl;
-                    cout << "║  3. Data Analytics Dashboard        ║     " << endl;
-                    cout << "║  4. Help & Resources                ║     " << endl;
-                    cout << "║  5. Logout                          ║     " << endl;
-                    cout << "╚═════════════════════════════════════╝" << endl;
-                    cout << " " << endl;
-                    cout << "Enter your choice: ";
-                }
-            }
-        }
-    }
-
-    @Override
     public void handleSettings(String username) {
         String newPassword, newEmail, newPhoneNumber, newUsername;
         char new2FA;
@@ -221,36 +150,36 @@ public class User implements UserInterface {
                 + "\n║  7. Back to Profile                 ║"
                 + "\n╚═════════════════════════════════════╝");
         System.out.print("\nEnter: ");
-        int accChoice = choice.nextInt();
+        int accChoice = userInput.nextInt();
         switch (accChoice)
         {
             case 1:
                 System.out.print("\nEnter new password: ");
-                newPassword = choice.nextLine();
+                newPassword = userInput.nextLine();
                 changePassword(username, newPassword);
                 break;
 
             case 2:
                 System.out.print("\nEnter new email: ");
-                newEmail = choice.nextLine();
+                newEmail = userInput.nextLine();
                 changeEmail(username, newEmail);
                 break;
 
             case 3:
                 System.out.print("\nEnter new phone: ");
-                newPhoneNumber = choice.nextLine();
+                newPhoneNumber = userInput.nextLine();
                 changePhoneNum(username, newPhoneNumber);
                 break;
 
             case 4:
                 System.out.print("\nEnter new username: ");
-                newUsername = choice.nextLine();
+                newUsername = userInput.nextLine();
                 changeUsername(username, newUsername);
                 break;
 
             case 5:
                 System.out.print("\nDo you want to enable 2FA?(Y/N): ");
-                new2FA = choice.next().charAt(0);
+                new2FA = userInput.next().charAt(0);
                 change2FAStatus(username, new2FA);
                 break;
 
@@ -268,72 +197,380 @@ public class User implements UserInterface {
 
     }
 
-    @Override
     public void processDeposit(String username) {
+        double depositAmount;
+        cout << "\nEnter the amount to deposit: $";
+        cin >> depositAmount;
+        cin.ignore(); // Clear the newline character
 
+        if (depositAmount <= 0.0)
+        {
+            cout << "*Invalid deposit amount. Please enter a positive amount." << endl;
+            return;
+        }
+
+        if (Transaction.depositFunds(username, depositAmount))
+        {
+            cout << " " << endl;
+            cout << "Deposit of $" << depositAmount << " successful." << endl;
+        }
+        else
+        {
+            cout << "*Deposit failed. Please try again." << endl;
+        }
+        cout << "\nPress Enter to continue...";
+        cin.get();
     }
 
-    @Override
     public void processWithdrawal(String username) {
+        double withdrawAmount;
+        cout << "\nEnter the amount to withdraw: $";
+        cin >> withdrawAmount;
+        cin.ignore(); // Clear the newline character
 
+        if (withdrawAmount <= 0.0)
+        {
+            cout << "*Invalid withdrawal amount. Please enter a positive amount." << endl;
+            return;
+        }
+
+        if (Transaction.withdrawFunds(username, withdrawAmount))
+        {
+            cout << "\nWithdrawal of $" << withdrawAmount << " successful." << endl;
+        }
+        else
+        {
+            cout << "*Withdrawal failed. Please try again." << endl;
+        }
+        cout << "\nPress Enter to continue...";
+        cin.get();
     }
 
-    @Override
     public void processPurchase(String username) {
-
+        double purchaseAmount;
+        String purchaseDescription;
+        cout << "\nEnter the purchase amount: $";
+        cin >> purchaseAmount;
+        cout << "\nEnter the purchase description: ";
+        cin >> purchaseDescription;
+        if (cin.fail())
+        {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "*Invalid amount. Please enter a valid number." << endl;
+        }
+        cin.ignore(); // Clear the newline character
+        if (purchaseAmount <= 0.0)
+        {
+            cout << "*Invalid transaction amount. Please enter a positive amount." << endl;
+        }
+        if (Transaction.makePurchase(username, purchaseAmount, purchaseDescription))
+        {
+            cout << endl;
+        }
+        else
+        {
+            cout << endl;
+        }
+        cout << " " << endl;
+        cout << "Press Enter to continue...";
+        cin.get();
     }
 
-    @Override
     public void processBills(String username) {
+        double billAmount;
+        String billdescription;
+        cout << "\nEnter the bill amount: $";
+        cin >> billAmount;
+        cout << "\nEnter the bill description: ";
+        cin >> billdescription;
+        if (cin.fail())
+        {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "*Invalid amount. Please enter a valid number." << endl;
+        }
+        cin.ignore(); // Clear the newline character
+        if (billAmount <= 0.0)
+        {
+            cout << "*Invalid amount. Please enter a positive amount." << endl;
+        }
+        if (Transaction.payBills(username, billAmount, billdescription))
+        {
+            cout << endl;
+        }
+        else
+        {
+            cout << endl;
+        }
 
+        cout << " " << endl;
+        cout << "Press Enter to continue...";
+        cin.get();
     }
 
-    @Override
     public void applyProduct() {
+        String name, username, password, email, phone, accounttype;
+        int acctype;
+        char enable2FA;
+        while (true)
+        {
+            cout << " " << endl;
+            cout << "╔═════════════════════════════════════╗    " << endl;
+            cout << "║       Product Application           ║   " << endl;
+            cout << "╚═════════════════════════════════════╝    " << endl;
+            cout << " " << endl;
+            cout << "Enter your full name: ";
+            getline(cin, name);
 
+            cout << "Enter username: ";
+            getline(cin, username);
+
+            // Check if the username is already taken
+            bool usernameTaken = isUsernameTaken(username);
+            if (usernameTaken)
+            {
+                cout << "\n*Username is already taken. Please choose another one." << endl;
+                cout << " " << endl;
+                cout << "Press Enter to continue...";
+                cin.get();
+            ::system("cls");
+                continue;
+            }
+
+            cout << "Enter password: ";
+            cin >> password;
+
+            cout << "Enter email: ";
+            cin >> email;
+
+            cout << "Enter phone: ";
+            cin >> phone;
+
+            cout << "\nDo you want to enable 2FA?(Y/N): ";
+            cin >> enable2FA;
+
+            cout << "\nPick account type: " << endl;
+            cout << "1. Savings Account" << endl;
+            cout << "2. Credit Account" << endl;
+
+            cout << "\nChoose your account type: ";
+            cin >> acctype;
+
+            switch (acctype)
+            {
+                case 1:
+                    accounttype = "Savings Account";
+                    break;
+                case 2:
+                    accounttype = "Credit Account";
+                    break;
+                default:
+                    cout << "*Invalid choice. Please select a valid option." << endl;
+                    continue;
+            }
+
+            // Create a new user account
+            bool registrationSuccess = BankSystem.createUser(name, username, password, email, phone, enable2FA, accounttype);
+            if (registrationSuccess)
+            {
+                cout << "Registration successful!" << endl;
+                cout << " " << endl;
+                cout << "Press Enter to continue...";
+                cin.get();
+                break;
+            }
+            else
+            {
+                cout << "*Registration failed. Please try again." << endl;
+                continue;
+            }
+        }
     }
 
-    @Override
     public String generateUserID() {
-        return null;
+        // Implement your logic to generate a unique transaction ID
+        // Example: You can use a combination of timestamp and a random number
+        return "USR" + to_string(time(nullptr)) + to_string(rand());
     }
 
-    @Override
     public boolean isUsernameTaken(String username) {
-        return false;
+        return std::any_of(users.begin(), users.end(),
+                           [&username](const User &user)
+        { return user.username == username; });
     }
 
-    @Override
     public void changePassword(String username, String password) {
+        for (User &user : users)
+        {
+            if (user.username == username)
+            {
+                for (Profile &profile : user.profiles)
+                {
+                    if (profile.isTwoFactorEnabled)
+                    {
+                        cout << "\nSending an OTP for 2 Factor Authentication." << endl;
+                        system.sendOTP();
 
+                        string inputOTP;
+                        cout << "\nEnter your OTP: ";
+                        cin >> inputOTP;
+                        cin.ignore();
+
+                        if (!system.verifyOTP(inputOTP))
+                        {
+                            cout << "\n*Incorrect OTP. Timeout for 30 seconds..." << endl;
+                            sleep_for(seconds(30));
+                            return;
+                        }
+                    }
+                    user.password = SecuritySys::encryptPass(password);
+                    string decrypass = SecuritySys::decryptPass(user.password);
+                    cout << "Password changed to " << decrypass << " successfully." << endl;
+                    BankSystem.saveDataToFile();
+                }
+            }
+        }
     }
 
-    @Override
     public void changeEmail(String username, String email) {
+        for (User &user : users)
+        {
+            if (user.username == username)
+            {
+                for (Profile &profile : user.profiles)
+                {
+                    if (profile.isTwoFactorEnabled)
+                    {
+                        cout << "\nSending an OTP for 2 Factor Authentication." << endl;
+                        system.sendOTP();
 
+                        string inputOTP;
+                        cout << "\nEnter your OTP: ";
+                        cin >> inputOTP;
+                        cin.ignore();
+
+                        if (!system.verifyOTP(inputOTP))
+                        {
+                            cout << "\n*Incorrect OTP. Timeout for 30 seconds..." << endl;
+                            sleep_for(seconds(30));
+                            return;
+                        }
+                    }
+                    profile.email = email;
+                    cout << "Email changed to " << profile.email << " successfully." << endl;
+                    BankSystem.saveDataToFile();
+                }
+            }
+        }
     }
 
-    @Override
     public void changePhoneNum(String username, String phoneNum) {
+        for (User &user : users)
+        {
+            if (user.username == username)
+            {
+                for (Profile &profile : user.profiles)
+                {
+                    if (profile.isTwoFactorEnabled)
+                    {
+                        cout << "\nSending an OTP for 2 Factor Authentication." << endl;
+                        system.sendOTP();
 
+                        string inputOTP;
+                        cout << "\nEnter your OTP: ";
+                        cin >> inputOTP;
+                        cin.ignore();
+
+                        if (!system.verifyOTP(inputOTP))
+                        {
+                            cout << "\n*Incorrect OTP. Timeout for 30 seconds..." << endl;
+                            sleep_for(seconds(30));
+                            return;
+                        }
+                    }
+                    profile.phone = phone;
+                    cout << "Phone changed to " << profile.phone << " successfully." << endl;
+                    BankSystem.saveDataToFile();
+                }
+            }
+        }
     }
 
-    @Override
     public void changeUsername(String username, String newUsername) {
+        for (User &user : users)
+        {
+            if (user.username == username)
+            {
+                for (Profile &profile : user.profiles)
+                {
+                    if (profile.isTwoFactorEnabled)
+                    {
+                        cout << "\nSending an OTP for 2 Factor Authentication." << endl;
+                        system.sendOTP();
 
+                        string inputOTP;
+                        cout << "\nEnter your OTP: ";
+                        cin >> inputOTP;
+                        cin.ignore();
+
+                        if (!system.verifyOTP(inputOTP))
+                        {
+                            cout << "\n*Incorrect OTP. Timeout for 30 seconds..." << endl;
+                            sleep_for(seconds(30));
+                            return;
+                        }
+                    }
+                    user.username = newusername;
+                    cout << "Username changed to " << user.username << " successfully." << endl;
+                    BankSystem.saveDataToFile();
+                }
+            }
+        }
     }
 
-    @Override
     public void change2FAStatus(String username, char twoFA) {
+        for (User &user : users)
+        {
+            if (user.username == username)
+            {
+                for (Profile &profile : user.profiles)
+                {
+                    if (profile.isTwoFactorEnabled)
+                    {
+                        cout << "\nSending an OTP for 2 Factor Authentication." << endl;
+                        system.sendOTP();
 
+                        string inputOTP;
+                        cout << "\nEnter your OTP: ";
+                        cin >> inputOTP;
+                        cin.ignore();
+
+                        if (!system.verifyOTP(inputOTP))
+                        {
+                            cout << "\n*Incorrect OTP. Timeout for 30 seconds..." << endl;
+                            sleep_for(seconds(30));
+                            return;
+                        }
+                    }
+                    profile.isTwoFactorEnabled = SecuritySys::enable2FA(twoFA);
+                    string show2FAStatus = profile.isTwoFactorEnabled ? "Enabled" : "Disabled";
+                    cout << "Two Factor Authentication: " << show2FAStatus << endl;
+                    BankSystem.saveDataToFile();
+                }
+            }
+        }
     }
 
-    @Override
     public void askHelp(String username) {
+        String message;
+        cout << "Enter your message: ";
 
-    }
+        // Clear any remaining newline characters from the input stream
+        cin.ignore();
 
-    public double getBalance() {
-        return balance;
+        getline(cin, message);
+
+        HelpAndResources.saveHelpAndResources(username, "Help", message, "");
     }
 }
