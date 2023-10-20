@@ -1,10 +1,8 @@
 package com.ctb.interfaces;
 
 public interface UserInterface {
-    void displaySettings(final String username);
     void displayActivityLog(final String username);
     void displaySessions(final String username);
-    void displayDashboard(final String username);
     void handleSettings(final String username);
     void processDeposit(final String username);
     void processWithdrawal(final String username);

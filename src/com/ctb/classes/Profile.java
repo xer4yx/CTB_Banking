@@ -43,7 +43,7 @@ public class Profile implements ProfileInterface {
                         + "\n  Balance: " + user.getBalance()
                         + "\n  Two Factor Authentication: " + show2FAStatus
                         + "\n══════════════════════════════════════════════════════════════");
-                user.displaySettings(user.getUsername());
+                user.displayUserSettings(user.getUsername());
             }
         }
     }

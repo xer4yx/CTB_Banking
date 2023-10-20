@@ -1,13 +1,11 @@
 package com.ctb.classes;
 
-import com.ctb.interfaces.UserInterface;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
-public class User implements UserInterface {
-    private Scanner choice = new Scanner(System.in);
+public class User {
+    private Scanner userInput = new Scanner(System.in);
     private String userID;
     private String name;
     private String username;
@@ -53,8 +51,7 @@ public class User implements UserInterface {
     }
 
     /*----------------------Class Methods----------------------*/
-
-    public void displaySettings(String username) {
+    public void displayUserSettings(String username) {
         while (true)
         {
             System.out.println(
@@ -65,7 +62,7 @@ public class User implements UserInterface {
                     + "│ 2. Back to Dashboard   │\n"
                     + "╰────────────────────────╯\n");
             System.out.print("Enter: ");
-            int settingChoice = choice.nextInt();
+            int settingChoice = userInput.nextInt();
             switch (settingChoice)
             {
                 case 1:
@@ -80,7 +77,6 @@ public class User implements UserInterface {
         }
     }
 
-    @Override
     public void displayActivityLog(String username) {
         cout << " " << endl;
         cout << "╭───────────────────────────╮" << endl;
@@ -115,7 +111,6 @@ public class User implements UserInterface {
         }
     }
 
-    @Override
     public void displaySessions(String username) {
         for (const User &user : users)
         {
@@ -139,75 +134,6 @@ public class User implements UserInterface {
         }
     }
 
-    @Override
-    public void displayDashboard(String username) {
-        for (const User &user : users)
-        {
-            if (user.username == username)
-            {
-                if (isadmin(username))
-                {
-                ::system("cls");
-                    cout << "╔═════════════════════════════════════╗    " << endl;
-                    cout << "║            Administrator            ║    " << endl;
-                    cout << "╚═════════════════════════════════════╝    " << endl;
-                    cout << "                                           " << endl;
-                    cout << "╔═════════════════════════════════════╗    " << endl;
-                    cout << "║         Dashboard Options:          ║     " << endl;
-                    cout << "╠═════════════════════════════════════╣    " << endl;
-                    cout << "║  1. Manage Users                    ║     " << endl;
-                    cout << "║  2. Help & Resources                ║     " << endl;
-                    cout << "║  3. Logout                          ║     " << endl;
-                    cout << "╚═════════════════════════════════════╝" << endl;
-                    cout << " " << endl;
-                    cout << "Enter your choice: ";
-                }
-                else if (iscustomerservice(username))
-                {
-                ::system("cls");
-                    cout << "╔═════════════════════════════════════╗    " << endl;
-                    cout << "║          Customer Service           ║    " << endl;
-                    cout << "╚═════════════════════════════════════╝    " << endl;
-                    cout << "                                           " << endl;
-                    cout << "╔═════════════════════════════════════╗    " << endl;
-                    cout << "║         Dashboard Options:          ║     " << endl;
-                    cout << "╠═════════════════════════════════════╣    " << endl;
-                    cout << "║  1. Messages                        ║     " << endl;
-                    cout << "║  2. Logout                          ║     " << endl;
-                    cout << "╚═════════════════════════════════════╝" << endl;
-                    cout << " " << endl;
-                    cout << "Enter your choice: ";
-                }
-                else
-                {
-                ::system("cls");
-                    SetConsoleOutputCP(CP_UTF8);
-                    cout << " " << endl;
-                    cout << "╭─────────────────────────────────────╮" << endl;
-                    cout << "│         CENTRAL TRUST BANK          │" << endl;
-                    cout << "╰─────────────────────────────────────╯" << endl;
-                    cout << " " << endl;
-                    cout << " Welcome " << user.name << "!" << endl;
-                    cout << "  " << endl;
-                    cout << " Current Balance: $" << getCurrentBalance(username) << endl;
-                    cout << "                                           " << endl;
-                    cout << "╔═════════════════════════════════════╗    " << endl;
-                    cout << "║         Dashboard Options:          ║     " << endl;
-                    cout << "╠═════════════════════════════════════╣    " << endl;
-                    cout << "║  1. Transaction Center              ║     " << endl;
-                    cout << "║  2. User Profile                    ║     " << endl;
-                    cout << "║  3. Data Analytics Dashboard        ║     " << endl;
-                    cout << "║  4. Help & Resources                ║     " << endl;
-                    cout << "║  5. Logout                          ║     " << endl;
-                    cout << "╚═════════════════════════════════════╝" << endl;
-                    cout << " " << endl;
-                    cout << "Enter your choice: ";
-                }
-            }
-        }
-    }
-
-    @Override
     public void handleSettings(String username) {
         String newPassword, newEmail, newPhoneNumber, newUsername;
         char new2FA;
@@ -224,36 +150,36 @@ public class User implements UserInterface {
                 + "\n║  7. Back to Profile                 ║"
                 + "\n╚═════════════════════════════════════╝");
         System.out.print("\nEnter: ");
-        int accChoice = choice.nextInt();
+        int accChoice = userInput.nextInt();
         switch (accChoice)
         {
             case 1:
                 System.out.print("\nEnter new password: ");
-                newPassword = choice.nextLine();
+                newPassword = userInput.nextLine();
                 changePassword(username, newPassword);
                 break;
 
             case 2:
                 System.out.print("\nEnter new email: ");
-                newEmail = choice.nextLine();
+                newEmail = userInput.nextLine();
                 changeEmail(username, newEmail);
                 break;
 
             case 3:
                 System.out.print("\nEnter new phone: ");
-                newPhoneNumber = choice.nextLine();
+                newPhoneNumber = userInput.nextLine();
                 changePhoneNum(username, newPhoneNumber);
                 break;
 
             case 4:
                 System.out.print("\nEnter new username: ");
-                newUsername = choice.nextLine();
+                newUsername = userInput.nextLine();
                 changeUsername(username, newUsername);
                 break;
 
             case 5:
                 System.out.print("\nDo you want to enable 2FA?(Y/N): ");
-                new2FA = choice.next().charAt(0);
+                new2FA = userInput.next().charAt(0);
                 change2FAStatus(username, new2FA);
                 break;
 
@@ -271,7 +197,6 @@ public class User implements UserInterface {
 
     }
 
-    @Override
     public void processDeposit(String username) {
         double depositAmount;
         cout << "\nEnter the amount to deposit: $";
@@ -284,7 +209,7 @@ public class User implements UserInterface {
             return;
         }
 
-        if (depositFunds(username, depositAmount))
+        if (Transaction.depositFunds(username, depositAmount))
         {
             cout << " " << endl;
             cout << "Deposit of $" << depositAmount << " successful." << endl;
@@ -297,7 +222,6 @@ public class User implements UserInterface {
         cin.get();
     }
 
-    @Override
     public void processWithdrawal(String username) {
         double withdrawAmount;
         cout << "\nEnter the amount to withdraw: $";
@@ -310,7 +234,7 @@ public class User implements UserInterface {
             return;
         }
 
-        if (withdrawFunds(username, withdrawAmount))
+        if (Transaction.withdrawFunds(username, withdrawAmount))
         {
             cout << "\nWithdrawal of $" << withdrawAmount << " successful." << endl;
         }
@@ -322,10 +246,9 @@ public class User implements UserInterface {
         cin.get();
     }
 
-    @Override
     public void processPurchase(String username) {
         double purchaseAmount;
-        string purchaseDescription;
+        String purchaseDescription;
         cout << "\nEnter the purchase amount: $";
         cin >> purchaseAmount;
         cout << "\nEnter the purchase description: ";
@@ -341,7 +264,7 @@ public class User implements UserInterface {
         {
             cout << "*Invalid transaction amount. Please enter a positive amount." << endl;
         }
-        if (makePurchase(username, purchaseAmount, purchaseDescription))
+        if (Transaction.makePurchase(username, purchaseAmount, purchaseDescription))
         {
             cout << endl;
         }
@@ -354,10 +277,9 @@ public class User implements UserInterface {
         cin.get();
     }
 
-    @Override
     public void processBills(String username) {
         double billAmount;
-        string billdescription;
+        String billdescription;
         cout << "\nEnter the bill amount: $";
         cin >> billAmount;
         cout << "\nEnter the bill description: ";
@@ -373,7 +295,7 @@ public class User implements UserInterface {
         {
             cout << "*Invalid amount. Please enter a positive amount." << endl;
         }
-        if (payBills(username, billAmount, billdescription))
+        if (Transaction.payBills(username, billAmount, billdescription))
         {
             cout << endl;
         }
@@ -387,7 +309,6 @@ public class User implements UserInterface {
         cin.get();
     }
 
-    @Override
     public void applyProduct() {
         string name, username, password, email, phone, accounttype;
         int acctype;
@@ -467,21 +388,18 @@ public class User implements UserInterface {
         }
     }
 
-    @Override
     public String generateUserID() {
         // Implement your logic to generate a unique transaction ID
         // Example: You can use a combination of timestamp and a random number
         return "USR" + to_string(time(nullptr)) + to_string(rand());
     }
 
-    @Override
     public boolean isUsernameTaken(String username) {
         return std::any_of(users.begin(), users.end(),
                            [&username](const User &user)
         { return user.username == username; });
     }
 
-    @Override
     public void changePassword(String username, String password) {
         for (User &user : users)
         {
@@ -515,7 +433,6 @@ public class User implements UserInterface {
         }
     }
 
-    @Override
     public void changeEmail(String username, String email) {
         for (User &user : users)
         {
@@ -548,7 +465,6 @@ public class User implements UserInterface {
         }
     }
 
-    @Override
     public void changePhoneNum(String username, String phoneNum) {
         for (User &user : users)
         {
@@ -581,7 +497,6 @@ public class User implements UserInterface {
         }
     }
 
-    @Override
     public void changeUsername(String username, String newUsername) {
         for (User &user : users)
         {
@@ -614,7 +529,6 @@ public class User implements UserInterface {
         }
     }
 
-    @Override
     public void change2FAStatus(String username, char twoFA) {
         for (User &user : users)
         {
@@ -648,7 +562,6 @@ public class User implements UserInterface {
         }
     }
 
-    @Override
     public void askHelp(String username) {
         String message;
         cout << "Enter your message: ";
