@@ -5,14 +5,14 @@ import java.util.List;
 import java.util.Scanner;
 
 public class User {
-    private Scanner userInput = new Scanner(System.in);
+    private final Scanner userInput = new Scanner(System.in);
+    private boolean isAdmin;
     private String userID;
     private String name;
     private String username;
     private String password;
     private String productType;
     private boolean isCustomerService;
-    private boolean isAdmin;
     private double balance;
     private List<Profile> userProfile = new LinkedList<>();
     private List<Transaction> userTransaction = new LinkedList<>();
@@ -43,7 +43,7 @@ public class User {
     /*----------------------Getter Methods----------------------*/
     public String getUserID() {return this.userID;}
     public String getName() {return this.name;}
-    public String getUsername() {return this.username;}
+    public static String getUsername() {return this.username;}
     public String getPassword() {return this.password;}
     public String getProductType() {return this.productType;}
     public double getBalance() {
@@ -388,19 +388,19 @@ public class User {
         }
     }
 
-    public String generateUserID() {
+    public static String generateUserID() {
         // Implement your logic to generate a unique transaction ID
         // Example: You can use a combination of timestamp and a random number
         return "USR" + to_string(time(nullptr)) + to_string(rand());
     }
 
-    public boolean isUsernameTaken(String username) {
+    public static boolean isUsernameTaken(String username) {
         return std::any_of(users.begin(), users.end(),
                            [&username](const User &user)
         { return user.username == username; });
     }
 
-    public void changePassword(String username, String password) {
+    public static void changePassword(String username, String password) {
         for (User &user : users)
         {
             if (user.username == username)
@@ -433,7 +433,7 @@ public class User {
         }
     }
 
-    public void changeEmail(String username, String email) {
+    public static void changeEmail(String username, String email) {
         for (User &user : users)
         {
             if (user.username == username)
@@ -465,7 +465,7 @@ public class User {
         }
     }
 
-    public void changePhoneNum(String username, String phoneNum) {
+    public static void changePhoneNum(String username, String phoneNum) {
         for (User &user : users)
         {
             if (user.username == username)
@@ -497,7 +497,7 @@ public class User {
         }
     }
 
-    public void changeUsername(String username, String newUsername) {
+    public static void changeUsername(String username, String newUsername) {
         for (User &user : users)
         {
             if (user.username == username)
@@ -529,7 +529,7 @@ public class User {
         }
     }
 
-    public void change2FAStatus(String username, char twoFA) {
+    public static void change2FAStatus(String username, char twoFA) {
         for (User &user : users)
         {
             if (user.username == username)
@@ -620,5 +620,21 @@ public class User {
 
     protected List<Dashboard> getUserDashboard() {
         return userDashboard;
+    }
+
+    public boolean isAdmin() {
+        return isAdmin;
+    }
+
+    public void setAdmin(boolean admin) {
+        isAdmin = admin;
+    }
+
+    public boolean isCustomerService() {
+        return isCustomerService;
+    }
+
+    public void setCustomerService(boolean customerService) {
+        isCustomerService = customerService;
     }
 }

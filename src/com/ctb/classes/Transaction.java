@@ -3,13 +3,14 @@ package com.ctb.classes;
 import com.ctb.interfaces.TransactionInterface;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 class Transaction {
     private String transactionID;
     private String transactionType;
     private String description;
     private double amount;
-    private final long timeStamp = Instant.now().getEpochSecond();
+    private final LocalDate timeStamp = LocalDate.now();
 
     /*----------------------Setter Methods----------------------*/
     public void setTransactionID(String transactionID) {this.transactionID = transactionID;}
@@ -22,7 +23,7 @@ class Transaction {
     public String getTransactionType() {return transactionType;}
     public String getDescription() {return description;}
     public double getAmount() {return amount;}
-    protected long getTimeStamp() {return timeStamp;}
+    protected LocalDate getTimeStamp() {return timeStamp;}
 
     /*----------------------Class Methods----------------------*/
 
@@ -61,7 +62,6 @@ class Transaction {
                     }
                 }
 
-                // Update user's transaction history
                 Transaction depositTransaction;
                 depositTransaction.transactionID = generateTransactionID(); // Call a function to generate a unique transaction ID
                 depositTransaction.transactionType = "Deposit";

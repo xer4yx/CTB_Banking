@@ -1,57 +1,59 @@
 package com.ctb.classes;
 
-import com.ctb.interfaces.*;
+import java.lang.Math;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
-public class BankSystem {
+class BankSystem {
     private final SecuritySystem system = new SecuritySystem();
     private String currentLoggedInUser;
     private String currentProductType;
     private String currentSessionID;
     private String dataFilePath;
-    private final List<User> users = new LinkedList<>();
-    private final List<Profile> profiles = new LinkedList<>();
+    private static final List<User> users = new LinkedList<>();
+    private static final List<Profile> profiles = new LinkedList<>();
     private final List<Transaction> transactionHistory = new LinkedList<>();
-    private final List<ProductApplication> productApplications = new LinkedList<>();
+    private static final List<ProductApplication> productApplications = new LinkedList<>();
     private final List<Session> sessions = new LinkedList<>();
     private final List<Dashboard> dashboards = new LinkedList<>();
 
-    public static List<User> getUsers() {
-        return users;
-    }
-
-    public List<Profile> getProfiles() {
-        return profiles;
-    }
+    protected static List<User> getUsers() {return users;}
+    protected List<Profile> getProfiles() {return profiles;}
+    protected List<Transaction> getTransactionHistory() {return transactionHistory;}
+    protected List<ProductApplication> getProductApplications() {return productApplications;}
+    protected List<Session> getSessions() {return sessions;}
+    protected List<Dashboard> getDashboards() {return dashboards;}
 
     protected static void clearConsole() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
     }
 
-    public double calculateEarnedInterest(String username) {
-        double interestRate = 0.05; // Annual interest rate
+    protected double calculateEarnedInterest(String username) {
+        double interestRate = 0.05;
         double interestEarned = 0;
+        LocalDateTime now = LocalDateTime.now();
 
-        time_t now = time(nullptr); // get current time
-
-        for (const User &user : users)
+        for (final User user : users)
         {
-            if (user.username == username)
+            if (Objects.equals(User.getUsername(), username))
             {
-                for (const Transaction &transaction : user.transactionhistory)
+                for (final Transaction transaction : getTransactionHistory())
                 {
-                    if (transaction.transactionType == "Deposit")
+                    if (Objects.equals(transaction.getTransactionType(), "Deposit"))
                     {
-                        // Calculate interest for this deposit
-                        double principal = transaction.amount;
-                        int years = difftime(now, transaction.timestamp) / (60 * 60 * 24 * 365.25); // convert seconds to years
-                        double amount = principal * pow(1 + interestRate, years);
+                        Duration duration = Duration.between(transaction.getTimeStamp(), now);
+                        long seconds = duration.getSeconds();
+                        double principal = transaction.getAmount();
+                        double years = (double) seconds / (60 * 60 * 24 * 365.25);
+                        double amount = principal * Math.pow(1 + interestRate, years);
                         double interest = amount - principal;
 
-                        // Add to total interest earned
                         interestEarned += interest;
                     }
                 }
@@ -61,18 +63,18 @@ public class BankSystem {
         return interestEarned;
     }
 
-    public double calculateTotalPaid(String username) {
+    protected double calculateTotalPaid(String username) {
         double totalPaid = 0;
 
-        for (const User &user : users)
+        for (final User user : users)
         {
-            if (user.username == username)
+            if (Objects.equals(User.getUsername(), username))
             {
-                for (const Transaction &transaction : user.transactionhistory)
+                for (final Transaction transaction : getTransactionHistory())
                 {
-                    if (transaction.transactionType == "Bill Payment")
+                    if (Objects.equals(transaction.getTransactionType(), "Bill Payment"))
                     {
-                        totalPaid += transaction.amount;
+                        totalPaid += transaction.getAmount();
                     }
                 }
             }
@@ -81,155 +83,144 @@ public class BankSystem {
         return totalPaid;
     }
 
-    public double calculateTotalSpent(String username) {
+    protected double calculateTotalSpent(String username) {
         double totalSpent = 0;
 
-        for (const User &user : users)
+        for (final User user : users)
         {
-            if (user.username == username)
+            if (Objects.equals(User.getUsername(), username))
             {
-                for (const Transaction &transaction : user.transactionhistory)
+                for (final Transaction transaction : getTransactionHistory())
                 {
-                    if (transaction.transactionType == "Purchase" || transaction.transactionType == "Deposit")
+                    if (Objects.equals(transaction.getTransactionType(), "Purchase") ||
+                            Objects.equals(transaction.getTransactionType(), "Deposit"))
                     {
-                        totalSpent += transaction.amount;
+                        totalSpent += transaction.getAmount();
                     }
                 }
             }
         }
-
         return totalSpent;
     }
 
-    public double calculateTotalNet(String username) {
+    protected double calculateTotalNet(String username) {
         double totalNet = 0;
-
-        for (const User &user : users)
+        for (final User user : users)
         {
-            if (user.username == username)
+            if (Objects.equals(User.getUsername(), username))
             {
-                for (const Transaction &transaction : user.transactionhistory)
+                for (final Transaction transaction : getTransactionHistory())
                 {
-                    if (transaction.transactionType == "Deposit")
+                    if (Objects.equals(transaction.getTransactionType(), "Deposit"))
                     {
-                        totalNet += transaction.amount;
+                        totalNet += transaction.getAmount();
                     }
                 }
             }
         }
-
         return totalNet;
     }
 
-    public void setCurrentLoggedInUser(String username) {currentLoggedInUser = username;}
+    protected void setCurrentLoggedInUser(String username) {currentLoggedInUser = username;}
 
-    public boolean isValidProductType(String productType) {
-        vector<string> validProductTypes = {"Savings Account", "Credit Account"};
-
-        // Check if the provided product type is in the list of valid types
-        return find(validProductTypes.begin(), validProductTypes.end(), producttype) != validProductTypes.end();
+    protected boolean isValidProductType(String productType) {
+        List<String> validProductTypes = new LinkedList<>(Arrays.asList("Savings Account", "Credit Account"));
+        return validProductTypes.contains(productType);
     }
 
-    public void setCurrentProductType(String productType) {
-        if (!isValidProductType(producttype))
+    protected void setCurrentProductType(String productType) {
+        if (!isValidProductType(productType))
         {
-            cout << "Invalid product type." << endl;
-            // Handle the error or return an error code if necessary
+            System.out.println("Invalid product type.");
             return;
         }
 
-        currentProductType = producttype;
+        currentProductType = productType;
     }
 
-    public String getCurrentProductType(String username) {
-        for (const User &user : users)
+    protected String getCurrentProductType(String username) {
+        for (final User user : users)
         {
-            if (user.username == username)
+            if (Objects.equals(User.getUsername(), username))
             {
-                return user.producttype;
+                return user.getProductType();
             }
         }
-        // If we've reached here, the user wasn't found
-        return "Unknown"; // You can choose a different indicator if needed
+        return "Unknown";
     }
 
-    public double getCurrentBalance(String username) {
-        for (const User &user : users)
+    protected double getCurrentBalance(String username) {
+        for (final User user : users)
         {
-            if (user.username == username)
+            if (Objects.equals(User.getUsername(), username))
             {
-                return user.balance;
+                return user.getBalance();
             }
         }
-
-        // If we've reached here, the user wasn't found
-        return -1.0; // Choose a different indicator if needed
+        return -1.0;
     }
 
-    public static boolean isAdmin(String username) {
-        for (const User &user : users)
+    protected static boolean isAdmin(String username) {
+        for (final User user : users)
         {
-            if (user.username == username)
+            if (Objects.equals(User.getUsername(), username))
             {
-                return user.isadmin;
+                return user.isAdmin();
             }
         }
         return false;
     }
 
-    public static boolean isCustomerService(String username) {
-        for (const User &user : users)
+    protected static boolean isCustomerService(String username) {
+        for (final User user : users)
         {
-            if (user.username == username)
+            if (Objects.equals(User.getUsername(), username))
             {
-                return user.iscustomerservice;
+                return user.isCustomerService();
             }
         }
         return false;
     }
 
-    public static boolean createUser(String name, String username, String password, String email, String phoneNum, char twoFA, String productType) {
-        if (isUsernameTaken(username))
+    protected static boolean createUser(String name, String username, String password, String email, String phoneNum, char twoFA, String productType) {
+        if (User.isUsernameTaken(username))
         {
-            cout << "Username is already taken. Please choose another one." << endl;
+            System.out.print("Username is already taken. Please choose another one.");
             return false;
         }
 
-        // Create a new user account
-        User newUser;
-        newUser.userID = generateUserID(); // Call a function to generate a unique user ID
-        newUser.name = name;
-        newUser.username = username;
-        newUser.password = SecuritySys::encryptPass(password);
-        newUser.isadmin = false;
-        newUser.producttype = producttype;
-        newUser.balance = 0.0;
+        User newUser = new User();
+        newUser.setUserID(User.generateUserID());
+        newUser.setName(name);
+        newUser.setUsername(username);
+        newUser.setPassword(SecuritySystem.encrypt(password));
+        newUser.setAdmin(false);
+        newUser.setProductType(productType);
+        newUser.setBalance(0.0);
 
         // Create a new profile for the user
-        Profile newProfile;
-        newProfile.email = email;
-        newProfile.phone = phone;
-        newProfile.isTwoFactorEnabled = SecuritySys::enable2FA(twoFA);
+        Profile newProfile = new Profile();
+        newProfile.setEmail(email);
+        newProfile.setPhoneNumber(phoneNum);
+        newProfile.set2FAStatus(SecuritySystem.enable2FA(twoFA));
 
-        ProductApplication newProductApplication;
-        newProductApplication.producttype = producttype;
-        newProductApplication.productID = generateProductID(producttype);
+        ProductApplication newProductApplication = new ProductApplication();
+        newProductApplication.setProductType(productType);
+        newProductApplication.setProductID(ProductApplication.generateProductID(productType));
 
-        newUser.productapplications.push_back(newProductApplication);
-        // Add the new profile to the user's profiles vector
-        newUser.profiles.push_back(newProfile);
+        productApplications.add(newProductApplication);
+        profiles.add(newProfile);
 
-        // Add the new user to the vector of users
-        users.push_back(newUser);
+        newUser.setUserProductApplications(productApplications);
+        newUser.setUserProfile(profiles);
+        users.add(newUser);
 
-        // Save the updated user data to the file
         saveDataToFile();
-
-        cout << "\nUser account created successfully." << endl;
+        System.out.print("\nUser account created successfully.");
         return true;
     }
 
-    public void loadDataToFile() {
+    protected void loadDataToFile() {
         ifstream file(dataFilePath);
         if (!file.is_open())
         {
@@ -242,7 +233,7 @@ public class BankSystem {
         file >> j;
         file.close();
 
-        for (const auto &item : j)
+        for (final auto item : j)
         {
             User user;
             user.userID = item.value("id", "");
@@ -254,7 +245,7 @@ public class BankSystem {
             user.producttype = item.value("producttype", "");
             user.balance = item.value("balance", 0.0);
 
-            for (const auto &profileItem : item["profiles"])
+            for (final auto profileItem : item["profiles"])
             {
                 Profile profile;
                 profile.email = profileItem.value("email", "");
@@ -265,7 +256,7 @@ public class BankSystem {
 
             if (item.contains("transactionhistory"))
             {
-                for (const auto &transactionItem : item["transactionhistory"])
+                for (final auto transactionItem : item["transactionhistory"])
                 {
                     Transaction transaction;
                     transaction.transactionID = transactionItem.value("transactionID", "");
@@ -279,7 +270,7 @@ public class BankSystem {
 
             if (item.contains("sessions"))
             {
-                for (const auto &sessionItem : item["sessions"])
+                for (final auto sessionItem : item["sessions"])
                 {
                     Session session;
                     session.sessionID = sessionItem.value("sessionID", "");
@@ -291,7 +282,7 @@ public class BankSystem {
 
             if (item.contains("productapplications"))
             {
-                for (const auto &productapplicationItem : item["productapplications"])
+                for (final auto productapplicationItem : item["productapplications"])
                 {
                     ProductApplication productapplication;
                     productapplication.producttype = productapplicationItem.value("producttype", "");
@@ -302,7 +293,7 @@ public class BankSystem {
 
             if (item.contains("helpandresources"))
             {
-                for (const auto &helpandresourcesItem : item["helpandresources"])
+                for (final auto helpandresourcesItem : item["helpandresources"])
                 {
                     HelpandResources resources;
                     resources.helpID = helpandresourcesItem.value("helpandresourcesID", "");
@@ -312,11 +303,11 @@ public class BankSystem {
                 }
             }
             users.emplace_back(user);
-            system.auditLog(true);
+            SecuritySystem.auditLog(true);
         }
     }
 
-    public static void saveDataToFile() {
+    protected static void saveDataToFile() {
         try
         {
             ofstream file(dataFilePath);
@@ -327,7 +318,7 @@ public class BankSystem {
                 return;
             }
             json j;
-            for (const User &user : users)
+            for (final User user : users)
             {
                 json userJson;
                 userJson["id"] = user.userID;
@@ -339,7 +330,7 @@ public class BankSystem {
                 userJson["producttype"] = user.producttype;
                 userJson["balance"] = user.balance;
 
-                for (const Profile &profile : user.profiles)
+                for (final Profile profile : user.profiles)
                 {
                     json profileJson;
                     profileJson["email"] = profile.email;
@@ -347,7 +338,7 @@ public class BankSystem {
                     profileJson["isTwoFactorEnabled"] = profile.isTwoFactorEnabled;
                     userJson["profiles"].push_back(profileJson);
                 }
-                for (const Transaction &transaction : user.transactionhistory)
+                for (final Transaction transaction : user.transactionhistory)
                 {
                     json transactionJson;
                     transactionJson["transactionID"] = transaction.transactionID;
@@ -357,7 +348,7 @@ public class BankSystem {
                     transactionJson["description"] = transaction.description;
                     userJson["transactionhistory"].push_back(transactionJson);
                 }
-                for (const Session &session : user.sessions)
+                for (final Session session : user.sessions)
                 {
                     json sessionJson;
                     sessionJson["sessionID"] = session.sessionID;
@@ -365,14 +356,14 @@ public class BankSystem {
                     sessionJson["timestamp"] = session.timestamp;
                     userJson["sessions"].push_back(sessionJson);
                 }
-                for (const ProductApplication &productapplication : user.productapplications)
+                for (final ProductApplication productapplication : user.productapplications)
                 {
                     json productapplicationJson;
                     productapplicationJson["producttype"] = productapplication.producttype;
                     productapplicationJson["productID"] = productapplication.productID;
                     userJson["productapplications"].push_back(productapplicationJson);
                 }
-                for (const HelpandResources &resources : user.helpandresources)
+                for (final HelpandResources resources : user.helpandresources)
                 {
                     json helpandresourcesJson;
                     helpandresourcesJson["helpandresourcesID"] = resources.helpID;
@@ -385,12 +376,12 @@ public class BankSystem {
             file << j.dump(4);
             file.close();
         }
-        catch (const json::exception &e) // catching specific exceptions related to the json library
+        catch (final json::exception e) // catching specific exceptions related to the json library
         {
             cout << "JSON error: " << e.what() << endl;
             system.auditLog(false);
         }
-        catch (const exception &e) // generic C++ exceptions
+        catch (final exception e) // generic C++ exceptions
         {
             cout << "Error saving data to file: " << e.what() << endl;
             system.auditLog(false);
