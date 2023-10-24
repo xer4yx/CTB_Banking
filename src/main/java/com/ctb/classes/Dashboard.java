@@ -20,7 +20,7 @@ public class Dashboard {
             {
                 if (isadmin(username))
                 {
-                ::system("cls");
+                BankSystem.clearConsole();
                     cout << "╔═════════════════════════════════════╗    " << endl;
                     cout << "║            Administrator            ║    " << endl;
                     cout << "╚═════════════════════════════════════╝    " << endl;

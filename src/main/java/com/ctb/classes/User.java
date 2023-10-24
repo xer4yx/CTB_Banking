@@ -14,7 +14,7 @@ public class User {
     private String productType;
     private boolean isCustomerService;
     private double balance;
-    private List<Profile> userProfile = new LinkedList<>();
+    public List<Profile> userProfile = new LinkedList<>();
     public List<Transaction> userTransaction = new LinkedList<>();
     public List<ProductApplication> userProductApplications = new LinkedList<>();
     public List<Session> userSessions = new LinkedList<>();

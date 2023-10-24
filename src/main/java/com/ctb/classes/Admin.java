@@ -70,9 +70,11 @@ class Admin extends User{
     private void updateUser() {
         BankSystem.clearConsole();
         System.out.print(
-                "\n╭────────────────────────────────────────────────────────────────╮" +
-                "\n│                         Update User                            │" +
-                "\n╰────────────────────────────────────────────────────────────────╯"
+                """
+
+                        ╭────────────────────────────────────────────────────────────────╮
+                        │                         Update User                            │
+                        ╰────────────────────────────────────────────────────────────────╯"""
         );
         System.out.print("\nEnter the username of the user you want to update: ");
         String pickedUsername = input.nextLine();
@@ -83,9 +85,11 @@ class Admin extends User{
     private void deleteUser() {
         BankSystem.clearConsole();
         System.out.print(
-                "\n╭────────────────────────────────────────────────────────────────╮" +
-                "\n│                         Delete User                            │" +
-                "\n╰────────────────────────────────────────────────────────────────╯"
+                """
+
+                        ╭────────────────────────────────────────────────────────────────╮
+                        │                         Delete User                            │
+                        ╰────────────────────────────────────────────────────────────────╯"""
         );
         System.out.print("\nEnter the username of the user to delete: ");
         String user = input.nextLine();
@@ -123,9 +127,11 @@ class Admin extends User{
         );
 
         System.out.print(
-                "\n──────────────────────────────────────────────────────────────────" +
-                "\n                           Profiles:                              " +
-                "\n──────────────────────────────────────────────────────────────────"
+                """
+
+                        ──────────────────────────────────────────────────────────────────
+                                                   Profiles:                             \s
+                        ──────────────────────────────────────────────────────────────────"""
         );
         for (final Profile profile : user.getUserProfile())
         {
@@ -137,9 +143,11 @@ class Admin extends User{
         }
 
         System.out.print(
-                "\n──────────────────────────────────────────────────────────────────" +
-                "\n                      Transaction History:                        " +
-                "\n──────────────────────────────────────────────────────────────────"
+                """
+
+                        ──────────────────────────────────────────────────────────────────
+                                              Transaction History:
+                        ──────────────────────────────────────────────────────────────────"""
         );
         for (final Transaction transaction : user.getUserTransaction())
         {
@@ -152,9 +160,11 @@ class Admin extends User{
         }
 
         System.out.print(
-                "\n──────────────────────────────────────────────────────────────────" +
-                "\n                          Sessions:" +
-                "\n──────────────────────────────────────────────────────────────────"
+                """
+
+                        ──────────────────────────────────────────────────────────────────
+                                                  Sessions:
+                        ──────────────────────────────────────────────────────────────────"""
         );
 
         for (final Session session : user.getUserSessions())
@@ -167,9 +177,11 @@ class Admin extends User{
         }
 
         System.out.print(
-            "\n──────────────────────────────────────────────────────────────────" +
-            "\n                     Product Applications:" +
-            "\n──────────────────────────────────────────────────────────────────"
+                """
+
+                        ──────────────────────────────────────────────────────────────────
+                                             Product Applications:
+                        ──────────────────────────────────────────────────────────────────"""
         );
         for (final ProductApplication productApp : user.getUserProductApplications())
         {
@@ -181,9 +193,11 @@ class Admin extends User{
         }
 
         System.out.print(
-            "\n──────────────────────────────────────────────────────────────────" +
-            "\n                      Help and Resources:" +
-            "\n──────────────────────────────────────────────────────────────────"
+                """
+
+                        ──────────────────────────────────────────────────────────────────
+                                              Help and Resources:
+                        ──────────────────────────────────────────────────────────────────"""
         );
         for (final HelpAndResources resources : user.getUserHelpAndResources())
         {
@@ -196,18 +210,22 @@ class Admin extends User{
             );
         }
         System.out.print(
-                "\n╔═══════════════════════════════════════════════════════════════════════════╗     " +
-                "\n║╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳║     " +
-                "\n╚═══════════════════════════════════════════════════════════════════════════╝     "
+                """
+
+                        ╔═══════════════════════════════════════════════════════════════════════════╗
+                        ║╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳║
+                        ╚═══════════════════════════════════════════════════════════════════════════╝"""
         );
     }
 
     private void displayAllUserData() {
         BankSystem.clearConsole();
         System.out.print(
-                "\n╔════════════════════════════════════════════════════════╗" +
-                "\n║                   View Users Data                      ║" +
-                "\n╚════════════════════════════════════════════════════════╝"
+                """
+
+                        ╔════════════════════════════════════════════════════════╗
+                        ║                   View Users Data                      ║
+                        ╚════════════════════════════════════════════════════════╝"""
         );
         for (final User user : BankSystem.getUsers())
         {
@@ -244,23 +262,25 @@ class Admin extends User{
             char new2FA;
             displayUserData(username);
             System.out.print(
-                "╔═════════════════════════════════════╗    " +
-                "║           Manage Account            ║   " +
-                "╠═════════════════════════════════════╣    " +
-                "║  1. Change Password                 ║" +
-                "║  2. Change Email                    ║" +
-                "║  3. Change Phone                    ║" +
-                "║  4. Change Username                 ║" +
-                "║  5. Enable/Disable 2FA              ║" +
-                "║  6. Show Activity Log               ║" +
-                "║  7. Make User Admin                 ║" +
-                "║  8. Make User Customer Service      ║" +
-                "║  9. Deposit(Savings Only)           ║" +
-                "║  10. Withdraw(Savings Only)         ║" +
-                "║  11. Make a Purchase(Credit Only)   ║" +
-                "║  12. Bills Payment(Credit Only)     ║" +
-                "║  13. Back to Profile                ║" +
-                "╚═════════════════════════════════════╝"
+                    """
+
+                            ╔═════════════════════════════════════╗
+                            ║           Manage Account            ║
+                            ╠═════════════════════════════════════╣
+                            ║  1. Change Password                 ║
+                            ║  2. Change Email                    ║
+                            ║  3. Change Phone                    ║
+                            ║  4. Change Username                 ║
+                            ║  5. Enable/Disable 2FA              ║
+                            ║  6. Show Activity Log               ║
+                            ║  7. Make User Admin                 ║
+                            ║  8. Make User Customer Service      ║
+                            ║  9. Deposit(Savings Only)           ║
+                            ║  10. Withdraw(Savings Only)         ║
+                            ║  11. Make a Purchase(Credit Only)   ║
+                            ║  12. Bills Payment(Credit Only)     ║
+                            ║  13. Back to Profile                ║
+                            ╚═════════════════════════════════════╝"""
             );
             System.out.print("Enter: ");
             int choice = input.nextInt();

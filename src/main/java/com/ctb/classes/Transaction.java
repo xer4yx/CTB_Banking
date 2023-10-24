@@ -1,6 +1,6 @@
 package com.ctb.classes;
 
-import java.time.LocalDate;
+import java.time.temporal.Temporal;
 
 public class Transaction {
     private String transactionID;
@@ -22,6 +22,7 @@ public class Transaction {
     public String getDescription() {return description;}
     public double getAmount() {return amount;}
     public long getTimeStamp() {return timeStamp;}
+
 
     /*----------------------Class Methods----------------------*/
 
@@ -72,7 +73,7 @@ public class Transaction {
                 user.balance += amount;
 
                 // Save the updated user data to the file
-                saveDataToFile();
+                BankSystem.saveDataToFile();
 
                 return true;
             }

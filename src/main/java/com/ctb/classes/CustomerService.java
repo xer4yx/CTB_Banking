@@ -1,66 +1,83 @@
 package com.ctb.classes;
 
+import java.util.Objects;
+import java.util.Scanner;
+
 class CustomerService {
+    private static final Scanner input = new Scanner(System.in);
+    
     protected static void displayHelpHistory(final String username) {
-        bool helpFound = false;
+        boolean helpFound = false;
 
-        for (const User &user : users)
+        for (final User user : BankSystem.users)
         {
-            if (user.username == username)
+            if (Objects.equals(User.getUsername(), username))
             {
-                cout << "╔═════════════════════════════════════════════════════════════╗    " << endl;
-                cout << "║                        Help History                         ║    " << endl;
-                cout << "╚═════════════════════════════════════════════════════════════╝    " << endl;
-                cout << "───────────────────────────────────────────────────────────────" << endl;
-                for (const HelpandResources &resources : user.helpandresources)
+                System.out.print(
+                        """
+
+                                ╔═════════════════════════════════════════════════════════════╗
+                                ║                        Help History                         ║
+                                ╚═════════════════════════════════════════════════════════════╝
+                                ───────────────────────────────────────────────────────────────"""
+                );
+                for (final HelpAndResources resources : user.userHelpAndResources)
                 {
+                    System.out.print(
+                            "\nHelp ID: " + resources.getHelpID() +
+                            "\nType: " + resources.getH_rType() +
+                            "\nDescription: " + resources.getH_rDescription()
+                    );
+                    if (!Objects.equals(resources.getFeedback(), "")) {
+                        System.out.print(
+                                "\nFeedback: " + resources.getFeedback() +
+                                "\n───────────────────────────────────────────────────────────────"
+                        );
 
-                    cout << "Help ID: " << resources.helpID << endl;
-                    cout << "Type: " << resources.helpandresourcesType << endl;
-                    cout << "Description: " << resources.helpandresourcesDescription << endl;
-                    if (resources.feedback != "")
-                    {
-                        cout << "Feedback: " << resources.feedback << endl;
-                    }
-                    else
-                    {
-                        cout << "Feedback: No feedback yet." << endl;
-                    }
-                    cout << "───────────────────────────────────────────────────────────────" << endl;
+                    } else {
+                        System.out.print(
+                                """
+                                        Feedback: No feedback yet.
+                                        ───────────────────────────────────────────────────────────────"""
+                        );
 
+                    }
                     helpFound = true;
                 }
             }
         }
-
         if (!helpFound)
         {
-            cout << "No Help history is available for the user " << username << "." << endl;
+            System.out.print("No Help history is available for the user " + username + ".");
         }
     }
 
     protected static void displayAllHR() {
-        cout << " " << endl;
-        cout << "╭───────────────────────────────────────────╮" << endl;
-        cout << "│             Help & Resources              │" << endl;
-        cout << "╰───────────────────────────────────────────╯" << endl;
-        cout << "────────────────────────────────────────────" << endl;
-        const string desiredType = "Help"; // Change this to the type you want to display
-        bool helpFound = false;            // Initialize a boolean flag to check if any Help is found
+        System.out.print(
+                """
 
-        for (const User &user : users)
+                        ╭───────────────────────────────────────────╮
+                        │             Help & Resources              │
+                        ╰───────────────────────────────────────────╯
+                        ────────────────────────────────────────────"""
+        );
+
+        final String desiredType = "Help"; // Change this to the type you want to display
+        boolean helpFound = false;            // Initialize a boolean flag to check if any Help is found
+
+        for (final User user : BankSystem.users)
         {
-            for (const HelpandResources &resources : user.helpandresources)
+            for (final HelpAndResources resources : user.userHelpAndResources)
             {
-                if (resources.helpandresourcesType == desiredType)
+                if (Objects.equals(resources.getH_rType(), desiredType))
                 {
-                    cout << "Help ID: " << resources.helpID << endl;
-                    cout << "Type: " << resources.helpandresourcesType << endl;
-                    cout << "Description: " << resources.helpandresourcesDescription << endl;
-                    cout << "Feedback: " << resources.feedback << endl;
-                    cout << "────────────────────────────────────────────" << endl;
-                    cout << " " << endl;
-
+                    System.out.print(
+                            "\nHelp ID: " + resources.getHelpID() +
+                            "\nType: " + resources.getH_rType() +
+                            "\nDescription: " + resources.getH_rDescription() +
+                            "\nFeedback: " + resources.getFeedback() +
+                            "────────────────────────────────────────────"
+                    );
                     helpFound = true; // Set the flag to true if Help is found
                 }
             }
@@ -68,34 +85,33 @@ class CustomerService {
 
         if (!helpFound)
         {
-            cout << "No Help is available." << endl;
+            System.out.print("\nNo Help is available.");
         }
     }
 
     protected static void replyToHelp() {
-        string helpID;
-        cout << "\nEnter the help ID of the help and resources to reply to: ";
-        cin >> helpID;
-        cin.ignore();
+        String helpID;
+        System.out.print("\nEnter the help ID of the help and resources to reply to: ");
+        helpID = input.nextLine();
+        input.nextLine();
+        
+        System.out.print("Enter your feedback: ");
+        String feedback = input.nextLine();
+        
 
-        string feedback;
-        cout << "Enter your feedback: ";
-        getline(cin, feedback);
-
-        for (User &user : users)
+        for (final User user : BankSystem.users)
         {
-            for (HelpandResources &resources : user.helpandresources)
+            for (final HelpAndResources resources : user.userHelpAndResources)
             {
-                if (resources.helpID == helpID)
+                if (Objects.equals(resources.getHelpID(), helpID))
                 {
-                    resources.feedback = feedback;
-                    cout << "Feedback saved successfully." << endl;
-                    saveDataToFile();
+                    resources.setFeedback(feedback);
+                    System.out.print("Feedback saved successfully.");
+                    BankSystem.saveDataToFile();
                     return;
                 }
             }
         }
-
-        cout << "Help and resources with ID '" << helpID << "' not found." << endl;
+        System.out.print("Help and resources with ID '" + helpID + "' not found.");
     }
 }
