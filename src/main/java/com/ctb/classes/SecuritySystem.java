@@ -22,7 +22,7 @@ class SecuritySystem {
         }
     }
 
-    protected static booleanean enable2FA(final char answer)
+    protected static boolean enable2FA(final char answer)
     {
         return Character.toUpperCase(answer) == 'Y';
     }

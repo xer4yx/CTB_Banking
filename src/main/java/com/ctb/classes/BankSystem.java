@@ -220,7 +220,7 @@ class BankSystem {
         return true;
     }
 
-    protected void loadDataToFile() {
+    protected void loadDataFromFile() {
         ifstream file(dataFilePath);
         if (!file.is_open())
         {
