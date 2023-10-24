@@ -9,13 +9,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-class BankSystem {
+public class BankSystem {
     private final SecuritySystem system = new SecuritySystem();
     private String currentLoggedInUser;
     private String currentProductType;
     private String currentSessionID;
     private String dataFilePath;
-    private static final List<User> users = new LinkedList<>();
+    public static final List<User> users = new LinkedList<>();
     private static final List<Profile> profiles = new LinkedList<>();
     private final List<Transaction> transactionHistory = new LinkedList<>();
     private static final List<ProductApplication> productApplications = new LinkedList<>();

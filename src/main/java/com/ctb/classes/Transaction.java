@@ -1,29 +1,27 @@
 package com.ctb.classes;
 
-import com.ctb.interfaces.TransactionInterface;
-
-import java.time.Instant;
 import java.time.LocalDate;
 
-class Transaction {
+public class Transaction {
     private String transactionID;
     private String transactionType;
     private String description;
     private double amount;
-    private final LocalDate timeStamp = LocalDate.now();
+    private long timeStamp;
 
     /*----------------------Setter Methods----------------------*/
     public void setTransactionID(String transactionID) {this.transactionID = transactionID;}
     public void setTransactionType(String transactionType) {this.transactionType = transactionType;}
     public void setDescription(String description) {this.description = description;}
     public void setAmount(double amount) {this.amount = amount;}
+    public void setTimeStamp(long timeStamp) {this.timeStamp = timeStamp;}
 
     /*----------------------Getter Methods----------------------*/
     public String getTransactionID() {return transactionID;}
     public String getTransactionType() {return transactionType;}
     public String getDescription() {return description;}
     public double getAmount() {return amount;}
-    protected LocalDate getTimeStamp() {return timeStamp;}
+    public long getTimeStamp() {return timeStamp;}
 
     /*----------------------Class Methods----------------------*/
 

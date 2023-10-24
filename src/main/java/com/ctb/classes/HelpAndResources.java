@@ -1,6 +1,6 @@
 package com.ctb.classes;
 
-class HelpAndResources {
+public class HelpAndResources {
     private String helpID;
     private String h_rType;
     private String h_rDescription;

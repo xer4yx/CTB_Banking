@@ -15,10 +15,10 @@ public class User {
     private boolean isCustomerService;
     private double balance;
     private List<Profile> userProfile = new LinkedList<>();
-    private List<Transaction> userTransaction = new LinkedList<>();
-    private List<ProductApplication> userProductApplications = new LinkedList<>();
-    private List<Session> userSessions = new LinkedList<>();
-    private List<HelpAndResources> userHelpAndResources = new LinkedList<>();
+    public List<Transaction> userTransaction = new LinkedList<>();
+    public List<ProductApplication> userProductApplications = new LinkedList<>();
+    public List<Session> userSessions = new LinkedList<>();
+    public List<HelpAndResources> userHelpAndResources = new LinkedList<>();
     private List<Dashboard> userDashboard = new LinkedList<>();
 
     /*----------------------Constructor Methods----------------------*/

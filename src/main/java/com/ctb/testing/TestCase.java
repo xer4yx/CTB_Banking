@@ -1,101 +1,99 @@
 package com.ctb.testing;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.logging.Logger;
+import com.ctb.classes.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import java.io.*;
+import java.util.logging.Logger;
+
+import static com.ctb.classes.BankSystem.users;
+
 public class TestCase {
     private String dataFilePath;
-
+    private Logger logger;
     protected void loadDataFromFile() {
         try {
             BufferedReader file = new BufferedReader(new FileReader(dataFilePath));
-            String data = "";
+            StringBuilder data = new StringBuilder();
             String line;
             while ((line = file.readLine()) != null) {
-                data += line;
+                data.append(line);
             }
             file.close();
 
-            JSONObject j = new JSONObject(new JSONTokener(data));
+            JSONObject j = new JSONObject(new JSONTokener(data.toString()));
 
             for (int i = 0; i < j.length(); i++) {
                 JSONObject item = j.getJSONObject(String.valueOf(i));
 
                 User user = new User();
-                user.userID = item.optString("id", "");
-                user.name = item.optString("name", "");
-                user.username = item.optString("username", "");
-                user.isadmin = item.optBoolean("isadmin", false);
-                user.iscustomerservice = item.optBoolean("iscustomerservice", false);
-                user.password = item.optString("password", "");
-                user.producttype = item.optString("producttype", "");
-                user.balance = item.optDouble("balance", 0.0);
+                user.setUserID(item.optString("id", ""));
+                user.setName(item.optString("name", ""));
+                user.setUsername(item.optString("username", ""));
+                user.setAdmin(item.optBoolean("isadmin", false));
+                user.setCustomerService(item.optBoolean("iscustomerservice", false));
+                user.setPassword(item.optString("password", ""));
+                user.setProductType(item.optString("producttype", ""));
+                user.setBalance(item.optDouble("balance", 0.0));
 
                 if (item.has("transactionhistory")) {
                     JSONArray transactionArray = item.getJSONArray("transactionhistory");
-                    for (int j = 0; j < transactionArray.length(); j++) {
-                        JSONObject transactionItem = transactionArray.getJSONObject(j);
+                    for (int n = 0; i < transactionArray.length(); n++) {
+                        JSONObject transactionItem = transactionArray.getJSONObject(n);
 
                         Transaction transaction = new Transaction();
-                        transaction.transactionID = transactionItem.optString("transactionID", "");
-                        transaction.transactionType = transactionItem.optString("transactionType", "");
-                        transaction.amount = transactionItem.optDouble("amount", 0.0);
-                        transaction.timestamp = transactionItem.optLong("timestamp", 0);
-                        transaction.description = transactionItem.optString("description", "");
+                        transaction.setTransactionID(transactionItem.optString("transactionID", ""));
+                        transaction.setTransactionType(transactionItem.optString("transactionType", ""));
+                        transaction.setAmount(transactionItem.optDouble("amount", 0.0));
+                        transaction.setTimeStamp(transactionItem.optLong("timestamp", 0));
+                        transaction.setDescription(transactionItem.optString("description", ""));
 
-                        user.transactionhistory.add(transaction);
+                        user.userTransaction.add(transaction);
                     }
                 }
 
                 if (item.has("sessions")) {
                     JSONArray sessionArray = item.getJSONArray("sessions");
-                    for (int j = 0; j < sessionArray.length(); j++) {
-                        JSONObject sessionItem = sessionArray.getJSONObject(j);
+                    for (int k = 0; k < sessionArray.length(); k++) {
+                        JSONObject sessionItem = sessionArray.getJSONObject(k);
 
                         Session session = new Session();
-                        session.sessionID = sessionItem.optString("sessionID", "");
-                        session.username = sessionItem.optString("username", "");
-                        session.timestamp = sessionItem.optLong("timestamp", 0);
+                        session.setSessionID(sessionItem.optString("sessionID", ""));
+                        session.setUsername(sessionItem.optString("username", ""));
+                        session.setTimeStamp(sessionItem.optLong("timestamp", 0));
 
-                        user.sessions.add(session);
+                        user.userSessions.add(session);
                     }
                 }
 
                 if (item.has("productapplications")) {
                     JSONArray productApplicationArray = item.getJSONArray("productapplications");
-                    for (int j = 0; j < productApplicationArray.length(); j++) {
-                        JSONObject productApplicationItem = productApplicationArray.getJSONObject(j);
+                    for (int l = 0; l < productApplicationArray.length(); l++) {
+                        JSONObject productApplicationItem = productApplicationArray.getJSONObject(l);
 
                         ProductApplication productApplication = new ProductApplication();
-                        productApplication.producttype = productApplicationItem.optString("producttype", "");
-                        productApplication.productID = productApplicationItem.optString("productID", "");
+                        productApplication.setProductType(productApplicationItem.optString("producttype", ""));
+                        productApplication.setProductID(productApplicationItem.optString("productID", ""));
 
-                        user.productapplications.add(productApplication);
+                        user.userProductApplications.add(productApplication);
                     }
                 }
 
                 if (item.has("helpandresources")) {
                     JSONArray helpandResourcesArray = item.getJSONArray("helpandresources");
-                    for (int j = 0; j < helpandResourcesArray.length(); j++) {
-                        JSONObject helpandResourcesItem = helpandResourcesArray.getJSONObject(j);
+                    for (int m = 0; m < helpandResourcesArray.length(); m++) {
+                        JSONObject helpandResourcesItem = helpandResourcesArray.getJSONObject(m);
 
-                        HelpAndResource helpAndResource = new HelpAndResource();
-                        helpAndResource.id = helpandResourcesItem.optString("id", "");
-                        helpAndResource.title = helpandResourcesItem.optString("title", "");
-                        helpAndResource.url = helpandResourcesItem.optString("url", "");
+                        HelpAndResources helpAndResource = new HelpAndResources();
+                        helpAndResource.setHelpID(helpandResourcesItem.optString("Help ID", ""));
+                        helpAndResource.setH_rType(helpandResourcesItem.optString("Type", ""));
+                        helpAndResource.setH_rDescription(helpandResourcesItem.optString("Description", ""));
 
-                        user.helpandresources.add(helpAndResource);
+                        user.userHelpAndResources.add(helpAndResource);
                     }
                 }
-
                 users.add(user);
             }
         } catch (IOException e) {
@@ -111,65 +109,40 @@ public class TestCase {
 
             for (User user : users) {
                 JSONObject userJson = new JSONObject();
-                userJson.put("id", user.userID);
-                userJson.put("name", user.name);
-                userJson.put("username", user.username);
-                userJson.put("isadmin", user.isadmin);
-                userJson.put("iscustomerservice", user.iscustomerservice);
-                userJson.put("password", user.password);
-                userJson.put("producttype", user.producttype);
-                userJson.put("balance", user.balance);
+                userJson.put("id", user.getUserID());
+                userJson.put("name", user.getName());
+                userJson.put("username", User.getUsername());
+                userJson.put("isadmin", user.isAdmin());
+                userJson.put("iscustomerservice", user.isCustomerService());
+                userJson.put("password", user.getPassword());
+                userJson.put("producttype", user.getProductType());
+                userJson.put("balance", user.getBalance());
 
-                JSONArray transactionHistoryArray = new JSONArray();
-                for (Transaction transaction : user.transactionhistory) {
-                    JSONObject transactionJson = new JSONObject();
-                    transactionJson.put("transactionID", transaction.transactionID);
-                    transactionJson.put("transactionType", transaction.transactionType);
-                    transactionJson.put("amount", transaction.amount);
-                    transactionJson.put("timestamp", transaction.timestamp);
-                    transactionJson.put("description", transaction.description);
-
-                    transactionHistoryArray.put(transactionJson);
-                }
+                JSONArray transactionHistoryArray = getUserTransactionHistory(user);
                 userJson.put("transactionhistory", transactionHistoryArray);
 
                 JSONArray sessionsArray = new JSONArray();
-                for (Session session : user.sessions) {
+                for (Session session : user.userSessions) {
                     JSONObject sessionJson = new JSONObject();
-                    sessionJson.put("sessionID", session.sessionID);
-                    sessionJson.put("username", session.username);
-                    sessionJson.put("timestamp", session.timestamp);
+                    sessionJson.put("sessionID", session.getSessionID());
+                    sessionJson.put("username", User.getUsername());
+                    sessionJson.put("timestamp", session.getTimeStamp());
 
                     sessionsArray.put(sessionJson);
                 }
                 userJson.put("sessions", sessionsArray);
 
-                JSONArray productApplicationsArray = new JSONArray();
-                for (ProductApplication productApplication : user.productapplications) {
-                    JSONObject productApplicationJson = new JSONObject();
-                    productApplicationJson.put("producttype", productApplication.producttype);
-                    productApplicationJson.put("productID", productApplication.productID);
-
-                    productApplicationsArray.put(productApplicationJson);
-                }
+                JSONArray productApplicationsArray = getUserProductApplications(user);
                 userJson.put("productapplications", productApplicationsArray);
 
-                JSONArray helpandResourcesArray = new JSONArray();
-                for (HelpAndResource helpAndResource : user.helpandresources) {
-                    JSONObject helpAndResourceJson = new JSONObject();
-                    helpAndResourceJson.put("id", helpAndResource.id);
-                    helpAndResourceJson.put("title", helpAndResource.title);
-                    helpAndResourceJson.put("url", helpAndResource.url);
-
-                    helpandResourcesArray.put(helpAndResourceJson);
-                }
+                JSONArray helpandResourcesArray = getUserHelpAndResources(user);
                 userJson.put("helpandresources", helpandResourcesArray);
 
                 jsonArray.put(userJson);
             }
 
             String jsonData = jsonArray.toString(4);
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(dataFilePath))) {
                 writer.write(jsonData);
             }
         } catch (IOException e) {
@@ -178,7 +151,44 @@ public class TestCase {
             logger.severe("Failed to save data to file: " + e.getMessage());
         }
     }
-\end{code}
 
-    Please note that these code snippets assume the use of a logger, so make sure to initialize and configure one
+    private static JSONArray getUserHelpAndResources(User user) {
+        JSONArray helpandResourcesArray = new JSONArray();
+        for (HelpAndResources helpAndResource : user.userHelpAndResources) {
+            JSONObject helpAndResourceJson = new JSONObject();
+            helpAndResourceJson.put("Help ID", helpAndResource.getHelpID());
+            helpAndResourceJson.put("Title", helpAndResource.getH_rType());
+            helpAndResourceJson.put("Description", helpAndResource.getH_rDescription());
+
+            helpandResourcesArray.put(helpAndResourceJson);
+        }
+        return helpandResourcesArray;
+    }
+
+    private static JSONArray getUserProductApplications(User user) {
+        JSONArray productApplicationsArray = new JSONArray();
+        for (ProductApplication productApplication : user.userProductApplications) {
+            JSONObject productApplicationJson = new JSONObject();
+            productApplicationJson.put("producttype", productApplication.getProductType());
+            productApplicationJson.put("productID", productApplication.getProductID());
+
+            productApplicationsArray.put(productApplicationJson);
+        }
+        return productApplicationsArray;
+    }
+
+    private static JSONArray getUserTransactionHistory(User user) {
+        JSONArray transactionHistoryArray = new JSONArray();
+        for (Transaction transaction : user.userTransaction) {
+            JSONObject transactionJson = new JSONObject();
+            transactionJson.put("transactionID", transaction.getTransactionID());
+            transactionJson.put("transactionType", transaction.getTransactionType());
+            transactionJson.put("amount", transaction.getAmount());
+            transactionJson.put("timestamp", transaction.getTimeStamp());
+            transactionJson.put("description", transaction.getDescription());
+
+            transactionHistoryArray.put(transactionJson);
+        }
+        return transactionHistoryArray;
+    }
 }

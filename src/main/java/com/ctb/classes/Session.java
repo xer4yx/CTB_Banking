@@ -6,13 +6,13 @@ import java.util.Objects;
 public class Session extends User{
     private String sessionID;
     private String sessionType;
-    private final long timeStamp = Instant.now().getEpochSecond();
+    private long timeStamp;
 
-    protected void setSessionID(String sessionID) {this.sessionID = sessionID;}
-    protected void setSessionType(String sessionType) {this.sessionType = sessionType;}
+    public void setSessionID(String sessionID) {this.sessionID = sessionID;}
+    public void setSessionType(String sessionType) {this.sessionType = sessionType;}
 
-    protected long getTimeStamp() {return timeStamp;}
-    protected String getSessionID() {return sessionID;}
+    public long getTimeStamp() {return timeStamp;}
+    public String getSessionID() {return sessionID;}
 
 
     /*----------------------Class Methods----------------------*/
@@ -47,5 +47,9 @@ public class Session extends User{
         }
         // If we've reached here, it means the user wasn't found.
         system.auditLog(false);
+    }
+
+    public void setTimeStamp(long timeStamp) {
+        this.timeStamp = timeStamp;
     }
 }
