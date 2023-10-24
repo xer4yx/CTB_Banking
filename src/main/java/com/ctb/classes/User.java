@@ -622,8 +622,8 @@ public class User {
         return userDashboard;
     }
 
-    public boolean isAdmin() {
-        return isAdmin;
+    public boolean isAdmin(final String username) {
+        if(isAdmin) return isAdmin;
     }
 
     public void setAdmin(boolean admin) {
