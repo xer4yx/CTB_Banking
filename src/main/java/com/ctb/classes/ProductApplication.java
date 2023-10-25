@@ -1,6 +1,12 @@
 package com.ctb.classes;
 
+import java.util.Calendar;
+import java.util.Objects;
+import java.util.Random;
+
 public class ProductApplication {
+    private static final Calendar calendar = Calendar.getInstance();
+    private static final Random rand = new Random();
     private String productID;
     private String productType;
 
@@ -14,17 +20,21 @@ public class ProductApplication {
 
     /*----------------------Class Methods----------------------*/
     protected static String generateProductID(final String productType) {
-        if (producttype == "Savings Account")
+        long time = calendar.getTimeInMillis();
+        int randomNumber = rand.nextInt();
+        String timeString = Long.toString(time);
+        String randomNumberString = Integer.toString(randomNumber);
+        if (Objects.equals(productType, "Savings Account"))
         {
-            return "SAV" + to_string(time(nullptr)) + to_string(rand());
+            return "SAV" + timeString + randomNumberString;
         }
-        if (producttype == "Credit Account")
+        if (Objects.equals(productType, "Credit Account"))
         {
-            return "CRD" + to_string(time(nullptr)) + to_string(rand());
+            return "CRD" + timeString + randomNumberString;
         }
         else
         {
-            return "PRD" + to_string(time(nullptr)) + to_string(rand());
+            return "PRD" + timeString + randomNumberString;
         }
     }
 }

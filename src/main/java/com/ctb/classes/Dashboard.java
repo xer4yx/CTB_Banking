@@ -23,7 +23,7 @@ public class Dashboard {
                 if (user.isAdmin())
                 {
                 BankSystem.clearConsole();
-                    System.out.println(
+                    System.out.print(
                             """
 
                                     ╔═════════════════════════════════════╗
@@ -38,12 +38,12 @@ public class Dashboard {
                                     ║  3. Logout                          ║
                                     ╚═════════════════════════════════════╝"""
                     );
-                    System.out.println("Enter your choice: ");
+                    System.out.print("Enter your choice: ");
                 }
                 else if (user.isCustomerService())
                 {
                 BankSystem.clearConsole();
-                    System.out.println(
+                    System.out.print(
                             """
 
                                     ╔═════════════════════════════════════╗
@@ -58,32 +58,31 @@ public class Dashboard {
                                     ╚═════════════════════════════════════╝"""
                     );
 
-                    System.out.println("Enter your choice: ");
+                    System.out.print("Enter your choice: ");
                 }
                 else
                 {
                 BankSystem.clearConsole();
-                    SetConsoleOutputCP(CP_UTF8);
-                    " "
-                    "╭─────────────────────────────────────╮"
-                    "│         CENTRAL TRUST BANK          │"
-                    "╰─────────────────────────────────────╯"
-                    " "
-                    " Welcome " << user.name << "!"
-                    "  "
-                    " Current Balance: $" << getCurrentBalance(username)
-                    "                                           "
-                    "╔═════════════════════════════════════╗    "
-                    "║         Dashboard Options:          ║     "
-                    "╠═════════════════════════════════════╣    "
-                    "║  1. Transaction Center              ║     "
-                    "║  2. User Profile                    ║     "
-                    "║  3. Data Analytics Dashboard        ║     "
-                    "║  4. Help & Resources                ║     "
-                    "║  5. Logout                          ║     "
-                    "╚═════════════════════════════════════╝"
-                    " "
-                    "Enter your choice: ";
+                    System.out.print(
+                            "\n╭─────────────────────────────────────╮" +
+                            "\n│         CENTRAL TRUST BANK          │" +
+                            "\n╰─────────────────────────────────────╯" +
+                            "\n                                       " +
+                            "\n Welcome " + user.getName() + "!" +
+                            "\n                                       " +
+                            "\n Current Balance: $" + BankSystem.getCurrentBalance(username) +
+                            "\n                                       " +
+                            "\n╔═════════════════════════════════════╗" +
+                            "\n║         Dashboard Options:          ║" +
+                            "\n╠═════════════════════════════════════╣" +
+                            "\n║  1. Transaction Center              ║" +
+                            "\n║  2. User Profile                    ║" +
+                            "\n║  3. Data Analytics Dashboard        ║" +
+                            "\n║  4. Help & Resources                ║" +
+                            "\n║  5. Logout                          ║" +
+                            "\n╚═════════════════════════════════════╝"
+                    );
+                    System.out.print("Enter your choice: ");
                 }
             }
         }

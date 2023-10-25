@@ -32,15 +32,17 @@ class Admin extends User{
     private void handleManageUsers(String username) {
         BankSystem.clearConsole();
         System.out.print(
-                "\n╔═══════════════════════════════╗" +
-                "\n║          Manage Users         ║" +
-                "\n╠═══════════════════════════════╣" +
-                "\n║  1. View Users Data           ║" +
-                "\n║  2. Add Users                 ║" +
-                "\n║  3. Delete Users              ║" +
-                "\n║  4. Update Users              ║" +
-                "\n║  5. Exit                      ║" +
-                "\n╚═══════════════════════════════╝"
+                """
+
+                        ╔═══════════════════════════════╗
+                        ║          Manage Users         ║
+                        ╠═══════════════════════════════╣
+                        ║  1. View Users Data           ║
+                        ║  2. Add Users                 ║
+                        ║  3. Delete Users              ║
+                        ║  4. Update Users              ║
+                        ║  5. Exit                      ║
+                        ╚═══════════════════════════════╝"""
         );
 
         System.out.print("Enter your choice: ");
@@ -101,7 +103,7 @@ class Admin extends User{
         }
     }
     private void displayUserData(String username) {
-        for (final User user : BankSystem.getUsers())
+        for (final User user : BankSystem.users)
         {
             if (Objects.equals(getUsername(), username))
             {
@@ -133,7 +135,7 @@ class Admin extends User{
                                                    Profiles:                             \s
                         ──────────────────────────────────────────────────────────────────"""
         );
-        for (final Profile profile : user.getUserProfile())
+        for (final Profile profile : user.userProfile)
         {
             System.out.print(
                     "\n Email                  : " + profile.getEmail() +
@@ -149,7 +151,7 @@ class Admin extends User{
                                               Transaction History:
                         ──────────────────────────────────────────────────────────────────"""
         );
-        for (final Transaction transaction : user.getUserTransaction())
+        for (final Transaction transaction : user.userTransaction)
         {
             System.out.print(
                     "\n  Transaction ID         : " + transaction.getTransactionID() +
@@ -167,7 +169,7 @@ class Admin extends User{
                         ──────────────────────────────────────────────────────────────────"""
         );
 
-        for (final Session session : user.getUserSessions())
+        for (final Session session : user.userSessions)
         {
             System.out.print(
                     "\n  Session ID             : " + session.getSessionID() +
@@ -183,7 +185,7 @@ class Admin extends User{
                                              Product Applications:
                         ──────────────────────────────────────────────────────────────────"""
         );
-        for (final ProductApplication productApp : user.getUserProductApplications())
+        for (final ProductApplication productApp : user.userProductApplications)
         {
             System.out.print(
                 "\n  Product ID             : " + productApp.getProductID() +
@@ -199,7 +201,7 @@ class Admin extends User{
                                               Help and Resources:
                         ──────────────────────────────────────────────────────────────────"""
         );
-        for (final HelpAndResources resources : user.getUserHelpAndResources())
+        for (final HelpAndResources resources : user.userHelpAndResources)
         {
             System.out.print(
                 "\n  Help ID                : " + resources.getHelpID() +
@@ -227,7 +229,7 @@ class Admin extends User{
                         ║                   View Users Data                      ║
                         ╚════════════════════════════════════════════════════════╝"""
         );
-        for (final User user : BankSystem.getUsers())
+        for (final User user : BankSystem.users)
         {
             handleUserData(user);
         }
@@ -235,7 +237,7 @@ class Admin extends User{
     }
 
     private void makeUserAdmin(String username) {
-        for (final User user : BankSystem.getUsers()) {
+        for (final User user : BankSystem.users) {
             if (getUsername().equals(username)) {
                 user.setAdminStatus(true);
                 System.out.printf("User %s is now an admin.", getUsername());
@@ -245,7 +247,7 @@ class Admin extends User{
     }
 
     private void makeUserCustomerService(String username) {
-        for (final User user : BankSystem.getUsers()) {
+        for (final User user : BankSystem.users) {
             if (getUsername().equals(username)) {
                 user.setCSStatus(true);
                 System.out.printf("User %s is now a customer service.", getUsername());
