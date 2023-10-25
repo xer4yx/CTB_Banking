@@ -3,9 +3,10 @@ package com.ctb.classes;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
 
 class SecuritySystem {
-    public String encrypt(String password) {
+    protected static String encrypt(String password) {
         try {
             final MessageDigest md5 = MessageDigest.getInstance("MD5");
             byte[] messageDigest = md5.digest(password.getBytes());
@@ -21,9 +22,14 @@ class SecuritySystem {
         }
     }
 
-    protected static boolean authenticateUser(final String username, final String password) {
+    protected static boolean enable2FA(final char answer)
+    {
+        return Character.toUpperCase(answer) == 'Y';
+    }
+
+    protected static booleanean authenticateUser(final String username, final String password) {
         auto user_it = find_if(users.begin(), users.end(),
-                [&](const User &user)
+                [&](final User &user)
         { return user.username == username; });
 
         // User not found.
@@ -64,4 +70,46 @@ class SecuritySystem {
         return true; // Successful authentication
     }
 
+    protected static string getcurrDate()
+    {
+        LocalDate currTime = LocalDate.now();
+        struct tm tstruct{};
+        char buf[80];
+        tstruct = *localtime(&currTime);
+        strftime(buf, sizeof(buf), "%Y-%m-%d %X", &tstruct);
+
+        return buf;
+    }
+
+    protected static boolean securityStatus(final boolean status)
+    {
+        if (status)
+            return true;
+
+        return false;
+    }
+
+    protected static void auditLog(final boolean status)
+    {
+        try
+        {
+            ofstream auditFile("audit_log.txt");
+            if (!auditFile)
+            {
+                cerr << "Error: Unable to open file for audit." << endl;
+                return;
+            }
+
+            boolean currentStatus = securityStatus(status);
+            string statusResult = currentStatus ? "PASSED" : "FAILED";
+
+            auditFile << "[" << getcurrDate() << "]: " << statusResult << endl;
+
+            auditFile.close();
+        }
+        catch (Exception e)
+        {
+            System.err.print(e.getMessage());
+        }
+    }
 }

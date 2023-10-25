@@ -13,7 +13,7 @@ public class ProductApplication {
     public String getProductType() {return productType;}
 
     /*----------------------Class Methods----------------------*/
-    private String generateProductID(final String productType) {
+    protected static String generateProductID(final String productType) {
         if (producttype == "Savings Account")
         {
             return "SAV" + to_string(time(nullptr)) + to_string(rand());

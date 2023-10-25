@@ -9,6 +9,7 @@ public class Profile{
     private String phoneNumber;
     private boolean is2FAEnabled;
     private final List<User> users = new LinkedList<>();
+    private final List<Profile> profiles = new LinkedList<>();
 
     /*----------------------Setter Methods----------------------*/
     public void setEmail(String email) {this.email = email;}
@@ -23,6 +24,7 @@ public class Profile{
     /*----------------------Class Methods----------------------*/
     public void displayProfile(String username) {
         users.add(new User("Angelo M. Bicomong", "Xerayx", "Savings Account"));
+        users.add(new User("Jenine R. Ruado", "lil_j9", "Credit Account"));
         for (final User user : users)
         {
             if (Objects.equals(user.getUsername(), username))
@@ -43,5 +45,9 @@ public class Profile{
                 user.displayUserSettings(user.getUsername());
             }
         }
+    }
+
+    public List<Profile> getProfiles() {
+        return profiles;
     }
 }
