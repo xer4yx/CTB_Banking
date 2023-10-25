@@ -1,8 +1,14 @@
 package com.ctb.classes;
 
-import java.time.temporal.Temporal;
+import java.util.Calendar;
+import java.util.Objects;
+import java.util.Random;
+import java.util.Scanner;
 
 public class Transaction {
+    private static final Scanner input = new Scanner(System.in);
+    private static final Calendar calendar = Calendar.getInstance();
+    private static final Random rand = new Random();
     private String transactionID;
     private String transactionType;
     private String description;
@@ -26,249 +32,193 @@ public class Transaction {
 
     /*----------------------Class Methods----------------------*/
 
-    protected void generateTransactionID() {
+    protected static String generateTransactionID() {
         {
-            // Implement your logic to generate a unique transaction ID
-            // Example: You can use a combination of timestamp and a random number
-            return "TXN" + to_string(time(nullptr)) + to_string(rand());
+            long time = calendar.getTimeInMillis();
+            int randomNumber = rand.nextInt();
+            String timeString = Long.toString(time);
+            String randomNumberString = Integer.toString(randomNumber);
+            
+            return "TXN" + timeString + randomNumberString;
         }
     }
 
     protected static boolean depositFunds(String username, double amount) {
-        for (User &user : users)
+        for (User user : BankSystem.users)
         {
-            if (user.username == username)
+            if (Objects.equals(User.getUsername(), username))
             {
                 // Check for 2FA within profiles of the user
-                for (const Profile &profile : user.profiles)
-                {
-                    if (profile.isTwoFactorEnabled)
-                    {
-                        cout << "\nSending an OTP for 2 Factor Authentication." << endl;
-                        system.sendOTP();
+                if (handleVerification(user)) return false;
 
-                        string inputOTP;
-                        cout << "\nEnter your OTP: ";
-                        cin >> inputOTP;
-                        cin.ignore();
-
-                        if (!system.verifyOTP(inputOTP))
-                        {
-                            cout << "\n*Incorrect OTP. Timeout for 30 seconds..." << endl;
-                            sleep_for(seconds(30));
-                            return false;
-                        }
-                    }
-                }
-
-                Transaction depositTransaction;
-                depositTransaction.transactionID = generateTransactionID(); // Call a function to generate a unique transaction ID
+                Transaction depositTransaction = new Transaction();
+                depositTransaction.transactionID = generateTransactionID();
                 depositTransaction.transactionType = "Deposit";
                 depositTransaction.amount = amount;
-                depositTransaction.timestamp = time(nullptr);
+                depositTransaction.timeStamp = Calendar.getInstance().getTimeInMillis();
 
-                user.transactionhistory.push_back(depositTransaction);
+                user.userTransaction.add(depositTransaction);
+                user.setBalance(amount);
 
-                // Update user's balance
-                user.balance += amount;
-
-                // Save the updated user data to the file
                 BankSystem.saveDataToFile();
-
                 return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean handleVerification(User user) {
+        for (final Profile profile : user.userProfile)
+        {
+            if (profile.get2FAStatus())
+            {
+                System.out.println("\nSending an OTP for 2 Factor Authentication.");
+                SecuritySystem.sendOTP();
+
+                System.out.println("\nEnter your OTP: ");
+                String inputOTP = input.nextLine();
+
+                if (!SecuritySystem.verifyOTP(inputOTP))
+                {
+                    System.out.println("\n*Incorrect OTP. Timeout for 30 seconds...");
+                    try {
+                        Thread.sleep(30000);
+                    } catch (InterruptedException e) {
+                        System.err.print(e.getMessage());
+                    }
+                    return true;
+                }
             }
         }
         return false;
     }
 
     protected static boolean withdrawFunds(String username, double amount) {
-        for (User &user : users)
+        for (User  user :  BankSystem.users)
         {
-            if (user.username == username)
+            if (Objects.equals(User.getUsername(), username))
             {
                 // Check for 2FA within profiles of the user
-                for (const Profile &profile : user.profiles)
-                {
-                    if (profile.isTwoFactorEnabled)
-                    {
-                        cout << "\nSending an OTP for 2 Factor Authentication." << endl;
-                        system.sendOTP();
-
-                        string inputOTP;
-                        cout << "\nEnter your OTP: ";
-                        cin >> inputOTP;
-
-                        if (!system.verifyOTP(inputOTP))
-                        {
-                            cout << "\n*Incorrect OTP. Timeout for 30 seconds..." << endl;
-                            sleep_for(seconds(30));
-                            return false;
-                        }
-                    }
-                }
+                if (handleVerification(user)) return false;
 
                 if (amount <= 0.0)
                 {
-                    cout << "*Invalid withdrawal amount. Please enter a positive amount." << endl;
+                    System.out.println("*Invalid withdrawal amount. Please enter a positive amount.");
                     return false;
                 }
 
-                if (user.balance >= amount)
+                if (user.getBalance() >= amount)
                 {
-                    // Update user's transaction history
-                    Transaction withdrawTransaction;
+                    Transaction withdrawTransaction = new Transaction();
                     withdrawTransaction.transactionID = generateTransactionID(); // Call a function to generate a unique transaction ID
                     withdrawTransaction.transactionType = "Withdrawal";
                     withdrawTransaction.amount = amount;
-                    withdrawTransaction.timestamp = time(nullptr);
+                    withdrawTransaction.timeStamp = Calendar.getInstance().getTimeInMillis();
 
-                    user.transactionhistory.push_back(withdrawTransaction);
-
-                    // Update user's balance
-                    user.balance -= amount;
-
-                    // Save the updated user data to the file
-                    saveDataToFile();
-
+                    user.userTransaction.add(withdrawTransaction);
+                    user.setBalance(user.getBalance() - amount);
+                    
+                    BankSystem.saveDataToFile();
                     return true;
                 }
                 else
                 {
-                    cout << "\n*Insufficient balance. Withdrawal failed." << endl;
+                    System.out.println("\n*Insufficient balance. Withdrawal failed.");
                     return false;
                 }
             }
         }
-
-        cout << "*User not found. Withdrawal failed." << endl;
+        System.out.println("*User not found. Withdrawal failed.");
         return false;
     }
 
     protected static boolean makePurchase(String username, double amount, String purchaseDescription) {
-        for (User &user : users)
+        for (User user :  BankSystem.users)
         {
-            if (user.username == username)
+            if (Objects.equals(User.getUsername(), username))
             {
                 // Check for 2FA within profiles of the user
-                for (const Profile &profile : user.profiles)
-                {
-                    if (profile.isTwoFactorEnabled)
-                    {
-                        cout << "\nSending an OTP for 2 Factor Authentication." << endl;
-                        system.sendOTP();
-
-                        string inputOTP;
-                        cout << "\nEnter your OTP: ";
-                        cin >> inputOTP;
-
-                        if (!system.verifyOTP(inputOTP))
-                        {
-                            cout << "\n*Incorrect OTP. Timeout for 30 seconds..." << endl;
-                            sleep_for(seconds(30));
-                            return false;
-                        }
-                    }
-                }
+                if (handleVerification(user)) return false;
 
                 if (amount <= 0.0)
                 {
-                    cout << "*Invalid purchase amount. Please enter a positive amount." << endl;
+                    System.out.println("*Invalid purchase amount. Please enter a positive amount.");
                     return false;
                 }
 
                 // Check if the user's balance will go below -5000 after the purchase
-                if (user.balance - amount < -5000.0)
+                if (user.getBalance() - amount < -5000.0)
                 {
-                    cout << "*Insufficient credit limit. Purchase failed." << endl;
+                    System.out.println("*Insufficient credit limit. Purchase failed.");
                     return false;
                 }
 
                 // Update user's transaction history
-                Transaction purchaseTransaction;
+                Transaction purchaseTransaction = new Transaction();
                 purchaseTransaction.transactionID = generateTransactionID();
                 purchaseTransaction.transactionType = "Purchase";
                 purchaseTransaction.amount = amount;
-                purchaseTransaction.timestamp = time(nullptr);
+                purchaseTransaction.timeStamp = Calendar.getInstance().getTimeInMillis();
                 purchaseTransaction.description = purchaseDescription;
 
-                user.transactionhistory.push_back(purchaseTransaction);
+                user.userTransaction.add(purchaseTransaction);
 
                 // Update user's balance (subtract the purchase amount for a credit card)
-                user.balance -= amount;
+                user.setBalance(user.getBalance() - amount);
 
                 // Save the updated user data to the file
-                saveDataToFile();
-                cout << endl;
-                cout << "Purchase of $" << amount << " successful. " << endl;
-                cout << "Description: " << purchaseDescription << endl;
+                BankSystem.saveDataToFile();
+                System.out.println(
+                        "Purchase of $" + amount + " successful. " +
+                        "Description: " + purchaseDescription);
 
                 return true;
             }
         }
-        cout << endl;
-        cout << "*User not found. Purchase failed." << endl;
+        System.out.println("*User not found. Purchase failed.");
         return false;
     }
 
     protected static boolean payBills(String username, double amount, String billDescription) {
-        for (User &user : users)
+        for (User  user :  BankSystem.users)
         {
-            if (user.username == username)
+            if (Objects.equals(User.getUsername(), username))
             {
-                for (const Profile &profile : user.profiles)
-                {
-                    if (profile.isTwoFactorEnabled)
-                    {
-                        cout << "\nSending an OTP for 2 Factor Authentication." << endl;
-                        system.sendOTP();
-
-                        string inputOTP;
-                        cout << "\nEnter your OTP: ";
-                        cin >> inputOTP;
-
-                        if (!system.verifyOTP(inputOTP))
-                        {
-                            cout << "\n*Incorrect OTP. Timeout for 30 seconds..." << endl;
-                            sleep_for(seconds(30));
-                            return false;
-                        }
-                    }
-                }
+                if (handleVerification(user)) return false;
 
                 if (amount <= 0.0)
                 {
-                    cout << "*Invalid bill amount. Please enter a positive amount." << endl;
+                    System.out.println("*Invalid bill amount. Please enter a positive amount.");
                     return false;
                 }
-                if (user.balance <= amount)
+                if (user.getBalance() <= amount)
                 {
-                    // Update user's transaction history
-                    Transaction billTransaction;
+
+                    Transaction billTransaction = new Transaction();
                     billTransaction.transactionID = generateTransactionID();
                     billTransaction.transactionType = "Bill Payment";
                     billTransaction.amount = amount;
-                    billTransaction.timestamp = time(nullptr);
+                    billTransaction.timeStamp = Calendar.getInstance().getTimeInMillis();
                     billTransaction.description = billDescription;
-                    user.transactionhistory.push_back(billTransaction);
-                    // Update user's balance
-                    user.balance += amount;
-                    // Save the updated user data to the file
-                    saveDataToFile();
+                    user.userTransaction.add(billTransaction);
 
-                    cout << endl;
-                    cout << "Bill payment of $" << amount << " successful. " << endl;
-                    cout << " Description: " << billDescription << endl;
+                    user.setBalance(amount);
+                    BankSystem.saveDataToFile();
+
+                    System.out.println(
+                            "Bill payment of $" + amount + " successful. " +
+                            " Description: " + billDescription);
+
                     return true;
                 }
                 else
                 {
-                    cout << endl;
-                    cout << "*Insufficient balance. Bill payment failed." << endl;
+                    System.out.println("*Insufficient balance. Bill payment failed.");
                     return false;
                 }
             }
         }
-        cout << "*User not found. Bill payment failed." << endl;
+        System.out.println("*User not found. Bill payment failed.");
         return false;
     }
 }

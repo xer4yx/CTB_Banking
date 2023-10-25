@@ -1,15 +1,11 @@
 package com.ctb.classes;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Objects;
 
 public class Profile{
     private String email;
     private String phoneNumber;
     private boolean is2FAEnabled;
-    private final List<User> users = new LinkedList<>();
-    private final List<Profile> profiles = new LinkedList<>();
 
     /*----------------------Setter Methods----------------------*/
     public void setEmail(String email) {this.email = email;}
@@ -23,31 +19,25 @@ public class Profile{
 
     /*----------------------Class Methods----------------------*/
     public void displayProfile(String username) {
-        users.add(new User("Angelo M. Bicomong", "Xerayx", "Savings Account"));
-        users.add(new User("Jenine R. Ruado", "lil_j9", "Credit Account"));
-        for (final User user : users)
+        for (final User user : BankSystem.users)
         {
-            if (Objects.equals(user.getUsername(), username))
+            if (Objects.equals(User.getUsername(), username))
             {
                 String show2FAStatus = get2FAStatus() ? "Enabled" : "Disabled";
                 System.out.println(
-                          "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-                        + "                      User Profile                            \n"
-                        + "══════════════════════════════════════════════════════════════\n"
-                        + "  Name: " + user.getName()
-                        + "\n  Username: " + user.getUsername()
-                        + "\n  Email: " + getEmail()
-                        + "\n  Phone: " + getPhoneNumber()
-                        + "\n  Account: " + user.getProductType()
-                        + "\n  Balance: " + user.getBalance()
-                        + "\n  Two Factor Authentication: " + show2FAStatus
-                        + "\n══════════════════════════════════════════════════════════════");
-                user.displayUserSettings(user.getUsername());
+                        "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" +
+                        "\n                      User Profile                            " +
+                        "\n══════════════════════════════════════════════════════════════" +
+                        "\n  Name: " + user.getName() +
+                        "\n  Username: " + User.getUsername() +
+                        "\n  Email: " + getEmail() +
+                        "\n  Phone: " + getPhoneNumber() +
+                        "\n  Account: " + user.getProductType() +
+                        "\n  Balance: " + user.getBalance() +
+                        "\n  Two Factor Authentication: " + show2FAStatus +
+                        "\n══════════════════════════════════════════════════════════════");
+                user.displayUserSettings(User.getUsername());
             }
         }
-    }
-
-    public List<Profile> getProfiles() {
-        return profiles;
     }
 }

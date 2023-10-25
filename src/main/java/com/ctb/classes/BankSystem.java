@@ -1,5 +1,7 @@
 package com.ctb.classes;
 
+import org.fusesource.jansi.Ansi;
+import org.fusesource.jansi.AnsiConsole;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,7 +20,7 @@ public class BankSystem {
     private String currentSessionID;
     private static String dataFilePath;
     public static final List<User> users = new LinkedList<>();
-    private static final List<Profile> profiles = new LinkedList<>();
+    public static final List<Profile> profiles = new LinkedList<>();
     private final List<Transaction> transactionHistory = new LinkedList<>();
     private static final List<ProductApplication> productApplications = new LinkedList<>();
     private final List<Session> sessions = new LinkedList<>();
@@ -32,8 +34,12 @@ public class BankSystem {
     protected List<Dashboard> getDashboards() {return dashboards;}
 
     protected static void clearConsole() {
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
+        AnsiConsole.systemInstall();
+        Ansi ansi = Ansi.ansi();
+        ansi.eraseScreen();
+        ansi.cursor(0, 0);
+        System.out.print(ansi.toString());
+        AnsiConsole.systemUninstall();
     }
 
     protected double showInterestEarned(String username, List<User> users) {
@@ -150,7 +156,7 @@ public class BankSystem {
         return "Unknown";
     }
 
-    protected double getCurrentBalance(String username) {
+    protected static double getCurrentBalance(String username) {
         for (final User user : users)
         {
             if (Objects.equals(User.getUsername(), username))
