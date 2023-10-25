@@ -1,22 +1,24 @@
 package com.ctb.classes;
 
 import java.time.Instant;
+import java.util.Date;
 import java.util.Objects;
 
 public class Session extends User{
+    private static final Date currentTime = new Date();
     private String sessionID;
-    private String sessionType;
     private long timeStamp;
 
     public void setSessionID(String sessionID) {this.sessionID = sessionID;}
-    public void setSessionType(String sessionType) {this.sessionType = sessionType;}
+    public void setSessionType(String sessionType) {
+    }
 
     public long getTimeStamp() {return timeStamp;}
     public String getSessionID() {return sessionID;}
 
 
     /*----------------------Class Methods----------------------*/
-    protected String generateSessionID() {
+    protected static String generateSessionID(String sessionType) {
         if (Objects.equals(sessionType, "Login")) {
             return "LGN" + Instant.now().getEpochSecond();
         }
@@ -29,24 +31,23 @@ public class Session extends User{
     }
 
     protected static void saveSession(final String username, final String sessionType) {
-        for (User user : users)
+        long currentTimeInSeconds = currentTime.getTime() / 1000;
+        for (User user : BankSystem.users)
         {
-            if (user.username == username)
+            if (Objects.equals(getUsername(), username))
             {
-                Session session;
+                Session session = new Session();
                 session.sessionID = generateSessionID(sessionType);
-                session.username = username;
-                session.timestamp = time(nullptr);
-                user.sessions.push_back(session);
+                session.setUsername(username);
+                session.setTimeStamp(currentTimeInSeconds);
+                user.userSessions.add(session);
 
-                // Save the updated user data to the file
-                saveDataToFile();
-                system.auditLog(true);
-                return; // Exit the function once the session is saved for the user.
+                BankSystem.saveDataToFile();
+                SecuritySystem.auditLog(true);
+                return;
             }
         }
-        // If we've reached here, it means the user wasn't found.
-        system.auditLog(false);
+        SecuritySystem.auditLog(false);
     }
 
     public void setTimeStamp(long timeStamp) {
