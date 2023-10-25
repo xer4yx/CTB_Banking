@@ -23,7 +23,7 @@ class SecuritySystem {
     private static final Scanner input = new Scanner(System.in);
     static int attempts;
     static long lastAttempt;
-    String OTP;
+    static String OTP;
     
     protected static String encrypt(String password) {
         try {
@@ -84,13 +84,13 @@ class SecuritySystem {
         return false;
     }
 
-    protected void sendOTP()
+    protected static void sendOTP()
     {
         OTP = generateOTP();
         System.out.println("Your One-time Password is: " + OTP + ". Do not give or send this to other people.");
     }
 
-    protected boolean verifyOTP(final String onetimepass) {
+    protected static boolean verifyOTP(final String onetimepass) {
         if (Objects.equals(OTP, onetimepass)) {
             attempts = 0;
             return true;

@@ -565,10 +565,6 @@ public class User {
     public void askHelp(String username) {
         String message;
         cout << "Enter your message: ";
-
-        // Clear any remaining newline characters from the input stream
-        cin.ignore();
-
         getline(cin, message);
 
         HelpAndResources.saveHelpAndResources(username, "Help", message, "");
