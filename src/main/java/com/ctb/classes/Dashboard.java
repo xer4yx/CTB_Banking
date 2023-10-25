@@ -1,5 +1,7 @@
 package com.ctb.classes;
 
+import java.util.Objects;
+
 public class Dashboard {
     private String dashboardID;
     private String dashboardContent;
@@ -16,43 +18,51 @@ public class Dashboard {
     public void displayDashboard(String username) {
         for (final User user : BankSystem.users)
         {
-            if (user.username == username)
+            if (Objects.equals(User.getUsername(), username))
             {
-                if (user.isAdmin(username))
+                if (user.isAdmin())
                 {
                 BankSystem.clearConsole();
-                    "╔═════════════════════════════════════╗"
-                    "║            Administrator            ║"
-                    "╚═════════════════════════════════════╝"
-                    "                                       "
-                    "╔═════════════════════════════════════╗"
-                    "║         Dashboard Options:          ║"
-                    "╠═════════════════════════════════════╣"
-                    "║  1. Manage BankSystem.users         ║"
-                    "║  2. Help & Resources                ║"
-                    "║  3. Logout                          ║"
-                    "╚═════════════════════════════════════╝"
-                    "Enter your choice: ";
+                    System.out.println(
+                            """
+
+                                    ╔═════════════════════════════════════╗
+                                    ║            Administrator            ║
+                                    ╚═════════════════════════════════════╝
+                                                                          \s
+                                    ╔═════════════════════════════════════╗
+                                    ║         Dashboard Options:          ║
+                                    ╠═════════════════════════════════════╣
+                                    ║  1. Manage BankSystem.users         ║
+                                    ║  2. Help & Resources                ║
+                                    ║  3. Logout                          ║
+                                    ╚═════════════════════════════════════╝"""
+                    );
+                    System.out.println("Enter your choice: ");
                 }
-                else if (iscustomerservice(username))
+                else if (user.isCustomerService())
                 {
-                ::system("cls");
-                    "╔═════════════════════════════════════╗    "
-                    "║          Customer Service           ║    "
-                    "╚═════════════════════════════════════╝    "
-                    "                                           "
-                    "╔═════════════════════════════════════╗    "
-                    "║         Dashboard Options:          ║     "
-                    "╠═════════════════════════════════════╣    "
-                    "║  1. Messages                        ║     "
-                    "║  2. Logout                          ║     "
-                    "╚═════════════════════════════════════╝"
-                    " "
-                    "Enter your choice: ";
+                BankSystem.clearConsole();
+                    System.out.println(
+                            """
+
+                                    ╔═════════════════════════════════════╗
+                                    ║          Customer Service           ║
+                                    ╚═════════════════════════════════════╝
+                                                                          \s
+                                    ╔═════════════════════════════════════╗
+                                    ║         Dashboard Options:          ║
+                                    ╠═════════════════════════════════════╣
+                                    ║  1. Messages                        ║
+                                    ║  2. Logout                          ║
+                                    ╚═════════════════════════════════════╝"""
+                    );
+
+                    System.out.println("Enter your choice: ");
                 }
                 else
                 {
-                ::system("cls");
+                BankSystem.clearConsole();
                     SetConsoleOutputCP(CP_UTF8);
                     " "
                     "╭─────────────────────────────────────╮"

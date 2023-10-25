@@ -622,7 +622,7 @@ public class User {
         return userDashboard;
     }
 
-    public boolean isAdmin(final String username) {
+    public boolean isAdmin() {
         if(isAdmin) return isAdmin;
     }
 

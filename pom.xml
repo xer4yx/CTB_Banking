@@ -21,6 +21,13 @@
             <artifactId>json</artifactId>
             <version>20230227</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.fusesource.jansi/jansi -->
+        <dependency>
+            <groupId>org.fusesource.jansi</groupId>
+            <artifactId>jansi</artifactId>
+            <version>2.4.1</version>
+        </dependency>
+
     </dependencies>
 
 </project>

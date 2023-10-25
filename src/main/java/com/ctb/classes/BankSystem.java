@@ -4,6 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.fusesource.jansi.AnsiConsole;
 
 import java.io.*;
 import java.util.*;
@@ -32,8 +33,9 @@ public class BankSystem {
     protected List<Dashboard> getDashboards() {return dashboards;}
 
     protected static void clearConsole() {
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
+        AnsiConsole.systemInstall();
+        System.out.print(AnsiConsole.RESET_LINE + AnsiConsole.);
+        AnsiConsole.systemUninstall();
     }
 
     protected double showInterestEarned(String username, List<User> users) {
