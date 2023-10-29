@@ -12,12 +12,17 @@ public class Session extends User{
     private String sessionID;
     private long timeStamp;
 
+    /*----------------------Setter Methods----------------------*/
+    public void setTimeStamp(long timeStamp) {
+        this.timeStamp = timeStamp;
+    }
+
+    /*----------------------Class Methods----------------------*/
     public void setSessionID(String sessionID) {this.sessionID = sessionID;}
     public long getTimeStamp() {return timeStamp;}
     public String getSessionID() {return sessionID;}
 
-
-    /*----------------------Class Methods----------------------*/
+    /*----------------------Getter Methods----------------------*/
     protected static String generateSessionID(String sessionType) {
         long time = calendar.getTimeInMillis();
         int randomNumber = rand.nextInt();
@@ -52,9 +57,5 @@ public class Session extends User{
             }
         }
         SecuritySystem.auditLog(false);
-    }
-
-    public void setTimeStamp(long timeStamp) {
-        this.timeStamp = timeStamp;
     }
 }
