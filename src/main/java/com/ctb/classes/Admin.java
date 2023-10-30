@@ -29,7 +29,7 @@ class Admin extends User{
         return false;
     }
 
-    private void handleManageUsers(String username) {
+    static void handleManageUsers(String username) {
         BankSystem.clearConsole();
         System.out.print(
                 """

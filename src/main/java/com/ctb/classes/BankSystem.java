@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 public class BankSystem {
     private final SecuritySystem system = new SecuritySystem();
     private static Logger logger;
-    private String currentLoggedInUser;
+    private static String currentLoggedInUser;
     private String currentProductType;
     private String currentSessionID;
     private static String dataFilePath;
@@ -128,24 +128,28 @@ public class BankSystem {
         return totalNet;
     }
 
-    protected void setCurrentLoggedInUser(String username) {currentLoggedInUser = username;}
-
     protected boolean isValidProductType(String productType) {
         List<String> validProductTypes = new LinkedList<>(Arrays.asList("Savings Account", "Credit Account"));
         return validProductTypes.contains(productType);
     }
 
+    protected static void setCurrentLoggedInUser(String username) {currentLoggedInUser = username;}
+
     protected void setCurrentProductType(String productType) {
         if (!isValidProductType(productType))
         {
-            System.out.println("Invalid product type.");
+            System.out.print("Invalid product type.");
             return;
         }
 
         currentProductType = productType;
     }
 
-    protected String getCurrentProductType(String username) {
+    protected static String getCurrentLoggedInUser() {
+        return currentLoggedInUser;
+    }
+
+    protected static String getCurrentProductType(String username) {
         for (final User user : users)
         {
             if (Objects.equals(User.getUsername(), username))
@@ -378,7 +382,7 @@ public class BankSystem {
                 try {
                     bufferedWriter.close();
                 } catch (IOException e) {
-                    System.out.println("Error closing file: " + e.getMessage());
+                    System.out.print("Error closing file: " + e.getMessage());
                 }
             }
         }

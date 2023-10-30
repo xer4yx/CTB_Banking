@@ -24,7 +24,7 @@ public class Profile{
             if (Objects.equals(User.getUsername(), username))
             {
                 String show2FAStatus = get2FAStatus() ? "Enabled" : "Disabled";
-                System.out.println(
+                System.out.print(
                         "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" +
                         "\n                      User Profile                            " +
                         "\n══════════════════════════════════════════════════════════════" +

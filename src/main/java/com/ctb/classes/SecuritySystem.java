@@ -87,7 +87,7 @@ class SecuritySystem {
     protected static void sendOTP()
     {
         OTP = generateOTP();
-        System.out.println("Your One-time Password is: " + OTP + ". Do not give or send this to other people.");
+        System.out.print("Your One-time Password is: " + OTP + ". Do not give or send this to other people.");
     }
 
     protected static boolean verifyOTP(final String onetimepass) {
@@ -102,7 +102,7 @@ class SecuritySystem {
         return toUpperCase(answer) == 'Y';
     }
 
-    public boolean authenticateUser(String username, String password) {
+    public static boolean authenticateUser(String username, String password) {
         Optional<User> user = users.stream()
                 .filter(u -> User.getUsername().equals(username))
                 .findFirst();
@@ -120,15 +120,15 @@ class SecuritySystem {
         // Check for 2FA within profiles of the user
         for (Profile profile : BankSystem.profiles) {
             if (profile.get2FAStatus()) {
-                System.out.println("\n---Sending an OTP for 2 Factor Authentication---");
+                System.out.print("\n---Sending an OTP for 2 Factor Authentication---");
                 sendOTP();
 
                 String inputOTP;
-                System.out.println("\nEnter your OTP: ");
+                System.out.print("\nEnter your OTP: ");
                 inputOTP = new Scanner(System.in).nextLine();
 
                 if (!verifyOTP(inputOTP)) {
-                    System.out.println("\n*Incorrect OTP. Timeout for 30 seconds...");
+                    System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
                     try {
                         Thread.sleep(30000);
                     } catch (InterruptedException e) {
@@ -182,7 +182,7 @@ class SecuritySystem {
             }
 
         } catch (IOException | org.json.JSONException e) {
-            System.err.println(e.getMessage());
+            System.err.print(e.getMessage());
         }
     }
 }
