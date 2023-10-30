@@ -72,15 +72,15 @@ public class Transaction {
         {
             if (profile.get2FAStatus())
             {
-                System.out.println("\nSending an OTP for 2 Factor Authentication.");
+                System.out.print("\nSending an OTP for 2 Factor Authentication.");
                 SecuritySystem.sendOTP();
 
-                System.out.println("\nEnter your OTP: ");
+                System.out.print("\nEnter your OTP: ");
                 String inputOTP = input.nextLine();
 
                 if (!SecuritySystem.verifyOTP(inputOTP))
                 {
-                    System.out.println("\n*Incorrect OTP. Timeout for 30 seconds...");
+                    System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
                     try {
                         Thread.sleep(30000);
                     } catch (InterruptedException e) {
@@ -103,7 +103,7 @@ public class Transaction {
 
                 if (amount <= 0.0)
                 {
-                    System.out.println("*Invalid withdrawal amount. Please enter a positive amount.");
+                    System.out.print("*Invalid withdrawal amount. Please enter a positive amount.");
                     return false;
                 }
 
@@ -123,12 +123,12 @@ public class Transaction {
                 }
                 else
                 {
-                    System.out.println("\n*Insufficient balance. Withdrawal failed.");
+                    System.out.print("\n*Insufficient balance. Withdrawal failed.");
                     return false;
                 }
             }
         }
-        System.out.println("*User not found. Withdrawal failed.");
+        System.out.print("*User not found. Withdrawal failed.");
         return false;
     }
 
@@ -142,14 +142,14 @@ public class Transaction {
 
                 if (amount <= 0.0)
                 {
-                    System.out.println("*Invalid purchase amount. Please enter a positive amount.");
+                    System.out.print("*Invalid purchase amount. Please enter a positive amount.");
                     return false;
                 }
 
                 // Check if the user's balance will go below -5000 after the purchase
                 if (user.getBalance() - amount < -5000.0)
                 {
-                    System.out.println("*Insufficient credit limit. Purchase failed.");
+                    System.out.print("*Insufficient credit limit. Purchase failed.");
                     return false;
                 }
 
@@ -168,14 +168,14 @@ public class Transaction {
 
                 // Save the updated user data to the file
                 BankSystem.saveDataToFile();
-                System.out.println(
+                System.out.print(
                         "Purchase of $" + amount + " successful. " +
                         "Description: " + purchaseDescription);
 
                 return true;
             }
         }
-        System.out.println("*User not found. Purchase failed.");
+        System.out.print("*User not found. Purchase failed.");
         return false;
     }
 
@@ -188,7 +188,7 @@ public class Transaction {
 
                 if (amount <= 0.0)
                 {
-                    System.out.println("*Invalid bill amount. Please enter a positive amount.");
+                    System.out.print("*Invalid bill amount. Please enter a positive amount.");
                     return false;
                 }
                 if (user.getBalance() <= amount)
@@ -205,7 +205,7 @@ public class Transaction {
                     user.setBalance(amount);
                     BankSystem.saveDataToFile();
 
-                    System.out.println(
+                    System.out.print(
                             "Bill payment of $" + amount + " successful. " +
                             " Description: " + billDescription);
 
@@ -213,12 +213,12 @@ public class Transaction {
                 }
                 else
                 {
-                    System.out.println("*Insufficient balance. Bill payment failed.");
+                    System.out.print("*Insufficient balance. Bill payment failed.");
                     return false;
                 }
             }
         }
-        System.out.println("*User not found. Bill payment failed.");
+        System.out.print("*User not found. Bill payment failed.");
         return false;
     }
 }

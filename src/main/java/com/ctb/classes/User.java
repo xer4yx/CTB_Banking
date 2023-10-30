@@ -12,7 +12,7 @@ public class User {
     private static String username;
     private String password;
     private String productType;
-    private boolean isCustomerService;
+    private static boolean isCustomerService;
     private double balance;
     public List<Profile> userProfile = new LinkedList<>();
     public List<Transaction> userTransaction = new LinkedList<>();
@@ -26,17 +26,19 @@ public class User {
 
     User(String name, String username, String productType) {
         this.name = name;
-        this.username = username;
+        User.username = username;
         this.productType = productType;
     }
 
     /*----------------------Setter Methods----------------------*/
     public void setUserID(String userID) {this.userID =  userID;}
     public void setName(String name) {this.name = name;}
-    public void setUsername(String username) {this.username = username;}
+    public void setUsername(String username) {
+        User.username = username;}
     public void setPassword(String password) {this.password = password;}
     public void setProductType(String productType) {this.productType = productType;}
-    public void setCSStatus(boolean isCustomerService) {this.isCustomerService = isCustomerService;}
+    public void setCSStatus(boolean isCustomerService) {
+        User.isCustomerService = isCustomerService;}
     public void setAdminStatus(boolean isAdmin) {this.isAdmin = isAdmin;}
     public void setBalance(double balance) {this.balance += balance;}
 
@@ -54,7 +56,7 @@ public class User {
     public void displayUserSettings(String username) {
         while (true)
         {
-            System.out.println(
+            System.out.print(
                     """
 
                             ╭────────────────────────╮
@@ -74,14 +76,14 @@ public class User {
                 case 2:
                     return;
                 default:
-                    System.out.println("Invalid choice. Please select a valid option.");
+                    System.out.print("Invalid choice. Please select a valid option.");
                     break;
             }
         }
     }
 
     public void displayActivityLog(String username) {
-        System.out.println(
+        System.out.print(
                 """
 
                         ╭───────────────────────────╮
@@ -93,7 +95,7 @@ public class User {
                         ╰───────────────────────────╯"""
         );
 
-        System.out.println("Enter: ");
+        System.out.print("Enter: ");
         int choice = input.nextInt();
 
         switch (choice)
@@ -107,10 +109,10 @@ public class User {
                 break;
             case 3:
                 BankSystem.clearConsole();
-                Display.displayHelpHistory(username);
+                CustomerService.displayHelpHistory(username);
                 break;
             default:
-                System.out.println("*Invalid choice. Please select a valid option.");
+                System.out.print("*Invalid choice. Please select a valid option.");
                 break;
         }
     }
@@ -121,7 +123,7 @@ public class User {
             if (Objects.equals(User.username, username))
             {
             BankSystem.clearConsole();
-                System.out.println(
+                System.out.print(
                         "\n╔════════════════════════════════════════════╗" +
                         "\n║               Session History              ║" +
                         "\n╚════════════════════════════════════════════╝" +
@@ -130,7 +132,7 @@ public class User {
                 );
                 for (final Session session : user.userSessions)
                 {
-                    System.out.println(
+                    System.out.print(
                             "\nSession ID: " + session.getSessionID() +
                             "\nUsername: " + getUsername() +
                             "\nTimestamp: " + session.getTimeStamp() +
@@ -144,7 +146,7 @@ public class User {
     public void handleSettings(String username) {
         String newPassword, newEmail, newPhoneNumber, newUsername;
         char new2FA;
-        System.out.println(
+        System.out.print(
                 """
 
                         ╔═════════════════════════════════════╗
@@ -200,80 +202,80 @@ public class User {
                 return;
 
             default:
-                System.out.println("*Invalid choice. Please select a valid option.");
+                System.out.print("*Invalid choice. Please select a valid option.");
                 break;
         }
 
     }
 
     public void processDeposit(String username) {
-        System.out.println("\nEnter the amount to deposit: $");
+        System.out.print("\nEnter the amount to deposit: $");
         double depositAmount = input.nextDouble();
         input.nextLine();
         if (depositAmount <= 0.0)
         {
-            System.out.println("*Invalid deposit amount. Please enter a positive amount.");
+            System.out.print("*Invalid deposit amount. Please enter a positive amount.");
             return;
         }
 
         if (Transaction.depositFunds(username, depositAmount))
         {
-            System.out.println("Deposit of $" + depositAmount + " successful.");
+            System.out.print("Deposit of $" + depositAmount + " successful.");
         }
         else
         {
-            System.out.println("*Deposit failed. Please try again.");
+            System.out.print("*Deposit failed. Please try again.");
         }
-        System.out.println("\nPress Enter to continue...");
+        System.out.print("\nPress Enter to continue...");
         input.nextLine();
     }
 
     public void processWithdrawal(String username) {
-        System.out.println("\nEnter the amount to withdraw: $");
+        System.out.print("\nEnter the amount to withdraw: $");
         double withdrawAmount = input.nextDouble(); // Clear the newline character
 
         if (withdrawAmount <= 0.0)
         {
-            System.out.println("*Invalid withdrawal amount. Please enter a positive amount.");
+            System.out.print("*Invalid withdrawal amount. Please enter a positive amount.");
             return;
         }
 
         if (Transaction.withdrawFunds(username, withdrawAmount))
         {
-            System.out.println("\nWithdrawal of $" + withdrawAmount + " successful.");
+            System.out.print("\nWithdrawal of $" + withdrawAmount + " successful.");
         }
         else
         {
-            System.out.println("*Withdrawal failed. Please try again.");
+            System.out.print("*Withdrawal failed. Please try again.");
         }
-        System.out.println("\nPress Enter to continue...");
+        System.out.print("\nPress Enter to continue...");
         input.nextLine();
     }
 
     public void processPurchase(String username) {
-        System.out.println("\nEnter the purchase amount: $");
+        System.out.print("\nEnter the purchase amount: $");
         double purchaseAmount = input.nextDouble();
-        System.out.println("\nEnter the purchase description: ");
+        System.out.print("\nEnter the purchase description: ");
         String purchaseDescription = input.nextLine();
         if (input.hasNextDouble())
         {
             input.nextDouble();
-            System.out.println("*Invalid amount. Please enter a valid number.");
+            System.out.print("*Invalid amount. Please enter a valid number.");
         }
         input.nextLine();
         if (purchaseAmount <= 0.0)
         {
-            System.out.println("*Invalid transaction amount. Please enter a positive amount.");
+            System.out.print("*Invalid transaction amount. Please enter a positive amount.");
         }
         if (Transaction.makePurchase(username, purchaseAmount, purchaseDescription))
         {
-            System.out.println("\nPurchase of $" + purchaseAmount + " successful.");
+            System.out.print("\nPurchase of $" + purchaseAmount + " successful.");
         }
         else
         {
-            System.out.println("*Purchase failed. Please try again.");
+            System.out.print("*Purchase failed. Please try again.");
         }
-        System.out.println("Press Enter to continue...");
+        System.out.print("Press Enter to continue...");
         input.nextLine();
     }
 
@@ -285,16 +287,16 @@ public class User {
         String billDescription = input.nextLine();
 
         if (billAmount <= 0.0) {
-            System.out.println("*Invalid amount. Please enter a positive amount.");
+            System.out.print("*Invalid amount. Please enter a positive amount.");
         }
 
         if (Transaction.payBills(username, billAmount, billDescription)) {
-            System.out.println("\nPayment of $" + billAmount + " successful.");
+            System.out.print("\nPayment of $" + billAmount + " successful.");
         } else {
-            System.out.println("*Payment failed. Please try again.");
+            System.out.print("*Payment failed. Please try again.");
         }
 
-        System.out.println("\nPress Enter to continue...");
+        System.out.print("\nPress Enter to continue...");
         input.nextLine();
     }
 
@@ -304,7 +306,7 @@ public class User {
         char enable2FA;
         while (true)
         {
-            System.out.println(
+            System.out.print(
                     """
 
                             ╔═════════════════════════════════════╗
@@ -321,8 +323,8 @@ public class User {
             boolean usernameTaken = isUsernameTaken(username);
             if (usernameTaken)
             {
-                System.out.println("\n*Username is already taken. Please choose another one.");
-                System.out.println("Press Enter to continue...");
+                System.out.print("\n*Username is already taken. Please choose another one.");
+                System.out.print("Press Enter to continue...");
                 input.nextLine();
             BankSystem.clearConsole();
                 continue;
@@ -340,7 +342,7 @@ public class User {
             System.out.print("\nDo you want to enable 2FA?(Y/N): ");
             enable2FA = input.next().charAt(0);
 
-            System.out.println(
+            System.out.print(
                     """
 
                             Pick account type:
@@ -360,14 +362,14 @@ public class User {
                     accounttype = "Credit Account";
                     break;
                 default:
-                    System.out.println("*Invalid choice. Please select a valid option.");
+                    System.out.print("*Invalid choice. Please select a valid option.");
                     continue;
             }
 
             boolean registrationSuccess = BankSystem.createUser(name, username, password, email, phone, enable2FA, accounttype);
             if (registrationSuccess)
             {
-                System.out.println(
+                System.out.print(
                         """
                                 Registration successful!
                                 Press Enter to continue..."""
@@ -377,7 +379,7 @@ public class User {
             }
             else
             {
-                System.out.println("*Registration failed. Please try again.");
+                System.out.print("*Registration failed. Please try again.");
             }
         }
     }
@@ -405,16 +407,16 @@ public class User {
                 {
                     if (profile.get2FAStatus())
                     {
-                        System.out.println("\nSending an OTP for 2 Factor Authentication.");
+                        System.out.print("\nSending an OTP for 2 Factor Authentication.");
                         SecuritySystem.sendOTP();
 
-                        System.out.println("\nEnter your OTP: ");
+                        System.out.print("\nEnter your OTP: ");
                         String inputOTP = input.nextLine();
                         input.nextLine();
 
                         if (!SecuritySystem.verifyOTP(inputOTP))
                         {
-                            System.out.println("\n*Incorrect OTP. Timeout for 30 seconds...");
+                            System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
                             try {
                                 Thread.sleep(30000);
                             } catch (InterruptedException e) {
@@ -425,7 +427,7 @@ public class User {
                     }
                     user.setPassword(SecuritySystem.encrypt(password));
                     String decryptPass = SecuritySystem.decrypt(user.password);
-                    System.out.println("Password changed to " + decryptPass + " successfully.");
+                    System.out.print("Password changed to " + decryptPass + " successfully.");
                     BankSystem.saveDataToFile();
                 }
             }
@@ -441,15 +443,15 @@ public class User {
                 {
                     if (profile.get2FAStatus())
                     {
-                        System.out.println("\nSending an OTP for 2 Factor Authentication.");
+                        System.out.print("\nSending an OTP for 2 Factor Authentication.");
                         SecuritySystem.sendOTP();
-                        System.out.println("\nEnter your OTP: ");
+                        System.out.print("\nEnter your OTP: ");
                         String inputOTP = input.nextLine();
                         input.nextLine();
 
                         if (!SecuritySystem.verifyOTP(inputOTP))
                         {
-                            System.out.println("\n*Incorrect OTP. Timeout for 30 seconds...");
+                            System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
                             try {
                                 Thread.sleep(30000);
                             } catch (InterruptedException e) {
@@ -459,7 +461,7 @@ public class User {
                         }
                     }
                     profile.setEmail(email);
-                    System.out.println("Email changed to " + profile.getEmail() + " successfully.");
+                    System.out.print("Email changed to " + profile.getEmail() + " successfully.");
                     BankSystem.saveDataToFile();
                 }
             }
@@ -475,16 +477,16 @@ public class User {
                 {
                     if (profile.get2FAStatus())
                     {
-                        System.out.println("\nSending an OTP for 2 Factor Authentication.");
+                        System.out.print("\nSending an OTP for 2 Factor Authentication.");
                         SecuritySystem.sendOTP();
 
-                        System.out.println("\nEnter your OTP: ");
+                        System.out.print("\nEnter your OTP: ");
                         String inputOTP = input.nextLine();
                         input.nextLine();
 
                         if (!SecuritySystem.verifyOTP(inputOTP))
                         {
-                            System.out.println("\n*Incorrect OTP. Timeout for 30 seconds...");
+                            System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
                             try {
                                 Thread.sleep(30000);
                             } catch (InterruptedException e) {
@@ -494,7 +496,7 @@ public class User {
                         }
                     }
                     profile.setPhoneNumber(phoneNum);
-                    System.out.println("Phone changed to " + profile.getPhoneNumber() + " successfully.");
+                    System.out.print("Phone changed to " + profile.getPhoneNumber() + " successfully.");
                     BankSystem.saveDataToFile();
                 }
             }
@@ -510,16 +512,16 @@ public class User {
                 {
                     if (profile.get2FAStatus())
                     {
-                        System.out.println("\nSending an OTP for 2 Factor Authentication.");
+                        System.out.print("\nSending an OTP for 2 Factor Authentication.");
                         SecuritySystem.sendOTP();
 
-                        System.out.println("\nEnter your OTP: ");
+                        System.out.print("\nEnter your OTP: ");
                         String inputOTP = input.nextLine();
                         input.nextLine();
 
                         if (!SecuritySystem.verifyOTP(inputOTP))
                         {
-                            System.out.println("\n*Incorrect OTP. Timeout for 30 seconds...");
+                            System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
                             try {
                                 Thread.sleep(30000);
                             } catch (InterruptedException e) {
@@ -529,7 +531,7 @@ public class User {
                         }
                     }
                     user.setUsername(newUsername);
-                    System.out.println("Username changed to " + getUsername() + " successfully.");
+                    System.out.print("Username changed to " + getUsername() + " successfully.");
                     BankSystem.saveDataToFile();
                 }
             }
@@ -545,16 +547,16 @@ public class User {
                 {
                     if (profile.get2FAStatus())
                     {
-                        System.out.println("\nSending an OTP for 2 Factor Authentication.");
+                        System.out.print("\nSending an OTP for 2 Factor Authentication.");
                         SecuritySystem.sendOTP();
 
-                        System.out.println("\nEnter your OTP: ");
+                        System.out.print("\nEnter your OTP: ");
                         String inputOTP = input.nextLine();
                         input.nextLine();
 
                         if (!SecuritySystem.verifyOTP(inputOTP))
                         {
-                            System.out.println("\n*Incorrect OTP. Timeout for 30 seconds...");
+                            System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
                             try {
                                 Thread.sleep(30000);
                             } catch (InterruptedException e) {
@@ -565,7 +567,7 @@ public class User {
                     }
                     profile.set2FAStatus(SecuritySystem.enable2FA(twoFA));
                     String show2FAStatus = profile.get2FAStatus() ? "Enabled" : "Disabled";
-                    System.out.println("Two Factor Authentication: " + show2FAStatus);
+                    System.out.print("Two Factor Authentication: " + show2FAStatus);
                     BankSystem.saveDataToFile();
                 }
             }
@@ -573,7 +575,7 @@ public class User {
     }
 
     public void askHelp(String username) {
-        System.out.println("Enter your message: ");
+        System.out.print("Enter your message: ");
         String message = input.nextLine();
 
         HelpAndResources.saveHelpAndResources(username, "Help", message, "");
@@ -627,7 +629,7 @@ public class User {
         return userDashboard;
     }
 
-    public boolean isAdmin() {
+    public static boolean isAdmin() {
         return isAdmin;
     }
 
@@ -635,7 +637,7 @@ public class User {
         isAdmin = admin;
     }
 
-    public boolean isCustomerService() {
+    public static boolean isCustomerService() {
         return isCustomerService;
     }
 
