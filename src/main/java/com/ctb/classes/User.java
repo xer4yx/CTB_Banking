@@ -1,15 +1,15 @@
 package com.ctb.classes;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class User {
-    private final Scanner userInput = new Scanner(System.in);
+    private static final Scanner input = new Scanner(System.in);
+    private static final Calendar calendar = Calendar.getInstance();
+    private static final Random rand = new Random();
     private boolean isAdmin;
     private String userID;
     private String name;
-    private String username;
+    private static String username;
     private String password;
     private String productType;
     private boolean isCustomerService;
@@ -43,7 +43,7 @@ public class User {
     /*----------------------Getter Methods----------------------*/
     public String getUserID() {return this.userID;}
     public String getName() {return this.name;}
-    public static String getUsername() {return this.username;}
+    public static String getUsername() {return username;}
     public String getPassword() {return this.password;}
     public String getProductType() {return this.productType;}
     public double getBalance() {
@@ -55,14 +55,17 @@ public class User {
         while (true)
         {
             System.out.println(
-                    "\n╭────────────────────────╮\n"
-                    + "│     User Settings      │\n"
-                    + "├────────────────────────┤\n"
-                    + "│ 1. Manage Account      │\n"
-                    + "│ 2. Back to Dashboard   │\n"
-                    + "╰────────────────────────╯\n");
+                    """
+
+                            ╭────────────────────────╮
+                            │     User Settings      │
+                            ├────────────────────────┤
+                            │ 1. Manage Account      │
+                            │ 2. Back to Dashboard   │
+                            ╰────────────────────────╯
+                            """);
             System.out.print("Enter: ");
-            int settingChoice = userInput.nextInt();
+            int settingChoice = input.nextInt();
             switch (settingChoice)
             {
                 case 1:
@@ -78,57 +81,61 @@ public class User {
     }
 
     public void displayActivityLog(String username) {
-        cout << " " << endl;
-        cout << "╭───────────────────────────╮" << endl;
-        cout << "│      Activity Log         │" << endl;
-        cout << "├───────────────────────────┤" << endl;
-        cout << "│ 1. Transaction History    │" << endl;
-        cout << "│ 2. Session History        │" << endl;
-        cout << "│ 3. Help History           │" << endl;
-        cout << "╰───────────────────────────╯" << endl;
-        cout << " " << endl;
+        System.out.println(
+                """
 
-        int achoice;
-        cout << "Enter: ";
-        cin >> achoice;
+                        ╭───────────────────────────╮
+                        │      Activity Log         │
+                        ├───────────────────────────┤
+                        │ 1. Transaction History    │
+                        │ 2. Session History        │
+                        │ 3. Help History           │
+                        ╰───────────────────────────╯"""
+        );
 
-        switch (achoice)
+        System.out.println("Enter: ");
+        int choice = input.nextInt();
+
+        switch (choice)
         {
             case 1:
-        ::system("cls");
-                displayTransactionHistory(username);
+                BankSystem.clearConsole();
+                Display.displayTransactionHistory(username);
                 break;
             case 2:
                 displaySessions(username);
                 break;
             case 3:
-        ::system("cls");
-                displayHelpHistory(username);
+                BankSystem.clearConsole();
+                Display.displayHelpHistory(username);
                 break;
             default:
-                cout << "*Invalid choice. Please select a valid option." << endl;
+                System.out.println("*Invalid choice. Please select a valid option.");
                 break;
         }
     }
 
     public void displaySessions(String username) {
-        for (const User &user : users)
+        for (final User user : BankSystem.users)
         {
-            if (user.username == username)
+            if (Objects.equals(User.username, username))
             {
-            ::system("cls");
-                cout << " " << endl;
-                cout << "╔════════════════════════════════════════════╗    " << endl;
-                cout << "║               Session History              ║    " << endl;
-                cout << "╚════════════════════════════════════════════╝    " << endl;
-                cout << " User: " << user.username << endl;
-                cout << "──────────────────────────────────────────────" << endl;
-                for (const Session &session : user.sessions)
+            BankSystem.clearConsole();
+                System.out.println(
+                        "\n╔════════════════════════════════════════════╗" +
+                        "\n║               Session History              ║" +
+                        "\n╚════════════════════════════════════════════╝" +
+                        "\n User: " + User.username +
+                        "\n──────────────────────────────────────────────"
+                );
+                for (final Session session : user.userSessions)
                 {
-                    cout << "Session ID: " << session.sessionID << endl;
-                    cout << "Username: " << session.username << endl;
-                    cout << "Timestamp: " << ctime(&session.timestamp);
-                    cout << "──────────────────────────────────────────────" << endl;
+                    System.out.println(
+                            "\nSession ID: " + session.getSessionID() +
+                            "\nUsername: " + getUsername() +
+                            "\nTimestamp: " + session.getTimeStamp() +
+                            "\n──────────────────────────────────────────────"
+                    );
                 }
             }
         }
@@ -138,48 +145,50 @@ public class User {
         String newPassword, newEmail, newPhoneNumber, newUsername;
         char new2FA;
         System.out.println(
-                  "\n╔═════════════════════════════════════╗    "
-                + "\n║           Manage Account            ║   "
-                + "\n╠═════════════════════════════════════╣   "
-                + "\n║  1. Change Password                 ║"
-                + "\n║  2. Change Email                    ║"
-                + "\n║  3. Change Phone                    ║"
-                + "\n║  4. Change Username                 ║"
-                + "\n║  5. Enable/Disable 2FA              ║"
-                + "\n║  6. Show Activity Log               ║"
-                + "\n║  7. Back to Profile                 ║"
-                + "\n╚═════════════════════════════════════╝");
+                """
+
+                        ╔═════════════════════════════════════╗
+                        ║           Manage Account            ║
+                        ╠═════════════════════════════════════╣
+                        ║  1. Change Password                 ║
+                        ║  2. Change Email                    ║
+                        ║  3. Change Phone                    ║
+                        ║  4. Change Username                 ║
+                        ║  5. Enable/Disable 2FA              ║
+                        ║  6. Show Activity Log               ║
+                        ║  7. Back to Profile                 ║
+                        ╚═════════════════════════════════════╝""");
         System.out.print("\nEnter: ");
-        int accChoice = userInput.nextInt();
+        int accChoice = input.nextInt();
         switch (accChoice)
         {
             case 1:
                 System.out.print("\nEnter new password: ");
-                newPassword = userInput.nextLine();
+                newPassword = input.nextLine();
                 changePassword(username, newPassword);
                 break;
 
             case 2:
                 System.out.print("\nEnter new email: ");
-                newEmail = userInput.nextLine();
+                newEmail = input.nextLine();
                 changeEmail(username, newEmail);
                 break;
 
             case 3:
                 System.out.print("\nEnter new phone: ");
-                newPhoneNumber = userInput.nextLine();
+                newPhoneNumber = input.nextLine();
                 changePhoneNum(username, newPhoneNumber);
                 break;
 
             case 4:
                 System.out.print("\nEnter new username: ");
-                newUsername = userInput.nextLine();
+                newUsername = input.nextLine();
                 changeUsername(username, newUsername);
                 break;
 
             case 5:
                 System.out.print("\nDo you want to enable 2FA?(Y/N): ");
-                new2FA = userInput.next().charAt(0);
+                new2FA = input.next().charAt(0);
                 change2FAStatus(username, new2FA);
                 break;
 
@@ -198,115 +207,95 @@ public class User {
     }
 
     public void processDeposit(String username) {
-        double depositAmount;
-        cout << "\nEnter the amount to deposit: $";
-        cin >> depositAmount;
-        cin.ignore(); // Clear the newline character
-
+        System.out.println("\nEnter the amount to deposit: $");
+        double depositAmount = input.nextDouble();
+        input.nextLine();
         if (depositAmount <= 0.0)
         {
-            cout << "*Invalid deposit amount. Please enter a positive amount." << endl;
+            System.out.println("*Invalid deposit amount. Please enter a positive amount.");
             return;
         }
 
         if (Transaction.depositFunds(username, depositAmount))
         {
-            cout << " " << endl;
-            cout << "Deposit of $" << depositAmount << " successful." << endl;
+            System.out.println("Deposit of $" + depositAmount + " successful.");
         }
         else
         {
-            cout << "*Deposit failed. Please try again." << endl;
+            System.out.println("*Deposit failed. Please try again.");
         }
-        cout << "\nPress Enter to continue...";
-        cin.get();
+        System.out.println("\nPress Enter to continue...");
+        input.nextLine();
     }
 
     public void processWithdrawal(String username) {
-        double withdrawAmount;
-        cout << "\nEnter the amount to withdraw: $";
-        cin >> withdrawAmount;
-        cin.ignore(); // Clear the newline character
+        System.out.println("\nEnter the amount to withdraw: $");
+        double withdrawAmount = input.nextDouble(); // Clear the newline character
 
         if (withdrawAmount <= 0.0)
         {
-            cout << "*Invalid withdrawal amount. Please enter a positive amount." << endl;
+            System.out.println("*Invalid withdrawal amount. Please enter a positive amount.");
             return;
         }
 
         if (Transaction.withdrawFunds(username, withdrawAmount))
         {
-            cout << "\nWithdrawal of $" << withdrawAmount << " successful." << endl;
+            System.out.println("\nWithdrawal of $" + withdrawAmount + " successful.");
         }
         else
         {
-            cout << "*Withdrawal failed. Please try again." << endl;
+            System.out.println("*Withdrawal failed. Please try again.");
         }
-        cout << "\nPress Enter to continue...";
-        cin.get();
+        System.out.println("\nPress Enter to continue...");
+        input.nextLine();
     }
 
     public void processPurchase(String username) {
-        double purchaseAmount;
-        String purchaseDescription;
-        cout << "\nEnter the purchase amount: $";
-        cin >> purchaseAmount;
-        cout << "\nEnter the purchase description: ";
-        cin >> purchaseDescription;
-        if (cin.fail())
+        System.out.println("\nEnter the purchase amount: $");
+        double purchaseAmount = input.nextDouble();
+        System.out.println("\nEnter the purchase description: ");
+        String purchaseDescription = input.nextLine();
+        if (input.hasNextDouble())
         {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "*Invalid amount. Please enter a valid number." << endl;
+            input.nextDouble();
+            System.out.println("*Invalid amount. Please enter a valid number.");
         }
-        cin.ignore(); // Clear the newline character
+        input.nextLine();
         if (purchaseAmount <= 0.0)
         {
-            cout << "*Invalid transaction amount. Please enter a positive amount." << endl;
+            System.out.println("*Invalid transaction amount. Please enter a positive amount.");
         }
         if (Transaction.makePurchase(username, purchaseAmount, purchaseDescription))
         {
-            cout << endl;
+            System.out.println("\nPurchase of $" + purchaseAmount + " successful.");
         }
         else
         {
-            cout << endl;
+            System.out.println("*Purchase failed. Please try again.");
         }
-        cout << " " << endl;
-        cout << "Press Enter to continue...";
-        cin.get();
+        System.out.println("Press Enter to continue...");
+        input.nextLine();
     }
 
-    public void processBills(String username) {
-        double billAmount;
-        String billdescription;
-        cout << "\nEnter the bill amount: $";
-        cin >> billAmount;
-        cout << "\nEnter the bill description: ";
-        cin >> billdescription;
-        if (cin.fail())
-        {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "*Invalid amount. Please enter a valid number." << endl;
-        }
-        cin.ignore(); // Clear the newline character
-        if (billAmount <= 0.0)
-        {
-            cout << "*Invalid amount. Please enter a positive amount." << endl;
-        }
-        if (Transaction.payBills(username, billAmount, billdescription))
-        {
-            cout << endl;
-        }
-        else
-        {
-            cout << endl;
+    public static void processBills(String username) {
+        System.out.print("\nEnter the bill amount: $");
+        double billAmount = input.nextDouble();
+
+        System.out.print("\nEnter the bill description: ");
+        String billDescription = input.nextLine();
+
+        if (billAmount <= 0.0) {
+            System.out.println("*Invalid amount. Please enter a positive amount.");
         }
 
-        cout << " " << endl;
-        cout << "Press Enter to continue...";
-        cin.get();
+        if (Transaction.payBills(username, billAmount, billDescription)) {
+            System.out.println("\nPayment of $" + billAmount + " successful.");
+        } else {
+            System.out.println("*Payment failed. Please try again.");
+        }
+
+        System.out.println("\nPress Enter to continue...");
+        input.nextLine();
     }
 
     public static void applyProduct() {
@@ -315,47 +304,52 @@ public class User {
         char enable2FA;
         while (true)
         {
-            cout << " " << endl;
-            cout << "╔═════════════════════════════════════╗    " << endl;
-            cout << "║       Product Application           ║   " << endl;
-            cout << "╚═════════════════════════════════════╝    " << endl;
-            cout << " " << endl;
-            cout << "Enter your full name: ";
-            getline(cin, name);
+            System.out.println(
+                    """
 
-            cout << "Enter username: ";
-            getline(cin, username);
+                            ╔═════════════════════════════════════╗
+                            ║       Product Application           ║
+                            ╚═════════════════════════════════════╝"""
+            );
+            System.out.print("Enter your full name: ");
+            name = input.nextLine();
+
+            System.out.print("Enter username: ");
+            username = input.nextLine();
 
             // Check if the username is already taken
-            bool usernameTaken = isUsernameTaken(username);
+            boolean usernameTaken = isUsernameTaken(username);
             if (usernameTaken)
             {
-                cout << "\n*Username is already taken. Please choose another one." << endl;
-                cout << " " << endl;
-                cout << "Press Enter to continue...";
-                cin.get();
-            ::system("cls");
+                System.out.println("\n*Username is already taken. Please choose another one.");
+                System.out.println("Press Enter to continue...");
+                input.nextLine();
+            BankSystem.clearConsole();
                 continue;
             }
 
-            cout << "Enter password: ";
-            cin >> password;
+            System.out.print("Enter password: ");
+            password = input.nextLine();
 
-            cout << "Enter email: ";
-            cin >> email;
+            System.out.print("Enter password: ");
+            email = input.nextLine();
 
-            cout << "Enter phone: ";
-            cin >> phone;
+            System.out.print("Enter phone: ");
+            phone = input.nextLine();
 
-            cout << "\nDo you want to enable 2FA?(Y/N): ";
-            cin >> enable2FA;
+            System.out.print("\nDo you want to enable 2FA?(Y/N): ");
+            enable2FA = input.next().charAt(0);
 
-            cout << "\nPick account type: " << endl;
-            cout << "1. Savings Account" << endl;
-            cout << "2. Credit Account" << endl;
+            System.out.println(
+                    """
 
-            cout << "\nChoose your account type: ";
-            cin >> acctype;
+                            Pick account type:
+                            1. Savings Account
+                            2. Credit Account"""
+            );
+
+            System.out.print("\nChoose your account type: ");
+            acctype = input.nextInt();
 
             switch (acctype)
             {
@@ -366,67 +360,72 @@ public class User {
                     accounttype = "Credit Account";
                     break;
                 default:
-                    cout << "*Invalid choice. Please select a valid option." << endl;
+                    System.out.println("*Invalid choice. Please select a valid option.");
                     continue;
             }
 
-            // Create a new user account
-            bool registrationSuccess = BankSystem.createUser(name, username, password, email, phone, enable2FA, accounttype);
+            boolean registrationSuccess = BankSystem.createUser(name, username, password, email, phone, enable2FA, accounttype);
             if (registrationSuccess)
             {
-                cout << "Registration successful!" << endl;
-                cout << " " << endl;
-                cout << "Press Enter to continue...";
-                cin.get();
+                System.out.println(
+                        """
+                                Registration successful!
+                                Press Enter to continue..."""
+                );
+                input.nextLine();
                 break;
             }
             else
             {
-                cout << "*Registration failed. Please try again." << endl;
-                continue;
+                System.out.println("*Registration failed. Please try again.");
             }
         }
     }
 
     public static String generateUserID() {
-        // Implement your logic to generate a unique transaction ID
-        // Example: You can use a combination of timestamp and a random number
-        return "USR" + to_string(time(nullptr)) + to_string(rand());
+        long time = calendar.getTimeInMillis();
+        int randomNumber = rand.nextInt();
+        String timeString = Long.toString(time);
+        String randomNumberString = Integer.toString(randomNumber);
+        return "USR" + timeString + randomNumberString;
     }
 
+
     public static boolean isUsernameTaken(String username) {
-        return std::any_of(users.begin(), users.end(),
-                           [&username](const User &user)
-        { return user.username == username; });
+        return BankSystem.users.stream()
+                .anyMatch(user -> Objects.equals(getUsername(), username));
     }
 
     public static void changePassword(String username, String password) {
-        for (User &user : users)
+        for (User user : BankSystem.users)
         {
-            if (user.username == username)
+            if (Objects.equals(getUsername(), username))
             {
-                for (Profile &profile : user.profiles)
+                for (Profile profile : user.userProfile)
                 {
-                    if (profile.isTwoFactorEnabled)
+                    if (profile.get2FAStatus())
                     {
-                        cout << "\nSending an OTP for 2 Factor Authentication." << endl;
-                        system.sendOTP();
+                        System.out.println("\nSending an OTP for 2 Factor Authentication.");
+                        SecuritySystem.sendOTP();
 
-                        string inputOTP;
-                        cout << "\nEnter your OTP: ";
-                        cin >> inputOTP;
-                        cin.ignore();
+                        System.out.println("\nEnter your OTP: ");
+                        String inputOTP = input.nextLine();
+                        input.nextLine();
 
-                        if (!system.verifyOTP(inputOTP))
+                        if (!SecuritySystem.verifyOTP(inputOTP))
                         {
-                            cout << "\n*Incorrect OTP. Timeout for 30 seconds..." << endl;
-                            sleep_for(seconds(30));
+                            System.out.println("\n*Incorrect OTP. Timeout for 30 seconds...");
+                            try {
+                                Thread.sleep(30000);
+                            } catch (InterruptedException e) {
+                                System.err.print(e.getMessage());
+                            }
                             return;
                         }
                     }
-                    user.password = SecuritySys::encryptPass(password);
-                    string decrypass = SecuritySys::decryptPass(user.password);
-                    cout << "Password changed to " << decrypass << " successfully." << endl;
+                    user.setPassword(SecuritySystem.encrypt(password));
+                    String decryptPass = SecuritySystem.decrypt(user.password);
+                    System.out.println("Password changed to " + decryptPass + " successfully.");
                     BankSystem.saveDataToFile();
                 }
             }
@@ -434,31 +433,33 @@ public class User {
     }
 
     public static void changeEmail(String username, String email) {
-        for (User &user : users)
+        for (User user : BankSystem.users)
         {
-            if (user.username == username)
+            if (Objects.equals(getUsername(), username))
             {
-                for (Profile &profile : user.profiles)
+                for (Profile profile : user.userProfile)
                 {
-                    if (profile.isTwoFactorEnabled)
+                    if (profile.get2FAStatus())
                     {
-                        cout << "\nSending an OTP for 2 Factor Authentication." << endl;
-                        system.sendOTP();
+                        System.out.println("\nSending an OTP for 2 Factor Authentication.");
+                        SecuritySystem.sendOTP();
+                        System.out.println("\nEnter your OTP: ");
+                        String inputOTP = input.nextLine();
+                        input.nextLine();
 
-                        string inputOTP;
-                        cout << "\nEnter your OTP: ";
-                        cin >> inputOTP;
-                        cin.ignore();
-
-                        if (!system.verifyOTP(inputOTP))
+                        if (!SecuritySystem.verifyOTP(inputOTP))
                         {
-                            cout << "\n*Incorrect OTP. Timeout for 30 seconds..." << endl;
-                            sleep_for(seconds(30));
+                            System.out.println("\n*Incorrect OTP. Timeout for 30 seconds...");
+                            try {
+                                Thread.sleep(30000);
+                            } catch (InterruptedException e) {
+                                System.err.print(e.getMessage());
+                            }
                             return;
                         }
                     }
-                    profile.email = email;
-                    cout << "Email changed to " << profile.email << " successfully." << endl;
+                    profile.setEmail(email);
+                    System.out.println("Email changed to " + profile.getEmail() + " successfully.");
                     BankSystem.saveDataToFile();
                 }
             }
@@ -466,31 +467,34 @@ public class User {
     }
 
     public static void changePhoneNum(String username, String phoneNum) {
-        for (User &user : users)
+        for (User user : BankSystem.users)
         {
-            if (user.username == username)
+            if (Objects.equals(getUsername(), username))
             {
-                for (Profile &profile : user.profiles)
+                for (Profile profile : user.userProfile)
                 {
-                    if (profile.isTwoFactorEnabled)
+                    if (profile.get2FAStatus())
                     {
-                        cout << "\nSending an OTP for 2 Factor Authentication." << endl;
-                        system.sendOTP();
+                        System.out.println("\nSending an OTP for 2 Factor Authentication.");
+                        SecuritySystem.sendOTP();
 
-                        string inputOTP;
-                        cout << "\nEnter your OTP: ";
-                        cin >> inputOTP;
-                        cin.ignore();
+                        System.out.println("\nEnter your OTP: ");
+                        String inputOTP = input.nextLine();
+                        input.nextLine();
 
-                        if (!system.verifyOTP(inputOTP))
+                        if (!SecuritySystem.verifyOTP(inputOTP))
                         {
-                            cout << "\n*Incorrect OTP. Timeout for 30 seconds..." << endl;
-                            sleep_for(seconds(30));
+                            System.out.println("\n*Incorrect OTP. Timeout for 30 seconds...");
+                            try {
+                                Thread.sleep(30000);
+                            } catch (InterruptedException e) {
+                                System.err.print(e.getMessage());
+                            }
                             return;
                         }
                     }
-                    profile.phone = phone;
-                    cout << "Phone changed to " << profile.phone << " successfully." << endl;
+                    profile.setPhoneNumber(phoneNum);
+                    System.out.println("Phone changed to " + profile.getPhoneNumber() + " successfully.");
                     BankSystem.saveDataToFile();
                 }
             }
@@ -498,31 +502,34 @@ public class User {
     }
 
     public static void changeUsername(String username, String newUsername) {
-        for (User &user : users)
+        for (User user : BankSystem.users)
         {
-            if (user.username == username)
+            if (Objects.equals(getUsername(), username))
             {
-                for (Profile &profile : user.profiles)
+                for (Profile profile : user.userProfile)
                 {
-                    if (profile.isTwoFactorEnabled)
+                    if (profile.get2FAStatus())
                     {
-                        cout << "\nSending an OTP for 2 Factor Authentication." << endl;
-                        system.sendOTP();
+                        System.out.println("\nSending an OTP for 2 Factor Authentication.");
+                        SecuritySystem.sendOTP();
 
-                        string inputOTP;
-                        cout << "\nEnter your OTP: ";
-                        cin >> inputOTP;
-                        cin.ignore();
+                        System.out.println("\nEnter your OTP: ");
+                        String inputOTP = input.nextLine();
+                        input.nextLine();
 
-                        if (!system.verifyOTP(inputOTP))
+                        if (!SecuritySystem.verifyOTP(inputOTP))
                         {
-                            cout << "\n*Incorrect OTP. Timeout for 30 seconds..." << endl;
-                            sleep_for(seconds(30));
+                            System.out.println("\n*Incorrect OTP. Timeout for 30 seconds...");
+                            try {
+                                Thread.sleep(30000);
+                            } catch (InterruptedException e) {
+                                System.err.print(e.getMessage());
+                            }
                             return;
                         }
                     }
-                    user.username = newusername;
-                    cout << "Username changed to " << user.username << " successfully." << endl;
+                    user.setUsername(newUsername);
+                    System.out.println("Username changed to " + getUsername() + " successfully.");
                     BankSystem.saveDataToFile();
                 }
             }
@@ -530,32 +537,35 @@ public class User {
     }
 
     public static void change2FAStatus(String username, char twoFA) {
-        for (User &user : users)
+        for (User user : BankSystem.users)
         {
-            if (user.username == username)
+            if (Objects.equals(getUsername(), username))
             {
-                for (Profile &profile : user.profiles)
+                for (Profile profile : user.userProfile)
                 {
-                    if (profile.isTwoFactorEnabled)
+                    if (profile.get2FAStatus())
                     {
-                        cout << "\nSending an OTP for 2 Factor Authentication." << endl;
-                        system.sendOTP();
+                        System.out.println("\nSending an OTP for 2 Factor Authentication.");
+                        SecuritySystem.sendOTP();
 
-                        string inputOTP;
-                        cout << "\nEnter your OTP: ";
-                        cin >> inputOTP;
-                        cin.ignore();
+                        System.out.println("\nEnter your OTP: ");
+                        String inputOTP = input.nextLine();
+                        input.nextLine();
 
-                        if (!system.verifyOTP(inputOTP))
+                        if (!SecuritySystem.verifyOTP(inputOTP))
                         {
-                            cout << "\n*Incorrect OTP. Timeout for 30 seconds..." << endl;
-                            sleep_for(seconds(30));
+                            System.out.println("\n*Incorrect OTP. Timeout for 30 seconds...");
+                            try {
+                                Thread.sleep(30000);
+                            } catch (InterruptedException e) {
+                                System.err.print(e.getMessage());
+                            }
                             return;
                         }
                     }
-                    profile.isTwoFactorEnabled = SecuritySys::enable2FA(twoFA);
-                    string show2FAStatus = profile.isTwoFactorEnabled ? "Enabled" : "Disabled";
-                    cout << "Two Factor Authentication: " << show2FAStatus << endl;
+                    profile.set2FAStatus(SecuritySystem.enable2FA(twoFA));
+                    String show2FAStatus = profile.get2FAStatus() ? "Enabled" : "Disabled";
+                    System.out.println("Two Factor Authentication: " + show2FAStatus);
                     BankSystem.saveDataToFile();
                 }
             }
@@ -563,9 +573,8 @@ public class User {
     }
 
     public void askHelp(String username) {
-        String message;
-        cout << "Enter your message: ";
-        getline(cin, message);
+        System.out.println("Enter your message: ");
+        String message = input.nextLine();
 
         HelpAndResources.saveHelpAndResources(username, "Help", message, "");
     }
@@ -619,7 +628,7 @@ public class User {
     }
 
     public boolean isAdmin() {
-        if(isAdmin) return isAdmin;
+        return isAdmin;
     }
 
     public void setAdmin(boolean admin) {
