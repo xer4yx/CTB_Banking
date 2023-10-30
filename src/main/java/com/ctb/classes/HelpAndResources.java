@@ -39,7 +39,7 @@ public class HelpAndResources {
         }
     }
 
-    protected void chatBot(final String message, final String username) {
+    protected static void chatBot(final String message, final String username) {
         Map<String, String> keywordToFeedback = new HashMap<>();
         keywordToFeedback.put("forgot password", "It seems like you've forgotten your password. Don't worry, you can reset it by clicking the 'Forgot Password?' button and following the instructions provided.");
         keywordToFeedback.put("guide", "Looking for a guide? We have comprehensive documentation and tutorials available to help you navigate through our system.");

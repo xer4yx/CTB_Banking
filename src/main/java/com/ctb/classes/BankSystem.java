@@ -16,19 +16,19 @@ public class BankSystem {
     private final SecuritySystem system = new SecuritySystem();
     private static Logger logger;
     private static String currentLoggedInUser;
-    private String currentProductType;
+    private static String currentProductType;
     private String currentSessionID;
     private static String dataFilePath;
     public static final List<User> users = new LinkedList<>();
     public static final List<Profile> profiles = new LinkedList<>();
-    private final List<Transaction> transactionHistory = new LinkedList<>();
+    private static final List<Transaction> transactionHistory = new LinkedList<>();
     private static final List<ProductApplication> productApplications = new LinkedList<>();
     private final List<Session> sessions = new LinkedList<>();
     private final List<Dashboard> dashboards = new LinkedList<>();
 
     protected static List<User> getUsers() {return users;}
     protected List<Profile> getProfiles() {return profiles;}
-    protected List<Transaction> getTransactionHistory() {return transactionHistory;}
+    protected static List<Transaction> getTransactionHistory() {return transactionHistory;}
     protected List<ProductApplication> getProductApplications() {return productApplications;}
     protected List<Session> getSessions() {return sessions;}
     protected List<Dashboard> getDashboards() {return dashboards;}
@@ -42,7 +42,7 @@ public class BankSystem {
         AnsiConsole.systemUninstall();
     }
 
-    protected double showInterestEarned(String username, List<User> users) {
+    protected static double showInterestEarned(String username) {
         double interestRate = 0.05; // Annual interest rate
         double interestEarned = 0;
 
@@ -70,7 +70,7 @@ public class BankSystem {
         return interestEarned;
     }
 
-    protected double calculateTotalPaid(String username) {
+    protected static double calculateTotalPaid(String username) {
         double totalPaid = 0;
 
         for (final User user : users)
@@ -90,7 +90,7 @@ public class BankSystem {
         return totalPaid;
     }
 
-    protected double calculateTotalSpent(String username) {
+    protected static double calculateTotalSpent(String username) {
         double totalSpent = 0;
 
         for (final User user : users)
@@ -110,7 +110,7 @@ public class BankSystem {
         return totalSpent;
     }
 
-    protected double calculateTotalNet(String username) {
+    protected static double calculateTotalNet(String username) {
         double totalNet = 0;
         for (final User user : users)
         {
@@ -128,14 +128,14 @@ public class BankSystem {
         return totalNet;
     }
 
-    protected boolean isValidProductType(String productType) {
+    protected static boolean isValidProductType(String productType) {
         List<String> validProductTypes = new LinkedList<>(Arrays.asList("Savings Account", "Credit Account"));
         return validProductTypes.contains(productType);
     }
 
     protected static void setCurrentLoggedInUser(String username) {currentLoggedInUser = username;}
 
-    protected void setCurrentProductType(String productType) {
+    protected static void setCurrentProductType(String productType) {
         if (!isValidProductType(productType))
         {
             System.out.print("Invalid product type.");

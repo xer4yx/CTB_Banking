@@ -5,7 +5,7 @@ import java.util.Scanner;
 
 class Admin extends User{
     private String adminID;
-    private final Scanner input = new Scanner(System.in);
+    private static final Scanner input = new Scanner(System.in);
 
     /*----------------------Setter Methods----------------------*/
     private void setAdminID(String adminID) {
@@ -16,7 +16,7 @@ class Admin extends User{
     private String getAdminID() {return adminID;}
 
     /*----------------------Class Methods----------------------*/
-    private boolean deleteUserByUsername(String userToDelete) {
+    private static boolean deleteUserByUsername(String userToDelete) {
         var userIterator = BankSystem.getUsers().iterator();
         while(userIterator.hasNext()) {
             User user = userIterator.next();
@@ -29,7 +29,7 @@ class Admin extends User{
         return false;
     }
 
-    static void handleManageUsers(String username) {
+    protected static void handleManageUsers(String username) {
         BankSystem.clearConsole();
         System.out.print(
                 """
@@ -69,7 +69,7 @@ class Admin extends User{
         }
     }
 
-    private void updateUser() {
+    private static void updateUser() {
         BankSystem.clearConsole();
         System.out.print(
                 """
@@ -84,7 +84,7 @@ class Admin extends User{
         handleSettings(pickedUsername);
     }
 
-    private void deleteUser() {
+    private static void deleteUser() {
         BankSystem.clearConsole();
         System.out.print(
                 """
@@ -102,7 +102,7 @@ class Admin extends User{
             System.out.printf("User with username '%s' not found.", user);
         }
     }
-    private void displayUserData(String username) {
+    private static void displayUserData(String username) {
         for (final User user : BankSystem.users)
         {
             if (Objects.equals(getUsername(), username))
@@ -114,7 +114,7 @@ class Admin extends User{
         System.out.printf("User with username '%s' not found.", username);
     }
 
-    private void handleUserData(User user) {
+    private static void handleUserData(User user) {
         System.out.print(
                 "\n──────────────────────────────────────────────────────────────────" +
                 "\n                          Information:                            " +
@@ -220,7 +220,7 @@ class Admin extends User{
         );
     }
 
-    private void displayAllUserData() {
+    private static void displayAllUserData() {
         BankSystem.clearConsole();
         System.out.print(
                 """
@@ -236,7 +236,7 @@ class Admin extends User{
         System.out.print("\nPress enter to continue...");
     }
 
-    private void makeUserAdmin(String username) {
+    private static void makeUserAdmin(String username) {
         for (final User user : BankSystem.users) {
             if (getUsername().equals(username)) {
                 user.setAdminStatus(true);
@@ -246,7 +246,7 @@ class Admin extends User{
         }
     }
 
-    private void makeUserCustomerService(String username) {
+    private static void makeUserCustomerService(String username) {
         for (final User user : BankSystem.users) {
             if (getUsername().equals(username)) {
                 user.setCSStatus(true);
@@ -256,8 +256,7 @@ class Admin extends User{
         }
     }
 
-    @Override
-    public void handleSettings(String username) {
+    public static void handleSettings(String username) {
         while (true)
         {
             String newPassword, newEmail, newPhoneNumber, newUsername;
@@ -353,7 +352,7 @@ class Admin extends User{
         }
     }
 
-    private void processDeposit() {
+    private static void processDeposit() {
         String username;
         double amount;
         System.out.print("Enter the username of the user to deposit funds: ");
@@ -372,7 +371,7 @@ class Admin extends User{
         }
     }
 
-    private void processWithdrawal() {
+    private static void processWithdrawal() {
         String username;
         double amount;
         System.out.print("Enter the username of the user to withdraw funds: ");
@@ -391,7 +390,7 @@ class Admin extends User{
         }
     }
 
-    private void processPurchase() {
+    private static void processPurchase() {
         String username, purchaseDescription;
         double amount;
         System.out.print("Enter the username of the user to make a purchase: ");
@@ -413,7 +412,7 @@ class Admin extends User{
         }
     }
 
-    private void processBills() {
+    private static void processBills() {
         String username, billDescription;
         double amount;
         System.out.print("Enter the username of the user to pay bills: ");

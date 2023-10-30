@@ -6,7 +6,7 @@ public class User {
     private static final Scanner input = new Scanner(System.in);
     private static final Calendar calendar = Calendar.getInstance();
     private static final Random rand = new Random();
-    private boolean isAdmin;
+    private static boolean isAdmin;
     private String userID;
     private String name;
     private static String username;
@@ -82,7 +82,7 @@ public class User {
         }
     }
 
-    public void displayActivityLog(String username) {
+    public static void displayActivityLog(String username) {
         System.out.print(
                 """
 
@@ -117,7 +117,7 @@ public class User {
         }
     }
 
-    public void displaySessions(String username) {
+    public static void displaySessions(String username) {
         for (final User user : BankSystem.users)
         {
             if (Objects.equals(User.username, username))
@@ -143,7 +143,7 @@ public class User {
         }
     }
 
-    public void handleSettings(String username) {
+    public static void handleSettings(String username) {
         String newPassword, newEmail, newPhoneNumber, newUsername;
         char new2FA;
         System.out.print(
@@ -208,7 +208,7 @@ public class User {
 
     }
 
-    public void processDeposit(String username) {
+    public static void processDeposit(String username) {
         System.out.print("\nEnter the amount to deposit: $");
         double depositAmount = input.nextDouble();
         input.nextLine();
@@ -230,7 +230,7 @@ public class User {
         input.nextLine();
     }
 
-    public void processWithdrawal(String username) {
+    public static void processWithdrawal(String username) {
         System.out.print("\nEnter the amount to withdraw: $");
         double withdrawAmount = input.nextDouble(); // Clear the newline character
 
@@ -252,7 +252,7 @@ public class User {
         input.nextLine();
     }
 
-    public void processPurchase(String username) {
+    public static void processPurchase(String username) {
         System.out.print("\nEnter the purchase amount: $");
         double purchaseAmount = input.nextDouble();
         System.out.print("\nEnter the purchase description: ");
@@ -574,7 +574,7 @@ public class User {
         }
     }
 
-    public void askHelp(String username) {
+    public static void askHelp(String username) {
         System.out.print("Enter your message: ");
         String message = input.nextLine();
 
