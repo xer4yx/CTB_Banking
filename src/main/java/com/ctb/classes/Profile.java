@@ -3,9 +3,9 @@ package com.ctb.classes;
 import java.util.Objects;
 
 public class Profile{
-    private String email;
-    private String phoneNumber;
-    private boolean is2FAEnabled;
+    private static String email;
+    private static String phoneNumber;
+    private static boolean is2FAEnabled;
 
     /*----------------------Setter Methods----------------------*/
     public void setEmail(String email) {this.email = email;}
@@ -13,12 +13,12 @@ public class Profile{
     public void set2FAStatus(boolean is2FAEnabled) {this.is2FAEnabled = is2FAEnabled;}
 
     /*----------------------Getter Methods----------------------*/
-    public String getEmail() {return this.email;}
-    public String getPhoneNumber() {return this.phoneNumber;}
-    public boolean get2FAStatus() {return this.is2FAEnabled;}
+    public static String getEmail() {return email;}
+    public static String getPhoneNumber() {return phoneNumber;}
+    public static boolean get2FAStatus() {return is2FAEnabled;}
 
     /*----------------------Class Methods----------------------*/
-    public void displayProfile(String username) {
+    public static void displayProfile(String username) {
         for (final User user : BankSystem.users)
         {
             if (Objects.equals(User.getUsername(), username))

@@ -6,7 +6,7 @@ public class User {
     private static final Scanner input = new Scanner(System.in);
     private static final Calendar calendar = Calendar.getInstance();
     private static final Random rand = new Random();
-    private boolean isAdmin;
+    private static boolean isAdmin;
     private String userID;
     private String name;
     private static String username;
@@ -82,7 +82,7 @@ public class User {
         }
     }
 
-    public void displayActivityLog(String username) {
+    public static void displayActivityLog(String username) {
         System.out.print(
                 """
 
@@ -95,7 +95,7 @@ public class User {
                         ╰───────────────────────────╯"""
         );
 
-        System.out.print("Enter: ");
+        System.out.print("\nEnter: ");
         int choice = input.nextInt();
 
         switch (choice)
@@ -117,7 +117,7 @@ public class User {
         }
     }
 
-    public void displaySessions(String username) {
+    public static void displaySessions(String username) {
         for (final User user : BankSystem.users)
         {
             if (Objects.equals(User.username, username))
@@ -143,7 +143,7 @@ public class User {
         }
     }
 
-    public void handleSettings(String username) {
+    public static void handleSettings(String username) {
         String newPassword, newEmail, newPhoneNumber, newUsername;
         char new2FA;
         System.out.print(
@@ -167,31 +167,31 @@ public class User {
             case 1:
                 System.out.print("\nEnter new password: ");
                 newPassword = input.nextLine();
-                changePassword(username, newPassword);
+                changePassword(username);
                 break;
 
             case 2:
                 System.out.print("\nEnter new email: ");
                 newEmail = input.nextLine();
-                changeEmail(username, newEmail);
+                changeEmail(username);
                 break;
 
             case 3:
                 System.out.print("\nEnter new phone: ");
                 newPhoneNumber = input.nextLine();
-                changePhoneNum(username, newPhoneNumber);
+                changePhoneNum(username);
                 break;
 
             case 4:
                 System.out.print("\nEnter new username: ");
                 newUsername = input.nextLine();
-                changeUsername(username, newUsername);
+                changeUsername(username);
                 break;
 
             case 5:
                 System.out.print("\nDo you want to enable 2FA?(Y/N): ");
                 new2FA = input.next().charAt(0);
-                change2FAStatus(username, new2FA);
+                change2FAStatus(username);
                 break;
 
             case 6:
@@ -208,7 +208,7 @@ public class User {
 
     }
 
-    public void processDeposit(String username) {
+    public static void processDeposit(String username) {
         System.out.print("\nEnter the amount to deposit: $");
         double depositAmount = input.nextDouble();
         input.nextLine();
@@ -230,7 +230,7 @@ public class User {
         input.nextLine();
     }
 
-    public void processWithdrawal(String username) {
+    public static void processWithdrawal(String username) {
         System.out.print("\nEnter the amount to withdraw: $");
         double withdrawAmount = input.nextDouble(); // Clear the newline character
 
@@ -252,7 +252,7 @@ public class User {
         input.nextLine();
     }
 
-    public void processPurchase(String username) {
+    public static void processPurchase(String username) {
         System.out.print("\nEnter the purchase amount: $");
         double purchaseAmount = input.nextDouble();
         System.out.print("\nEnter the purchase description: ");
@@ -311,15 +311,12 @@ public class User {
 
                             ╔═════════════════════════════════════╗
                             ║       Product Application           ║
-                            ╚═════════════════════════════════════╝"""
+                            ╚═════════════════════════════════════╝
+                            Enter your full name:\s"""
             );
-            System.out.print("Enter your full name: ");
             name = input.nextLine();
-
             System.out.print("Enter username: ");
             username = input.nextLine();
-
-            // Check if the username is already taken
             boolean usernameTaken = isUsernameTaken(username);
             if (usernameTaken)
             {
@@ -329,19 +326,14 @@ public class User {
             BankSystem.clearConsole();
                 continue;
             }
-
             System.out.print("Enter password: ");
             password = input.nextLine();
-
-            System.out.print("Enter password: ");
+            System.out.print("Enter email: ");
             email = input.nextLine();
-
             System.out.print("Enter phone: ");
             phone = input.nextLine();
-
             System.out.print("\nDo you want to enable 2FA?(Y/N): ");
             enable2FA = input.next().charAt(0);
-
             System.out.print(
                     """
 
@@ -349,7 +341,6 @@ public class User {
                             1. Savings Account
                             2. Credit Account"""
             );
-
             System.out.print("\nChoose your account type: ");
             acctype = input.nextInt();
 
@@ -398,7 +389,7 @@ public class User {
                 .anyMatch(user -> Objects.equals(getUsername(), username));
     }
 
-    public static void changePassword(String username, String password) {
+    public static void changePassword(String username) {
         for (User user : BankSystem.users)
         {
             if (Objects.equals(getUsername(), username))
@@ -412,7 +403,6 @@ public class User {
 
                         System.out.print("\nEnter your OTP: ");
                         String inputOTP = input.nextLine();
-                        input.nextLine();
 
                         if (!SecuritySystem.verifyOTP(inputOTP))
                         {
@@ -420,11 +410,14 @@ public class User {
                             try {
                                 Thread.sleep(30000);
                             } catch (InterruptedException e) {
-                                System.err.print(e.getMessage());
+                                System.err.print("\n" + e.getMessage());
                             }
                             return;
                         }
                     }
+
+                    String password = input.nextLine();
+
                     user.setPassword(SecuritySystem.encrypt(password));
                     String decryptPass = SecuritySystem.decrypt(user.password);
                     System.out.print("Password changed to " + decryptPass + " successfully.");
@@ -434,7 +427,7 @@ public class User {
         }
     }
 
-    public static void changeEmail(String username, String email) {
+    public static void changeEmail(String username) {
         for (User user : BankSystem.users)
         {
             if (Objects.equals(getUsername(), username))
@@ -447,7 +440,6 @@ public class User {
                         SecuritySystem.sendOTP();
                         System.out.print("\nEnter your OTP: ");
                         String inputOTP = input.nextLine();
-                        input.nextLine();
 
                         if (!SecuritySystem.verifyOTP(inputOTP))
                         {
@@ -455,11 +447,14 @@ public class User {
                             try {
                                 Thread.sleep(30000);
                             } catch (InterruptedException e) {
-                                System.err.print(e.getMessage());
+                                System.err.print("\n" + e.getMessage());
                             }
                             return;
                         }
                     }
+
+                    String email = input.nextLine();
+
                     profile.setEmail(email);
                     System.out.print("Email changed to " + profile.getEmail() + " successfully.");
                     BankSystem.saveDataToFile();
@@ -468,7 +463,7 @@ public class User {
         }
     }
 
-    public static void changePhoneNum(String username, String phoneNum) {
+    public static void changePhoneNum(String username) {
         for (User user : BankSystem.users)
         {
             if (Objects.equals(getUsername(), username))
@@ -482,7 +477,6 @@ public class User {
 
                         System.out.print("\nEnter your OTP: ");
                         String inputOTP = input.nextLine();
-                        input.nextLine();
 
                         if (!SecuritySystem.verifyOTP(inputOTP))
                         {
@@ -490,11 +484,14 @@ public class User {
                             try {
                                 Thread.sleep(30000);
                             } catch (InterruptedException e) {
-                                System.err.print(e.getMessage());
+                                System.err.print("\n" + e.getMessage());
                             }
                             return;
                         }
                     }
+
+                    String phoneNum = input.nextLine();
+
                     profile.setPhoneNumber(phoneNum);
                     System.out.print("Phone changed to " + profile.getPhoneNumber() + " successfully.");
                     BankSystem.saveDataToFile();
@@ -503,7 +500,7 @@ public class User {
         }
     }
 
-    public static void changeUsername(String username, String newUsername) {
+    public static void changeUsername(String username) {
         for (User user : BankSystem.users)
         {
             if (Objects.equals(getUsername(), username))
@@ -525,11 +522,14 @@ public class User {
                             try {
                                 Thread.sleep(30000);
                             } catch (InterruptedException e) {
-                                System.err.print(e.getMessage());
+                                System.err.print("\n" + e.getMessage());
                             }
                             return;
                         }
                     }
+
+                    String newUsername = input.nextLine();
+
                     user.setUsername(newUsername);
                     System.out.print("Username changed to " + getUsername() + " successfully.");
                     BankSystem.saveDataToFile();
@@ -538,7 +538,7 @@ public class User {
         }
     }
 
-    public static void change2FAStatus(String username, char twoFA) {
+    public static void change2FAStatus(String username) {
         for (User user : BankSystem.users)
         {
             if (Objects.equals(getUsername(), username))
@@ -560,11 +560,14 @@ public class User {
                             try {
                                 Thread.sleep(30000);
                             } catch (InterruptedException e) {
-                                System.err.print(e.getMessage());
+                                System.err.print("\n" + e.getMessage());
                             }
                             return;
                         }
                     }
+
+                    char twoFA = input.next().charAt(0);
+
                     profile.set2FAStatus(SecuritySystem.enable2FA(twoFA));
                     String show2FAStatus = profile.get2FAStatus() ? "Enabled" : "Disabled";
                     System.out.print("Two Factor Authentication: " + show2FAStatus);
@@ -574,7 +577,7 @@ public class User {
         }
     }
 
-    public void askHelp(String username) {
+    public static void askHelp(String username) {
         System.out.print("Enter your message: ");
         String message = input.nextLine();
 

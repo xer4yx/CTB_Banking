@@ -87,7 +87,7 @@ class SecuritySystem {
     protected static void sendOTP()
     {
         OTP = generateOTP();
-        System.out.print("Your One-time Password is: " + OTP + ". Do not give or send this to other people.");
+        System.out.print("\nYour One-time Password is: " + OTP + ". Do not give or send this to other people.");
     }
 
     protected static boolean verifyOTP(final String onetimepass) {
@@ -111,14 +111,13 @@ class SecuritySystem {
             return false;
         }
 
-        String decryptedPass = decrypt(user.get().getPassword());
+        String decryptedPass = encrypt(password);
 
-        if (!attemptLogin(decryptedPass, password)) {
+        if (!attemptLogin(decryptedPass, user.get().getPassword())) {
             return false;
         }
 
-        // Check for 2FA within profiles of the user
-        for (Profile profile : BankSystem.profiles) {
+        for (Profile profile : user.get().userProfile) {
             if (profile.get2FAStatus()) {
                 System.out.print("\n---Sending an OTP for 2 Factor Authentication---");
                 sendOTP();
@@ -132,7 +131,7 @@ class SecuritySystem {
                     try {
                         Thread.sleep(30000);
                     } catch (InterruptedException e) {
-                        System.err.print(e.getMessage());
+                        System.err.print("\n" + e.getMessage());
                     }
                     return false;
                 }
@@ -155,8 +154,13 @@ class SecuritySystem {
 
     public static void auditLog(boolean status) {
         try {
-            // Read existing audit log file
-            String existingLogs = new String(Files.readAllBytes(Paths.get("audit_log.json")));
+            String existingLogs = "[]";
+            try {
+                existingLogs = new String(Files.readAllBytes(Paths.get("audit_log.json")));
+            } catch (IOException e) {
+                System.err.print(e.getMessage());
+            }
+
             JSONArray auditLogs = new JSONArray(existingLogs);
 
             // Get the current date
@@ -180,9 +184,9 @@ class SecuritySystem {
                 file.write(auditLogs.toString());
                 file.flush();
             }
-
         } catch (IOException | org.json.JSONException e) {
-            System.err.print(e.getMessage());
+            System.err.print("\n" + e.getMessage());
         }
     }
+
 }

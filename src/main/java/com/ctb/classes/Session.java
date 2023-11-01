@@ -39,12 +39,10 @@ public class Session extends User{
         return "SSN" + timeString + randomNumberString;
     }
 
-    protected static void saveSession(final String username, final String sessionType) {
+    public static void saveSession(final String username, final String sessionType) {
         long currentTimeInSeconds = currentTime.getTime() / 1000;
-        for (User user : BankSystem.users)
-        {
-            if (Objects.equals(getUsername(), username))
-            {
+        for (User user : BankSystem.users) {
+            if (Objects.equals(getUsername(), username)) {
                 Session session = new Session();
                 session.sessionID = generateSessionID(sessionType);
                 session.setUsername(username);

@@ -5,33 +5,35 @@ import org.fusesource.jansi.AnsiConsole;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
 public class BankSystem {
     private final SecuritySystem system = new SecuritySystem();
-    private static Logger logger;
     private static String currentLoggedInUser;
-    private String currentProductType;
+    private static String currentProductType;
     private String currentSessionID;
     private static String dataFilePath;
     public static final List<User> users = new LinkedList<>();
     public static final List<Profile> profiles = new LinkedList<>();
-    private final List<Transaction> transactionHistory = new LinkedList<>();
+    private static final List<Transaction> transactionHistory = new LinkedList<>();
     private static final List<ProductApplication> productApplications = new LinkedList<>();
     private final List<Session> sessions = new LinkedList<>();
     private final List<Dashboard> dashboards = new LinkedList<>();
 
     protected static List<User> getUsers() {return users;}
     protected List<Profile> getProfiles() {return profiles;}
-    protected List<Transaction> getTransactionHistory() {return transactionHistory;}
+    protected static List<Transaction> getTransactionHistory() {return transactionHistory;}
     protected List<ProductApplication> getProductApplications() {return productApplications;}
     protected List<Session> getSessions() {return sessions;}
     protected List<Dashboard> getDashboards() {return dashboards;}
+
+    public BankSystem(String dataFile) {
+        dataFilePath = dataFile;
+        loadDataFromFile();
+    }
 
     protected static void clearConsole() {
         AnsiConsole.systemInstall();
@@ -42,7 +44,7 @@ public class BankSystem {
         AnsiConsole.systemUninstall();
     }
 
-    protected double showInterestEarned(String username, List<User> users) {
+    protected static double showInterestEarned(String username) {
         double interestRate = 0.05; // Annual interest rate
         double interestEarned = 0;
 
@@ -70,7 +72,7 @@ public class BankSystem {
         return interestEarned;
     }
 
-    protected double calculateTotalPaid(String username) {
+    protected static double calculateTotalPaid(String username) {
         double totalPaid = 0;
 
         for (final User user : users)
@@ -90,7 +92,7 @@ public class BankSystem {
         return totalPaid;
     }
 
-    protected double calculateTotalSpent(String username) {
+    protected static double calculateTotalSpent(String username) {
         double totalSpent = 0;
 
         for (final User user : users)
@@ -110,7 +112,7 @@ public class BankSystem {
         return totalSpent;
     }
 
-    protected double calculateTotalNet(String username) {
+    protected static double calculateTotalNet(String username) {
         double totalNet = 0;
         for (final User user : users)
         {
@@ -128,14 +130,14 @@ public class BankSystem {
         return totalNet;
     }
 
-    protected boolean isValidProductType(String productType) {
+    protected static boolean isValidProductType(String productType) {
         List<String> validProductTypes = new LinkedList<>(Arrays.asList("Savings Account", "Credit Account"));
         return validProductTypes.contains(productType);
     }
 
     protected static void setCurrentLoggedInUser(String username) {currentLoggedInUser = username;}
 
-    protected void setCurrentProductType(String productType) {
+    protected static void setCurrentProductType(String productType) {
         if (!isValidProductType(productType))
         {
             System.out.print("Invalid product type.");
@@ -241,10 +243,10 @@ public class BankSystem {
             }
             file.close();
 
-            JSONObject j = new JSONObject(new JSONTokener(data.toString()));
+            JSONArray jsonArray = new JSONArray(data.toString());
 
-            for (int i = 0; i < j.length(); i++) {
-                JSONObject item = j.getJSONObject(String.valueOf(i));
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject item = jsonArray.getJSONObject(i);
 
                 User user = new User();
                 user.setUserID(item.optString("id", ""));
@@ -256,9 +258,23 @@ public class BankSystem {
                 user.setProductType(item.optString("producttype", ""));
                 user.setBalance(item.optDouble("balance", 0.0));
 
+                if(item.has("profiles")) {
+                    JSONArray profileArray = item.getJSONArray(("profiles"));
+                    for(int n = 0; n < profileArray.length(); n++) {
+                        JSONObject profileItem = profileArray.getJSONObject(n);
+
+                        Profile profile = new Profile();
+                        profile.setEmail(profileItem.optString("email", ""));
+                        profile.setPhoneNumber(profileItem.optString("phone"));
+                        profile.set2FAStatus(profileItem.optBoolean("isTwoFactorEnabled", false));
+
+                        user.userProfile.add(profile);
+                    }
+                }
+
                 if (item.has("transactionhistory")) {
                     JSONArray transactionArray = item.getJSONArray("transactionhistory");
-                    for (int n = 0; i < transactionArray.length(); n++) {
+                    for (int n = 0; n < transactionArray.length(); n++) {
                         JSONObject transactionItem = transactionArray.getJSONObject(n);
 
                         Transaction transaction = new Transaction();
@@ -302,12 +318,12 @@ public class BankSystem {
                 if (item.has("helpandresources")) {
                     JSONArray helpandResourcesArray = item.getJSONArray("helpandresources");
                     for (int m = 0; m < helpandResourcesArray.length(); m++) {
-                        JSONObject helpandResourcesItem = helpandResourcesArray.getJSONObject(m);
+                        JSONObject helpAndResourcesItem = helpandResourcesArray.getJSONObject(m);
 
                         HelpAndResources helpAndResource = new HelpAndResources();
-                        helpAndResource.setHelpID(helpandResourcesItem.optString("Help ID", ""));
-                        helpAndResource.setH_rType(helpandResourcesItem.optString("Type", ""));
-                        helpAndResource.setH_rDescription(helpandResourcesItem.optString("Description", ""));
+                        helpAndResource.setHelpID(helpAndResourcesItem.optString("Help ID", ""));
+                        helpAndResource.setH_rType(helpAndResourcesItem.optString("Type", ""));
+                        helpAndResource.setH_rDescription(helpAndResourcesItem.optString("Description", ""));
 
                         user.userHelpAndResources.add(helpAndResource);
                     }
@@ -315,9 +331,9 @@ public class BankSystem {
                 users.add(user);
             }
         } catch (IOException e) {
-            logger.severe("Failed to read from file: " + e.getMessage());
+            System.err.print("Failed to read from file: " + e.getMessage());
         } catch (Exception e) {
-            logger.severe("Failed to parse JSON data: " + e.getMessage());
+            System.err.print("Failed to parse JSON data: " + e.getMessage());
         }
     }
 
@@ -374,15 +390,15 @@ public class BankSystem {
             bufferedWriter.write(jsonArray.toString(4));
             bufferedWriter.close();
         } catch (JSONException e) {
-            logger.severe("JSON error: " + e.getMessage());
+            System.err.print("JSON error: " + e.getMessage());
         } catch (IOException e) {
-            logger.severe(("I/O error: " + e.getMessage()));
+            System.err.print(("I/O error: " + e.getMessage()));
         } finally {
             if (bufferedWriter != null) {
                 try {
                     bufferedWriter.close();
                 } catch (IOException e) {
-                    System.out.print("Error closing file: " + e.getMessage());
+                    System.err.print("Error closing file: " + e.getMessage());
                 }
             }
         }
