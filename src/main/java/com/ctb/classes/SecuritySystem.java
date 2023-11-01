@@ -87,7 +87,7 @@ class SecuritySystem {
     protected static void sendOTP()
     {
         OTP = generateOTP();
-        System.out.print("Your One-time Password is: " + OTP + ". Do not give or send this to other people.");
+        System.out.print("\nYour One-time Password is: " + OTP + ". Do not give or send this to other people.");
     }
 
     protected static boolean verifyOTP(final String onetimepass) {
@@ -111,15 +111,14 @@ class SecuritySystem {
             return false;
         }
 
-        String decryptedPass = decrypt(user.get().getPassword());
+        String decryptedPass = encrypt(password);
 
-        if (!attemptLogin(decryptedPass, password)) {
+        if (!attemptLogin(decryptedPass, user.get().getPassword())) {
             return false;
         }
 
-        // Check for 2FA within profiles of the user
         for (Profile profile : BankSystem.profiles) {
-            if (profile.get2FAStatus()) {
+            if (Profile.get2FAStatus()) {
                 System.out.print("\n---Sending an OTP for 2 Factor Authentication---");
                 sendOTP();
 

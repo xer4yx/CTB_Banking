@@ -8,17 +8,17 @@ import java.util.Scanner;
 import static com.ctb.classes.BankSystem.*;
 
 public class Display {
-    private final Scanner input = new Scanner(System.in);
+    private static final Scanner input = new Scanner(System.in);
     public static void displayMainMenu()
     {
         System.out.print(
                 """
+                        
                         ╔══════════════════════════════════════╗
                         ║      ╔═══════════════════════╗       ║
                         ║      ║   CENTRAL TRUST BANK  ║       ║
                         ║      ╚═══════════════════════╝       ║
                         ╚══════════════════════════════════════╝
-                                                              \s
                         ┌──────────────────────────────────────┐
                         │ ┌──────────────────────────────────┐ │
                         │ │  1. Login                        │ │
@@ -26,13 +26,12 @@ public class Display {
                         │ │  3. Forgot Password              │ │
                         │ │  4. Exit                         │ │
                         │ └──────────────────────────────────┘ │
-                        └──────────────────────────────────────┘"""
+                        └──────────────────────────────────────┘
+                        Enter your choice:\s"""
         );
-
-        System.out.print("Enter your choice: ");
     }
 
-     protected boolean loginUser(String loggedInUsername)
+     public static boolean loginUser()
      {
         BankSystem.clearConsole();
          System.out.print(
@@ -49,17 +48,16 @@ public class Display {
                         ╚══════════════════════════════════════╝"""
          );
         String username, password;
-        System.out.print("Enter username:");
+        System.out.print("\nEnter username:");
         username = input.nextLine();
         System.out.print("Enter password:");
         password = input.nextLine();
 
         if (SecuritySystem.authenticateUser(username, password))
         {
-            loggedInUsername = username;
 
-            BankSystem.setCurrentLoggedInUser(loggedInUsername);
-            BankSystem.setCurrentProductType(loggedInUsername);
+            BankSystem.setCurrentLoggedInUser(username);
+            BankSystem.setCurrentProductType(username);
             System.out.print(
                     """
                             
@@ -88,7 +86,7 @@ public class Display {
         }
     }
 
-    protected void logout(String username)
+    protected static void logout(String username)
     {
         for (User user : BankSystem.users)
         {
@@ -156,7 +154,7 @@ public class Display {
         }
     }
 
-     void displayDashboardMenu(final String username)
+     static void displayDashboardMenu(final String username)
     {
         for (final User user : BankSystem.users)
         {
@@ -211,9 +209,10 @@ public class Display {
                                     """
                     );
                     System.out.print("Welcome " + BankSystem.getCurrentLoggedInUser() + "!");
-                    System.out.print("Current Balance: $" + BankSystem.getCurrentBalance(BankSystem.getCurrentLoggedInUser()));
+                    System.out.print("\nCurrent Balance: $" + BankSystem.getCurrentBalance(BankSystem.getCurrentLoggedInUser()));
                     System.out.print(
                             """
+                                    
                                     ╔═════════════════════════════════════╗
                                     ║         Dashboard Options:          ║
                                     ╠═════════════════════════════════════╣
@@ -231,11 +230,11 @@ public class Display {
         }
     }
 
-     void handleDashboardOptions(final String username)
+    public static void handleDashboardOptions()
     {
         while (true)
         {
-            displayDashboardMenu(username);
+            displayDashboardMenu(getCurrentLoggedInUser());
             String productType = BankSystem.getCurrentProductType(BankSystem.getCurrentLoggedInUser());
             int choice = input.nextInt();
             input.nextLine();
@@ -244,7 +243,7 @@ public class Display {
                 switch (choice)
                 {
                     case 1:
-                        Admin.handleManageUsers(username);
+                        Admin.handleManageUsers(getCurrentLoggedInUser());
                         input.nextLine();
                         break;
                     case 2:
@@ -254,7 +253,7 @@ public class Display {
                         break;
                     case 3:
                         System.out.print("Logging out...");
-                        logout(username);
+                        logout(getCurrentLoggedInUser());
                         setCurrentLoggedInUser("");
                         System.out.print("Press Enter to continue...");
                         input.nextLine();
@@ -275,7 +274,7 @@ public class Display {
                         break;
                     case 2:
                         System.out.print("Logging out...");
-                        logout(username);
+                        logout(getCurrentLoggedInUser());
                         setCurrentLoggedInUser("");
                         System.out.print("Press Enter to continue...");
                         input.nextLine();
@@ -290,20 +289,20 @@ public class Display {
                 switch (choice)
                 {
                     case 1:
-                        handleProductOptions(productType, username);
+                        handleProductOptions(getCurrentProductType(getCurrentLoggedInUser()), getCurrentLoggedInUser());
                         break;
                     case 2:
-                        Profile.displayProfile(username);
+                        Profile.displayProfile(getCurrentLoggedInUser());
                         break;
                     case 3:
-                        viewAnalyticsDashBoard(username);
+                        viewAnalyticsDashBoard(getCurrentLoggedInUser());
                         break;
                     case 4:
-                        handleHelpAndResources(username);
+                        handleHelpAndResources(getCurrentLoggedInUser());
                         break;
                     case 5:
                         System.out.print("\nLogging out...");
-                        logout(username);
+                        logout(getCurrentLoggedInUser());
                         setCurrentLoggedInUser("");
                         System.out.print(
                                 """
@@ -320,7 +319,7 @@ public class Display {
         }
     }
 
-     void handleProductOptions(final String producttype, final String username)
+    public static void handleProductOptions(final String producttype, final String username)
     {
         if (Objects.equals(producttype, "Savings Account"))
         {
@@ -332,17 +331,17 @@ public class Display {
         }
     }
 
-     void displaySavingsMenu(final String username)
+    protected static void displaySavingsMenu(final String username)
     {
         handleTransactionCenter(username);
     }
 
-    protected void displayCreditMenu(final String username)
+    protected static void displayCreditMenu(final String username)
     {
         handleCreditCenter(username);
     }
 
-    protected void displayTransactionMenu(final String username)
+    protected static void displayTransactionMenu(final String username)
     {
         BankSystem.clearConsole();
         System.out.print(
@@ -361,7 +360,7 @@ public class Display {
         setCurrentLoggedInUser(username);
     }
 
-    protected void displayTransactionCredit(final String username)
+    protected static void displayTransactionCredit(final String username)
     {
     BankSystem.clearConsole();
         System.out.print(
@@ -412,7 +411,7 @@ public class Display {
         }
     }
 
-    protected void handleTransactionCenter(final String username)
+    protected static void handleTransactionCenter(final String username)
     {
         while (true)
         {
@@ -442,7 +441,7 @@ public class Display {
         }
     }
 
-     void handleCreditCenter(final String username)
+    protected static void handleCreditCenter(final String username)
     {
         while (true)
         {
@@ -475,7 +474,7 @@ public class Display {
         }
     }
 
-     void handleHelpAndResources(final String username)
+     public static void handleHelpAndResources(final String username)
      {
         BankSystem.clearConsole();
         System.out.print(
@@ -553,7 +552,7 @@ public class Display {
         }
      }
 
-     void viewAnalyticsDashBoard(final String username)
+    public static void viewAnalyticsDashBoard(final String username)
     {
         for (final User user : BankSystem.users)
         {
@@ -573,8 +572,8 @@ public class Display {
                 if (Objects.equals(user.getProductType(), "Savings Account"))
                 {
                     System.out.print(
-                            "Total Net worth: " + BankSystem.calculateTotalNet(BankSystem.getCurrentLoggedInUser()) +
-                            "Total Interest Earned: " + BankSystem.showInterestEarned(BankSystem.getCurrentLoggedInUser())
+                            "\nTotal Net worth: " + BankSystem.calculateTotalNet(BankSystem.getCurrentLoggedInUser()) +
+                            "\nTotal Interest Earned: " + BankSystem.showInterestEarned(BankSystem.getCurrentLoggedInUser())
                     );
                 }
                 else if (Objects.equals(getCurrentProductType(getCurrentLoggedInUser()), "Credit Account"))
@@ -590,4 +589,10 @@ public class Display {
         System.out.print("Press Enter to continue...");
         input.nextLine();
     }
+
+    public static void handleProductApplication()
+    {
+        User.applyProduct();
+    }
+
 }

@@ -95,7 +95,7 @@ public class User {
                         ╰───────────────────────────╯"""
         );
 
-        System.out.print("Enter: ");
+        System.out.print("\nEnter: ");
         int choice = input.nextInt();
 
         switch (choice)
@@ -311,15 +311,12 @@ public class User {
 
                             ╔═════════════════════════════════════╗
                             ║       Product Application           ║
-                            ╚═════════════════════════════════════╝"""
+                            ╚═════════════════════════════════════╝
+                            Enter your full name:\s"""
             );
-            System.out.print("Enter your full name: ");
             name = input.nextLine();
-
             System.out.print("Enter username: ");
             username = input.nextLine();
-
-            // Check if the username is already taken
             boolean usernameTaken = isUsernameTaken(username);
             if (usernameTaken)
             {
@@ -329,19 +326,14 @@ public class User {
             BankSystem.clearConsole();
                 continue;
             }
-
             System.out.print("Enter password: ");
             password = input.nextLine();
-
-            System.out.print("Enter password: ");
+            System.out.print("Enter email: ");
             email = input.nextLine();
-
             System.out.print("Enter phone: ");
             phone = input.nextLine();
-
             System.out.print("\nDo you want to enable 2FA?(Y/N): ");
             enable2FA = input.next().charAt(0);
-
             System.out.print(
                     """
 
@@ -349,7 +341,6 @@ public class User {
                             1. Savings Account
                             2. Credit Account"""
             );
-
             System.out.print("\nChoose your account type: ");
             acctype = input.nextInt();
 

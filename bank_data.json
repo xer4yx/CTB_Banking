@@ -1,0 +1,33 @@
+[{
+    "sessions": [
+        {
+            "sessionID": "LGN16987152225832027957196",
+            "username": "my_boo",
+            "timestamp": 1698715222
+        },
+        {
+            "sessionID": "LGT1698715222583-1347269098",
+            "username": "my_boo",
+            "timestamp": 1698715222
+        }
+    ],
+    "transactionhistory": [],
+    "helpandresources": [],
+    "profiles": [{
+        "isTwoFactorEnabled": true,
+        "phone": "09171293485",
+        "email": "crezz@gmail.com"
+    }],
+    "producttype": "Savings Account",
+    "iscustomerservice": false,
+    "password": "827ccb0eea8a706c4c34a16891f84e7b",
+    "isadmin": false,
+    "balance": 0,
+    "name": "Crezza Dela Puerto",
+    "productapplications": [{
+        "productID": "SAV1698715178244190221087",
+        "producttype": "Savings Account"
+    }],
+    "id": "USR16987151370641182312591",
+    "username": "my_boo"
+}]

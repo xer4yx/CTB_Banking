@@ -10,11 +10,9 @@ import org.json.JSONTokener;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
 public class BankSystem {
     private final SecuritySystem system = new SecuritySystem();
-    private static Logger logger;
     private static String currentLoggedInUser;
     private static String currentProductType;
     private String currentSessionID;
@@ -32,6 +30,11 @@ public class BankSystem {
     protected List<ProductApplication> getProductApplications() {return productApplications;}
     protected List<Session> getSessions() {return sessions;}
     protected List<Dashboard> getDashboards() {return dashboards;}
+
+    public BankSystem(String dataFile) {
+        dataFilePath = dataFile;
+        loadDataFromFile();
+    }
 
     protected static void clearConsole() {
         AnsiConsole.systemInstall();
@@ -315,9 +318,9 @@ public class BankSystem {
                 users.add(user);
             }
         } catch (IOException e) {
-            logger.severe("Failed to read from file: " + e.getMessage());
+            System.out.print("Failed to read from file: " + e.getMessage());
         } catch (Exception e) {
-            logger.severe("Failed to parse JSON data: " + e.getMessage());
+            System.out.print("Failed to parse JSON data: " + e.getMessage());
         }
     }
 
@@ -374,9 +377,9 @@ public class BankSystem {
             bufferedWriter.write(jsonArray.toString(4));
             bufferedWriter.close();
         } catch (JSONException e) {
-            logger.severe("JSON error: " + e.getMessage());
+            System.out.print("JSON error: " + e.getMessage());
         } catch (IOException e) {
-            logger.severe(("I/O error: " + e.getMessage()));
+            System.out.print(("I/O error: " + e.getMessage()));
         } finally {
             if (bufferedWriter != null) {
                 try {
