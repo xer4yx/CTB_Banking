@@ -48,9 +48,9 @@ public class Display {
                         ╚══════════════════════════════════════╝"""
          );
         String username, password;
-        System.out.print("\nEnter username:");
+        System.out.print("\nEnter username: ");
         username = input.nextLine();
-        System.out.print("Enter password:");
+        System.out.print("Enter password: ");
         password = input.nextLine();
 
         if (SecuritySystem.authenticateUser(username, password))
@@ -61,11 +61,11 @@ public class Display {
             System.out.print(
                     """
                             
-                            ---Login successful!---
-                            
-                            """
+                            ╔══════════════════════════════════════╗
+                            ║          Login successful!           ║
+                            ╚══════════════════════════════════════╝"""
             );
-            System.out.print("Press Enter to continue...");
+            System.out.print("\nPress Enter to continue...");
             input.nextLine();
             BankSystem.clearConsole();
             return true;
@@ -88,18 +88,19 @@ public class Display {
 
     protected static void logout(String username)
     {
+        System.out.print("\nLogging out...");
         for (User user : BankSystem.users)
         {
             if (User.getUsername().equals(username))
             {
                 Session.saveSession(username, "Logout");
-                System.out.print("Logged out successfully.");
+                System.out.print("\nLogged out successfully.");
                 break;
             }
         }
     }
 
-     void forgotPassword()
+     public static void forgotPassword()
      {
          BankSystem.clearConsole();
          System.out.print(
@@ -141,7 +142,7 @@ public class Display {
                                     """
                     );
                     String newpass = input.nextLine();
-                    User.changePassword(User.getUsername(), newpass);
+                    User.changePassword(User.getUsername());
                     System.out.print("---Password changed successfully!---");
                     emailFound = true;
                 }
@@ -252,10 +253,9 @@ public class Display {
                         CustomerService.replyToHelp();
                         break;
                     case 3:
-                        System.out.print("Logging out...");
                         logout(getCurrentLoggedInUser());
                         setCurrentLoggedInUser("");
-                        System.out.print("Press Enter to continue...");
+                        System.out.print("\nPress Enter to continue...");
                         input.nextLine();
                         BankSystem.clearConsole();
                         return;
@@ -306,6 +306,7 @@ public class Display {
                         setCurrentLoggedInUser("");
                         System.out.print(
                                 """
+                                        
                                         ──────────────────────────────────
                                         Press Enter to continue..."""
                         );
@@ -573,6 +574,7 @@ public class Display {
                 {
                     System.out.print(
                             "\nTotal Net worth: " + BankSystem.calculateTotalNet(BankSystem.getCurrentLoggedInUser()) +
+                            "\nTotal Interest Earned: " + BankSystem.showInterestEarned(BankSystem.getCurrentLoggedInUser()) +
                             "\nTotal Interest Earned: " + BankSystem.showInterestEarned(BankSystem.getCurrentLoggedInUser())
                     );
                 }

@@ -117,8 +117,8 @@ class SecuritySystem {
             return false;
         }
 
-        for (Profile profile : BankSystem.profiles) {
-            if (Profile.get2FAStatus()) {
+        for (Profile profile : user.get().userProfile) {
+            if (profile.get2FAStatus()) {
                 System.out.print("\n---Sending an OTP for 2 Factor Authentication---");
                 sendOTP();
 
@@ -131,7 +131,7 @@ class SecuritySystem {
                     try {
                         Thread.sleep(30000);
                     } catch (InterruptedException e) {
-                        System.err.print(e.getMessage());
+                        System.err.print("\n" + e.getMessage());
                     }
                     return false;
                 }
@@ -154,8 +154,13 @@ class SecuritySystem {
 
     public static void auditLog(boolean status) {
         try {
-            // Read existing audit log file
-            String existingLogs = new String(Files.readAllBytes(Paths.get("audit_log.json")));
+            String existingLogs = "[]";
+            try {
+                existingLogs = new String(Files.readAllBytes(Paths.get("audit_log.json")));
+            } catch (IOException e) {
+                System.err.print(e.getMessage());
+            }
+
             JSONArray auditLogs = new JSONArray(existingLogs);
 
             // Get the current date
@@ -179,9 +184,9 @@ class SecuritySystem {
                 file.write(auditLogs.toString());
                 file.flush();
             }
-
         } catch (IOException | org.json.JSONException e) {
-            System.err.print(e.getMessage());
+            System.err.print("\n" + e.getMessage());
         }
     }
+
 }

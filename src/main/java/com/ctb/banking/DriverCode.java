@@ -27,6 +27,7 @@ public class DriverCode {
                     break;
 
                 case 3:
+                    Display.forgotPassword();
                     break;
 
                 case 4:

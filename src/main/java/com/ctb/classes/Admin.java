@@ -291,31 +291,31 @@ class Admin extends User{
                 case 1:
                     System.out.print("Enter new password: ");
                     newPassword = input.nextLine();
-                    Admin.changePassword(username, newPassword);
+                    Admin.changePassword(username);
                     break;
 
                 case 2:
                     System.out.print("Enter new email: ");
                     newEmail = input.nextLine();
-                    Admin.changeEmail(username, newEmail);
+                    Admin.changeEmail(username);
                     break;
 
                 case 3:
                     System.out.print("Enter new phone: ");
                     newPhoneNumber = input.nextLine();
-                    Admin.changePhoneNum(username, newPhoneNumber);
+                    Admin.changePhoneNum(username);
                     break;
 
                 case 4:
                     System.out.print("Enter new username: ");
                     newUsername = input.nextLine();
-                    Admin.changeUsername(username, newUsername);
+                    Admin.changeUsername(username);
                     break;
 
                 case 5:
                     System.out.print("Do you want to enable 2FA?(Y/N): ");
                     new2FA = input.next().charAt(0);
-                    Admin.change2FAStatus(username, new2FA);
+                    Admin.change2FAStatus(username);
                     break;
 
                 case 6:
