@@ -20,8 +20,8 @@ public class BankSystem {
     public static final List<Profile> profiles = new LinkedList<>();
     private static final List<Transaction> transactionHistory = new LinkedList<>();
     private static final List<ProductApplication> productApplications = new LinkedList<>();
-    private final List<Session> sessions = new LinkedList<>();
-    private final List<Dashboard> dashboards = new LinkedList<>();
+    private static final List<Session> sessions = new LinkedList<>();
+    private static final List<Dashboard> dashboards = new LinkedList<>();
 
     protected static List<User> getUsers() {return users;}
     protected List<Profile> getProfiles() {return profiles;}
@@ -217,15 +217,14 @@ public class BankSystem {
         newProfile.setPhoneNumber(phoneNum);
         newProfile.set2FAStatus(SecuritySystem.enable2FA(twoFA));
 
+        newUser.userProfile.add(newProfile);
+
         ProductApplication newProductApplication = new ProductApplication();
         newProductApplication.setProductType(productType);
         newProductApplication.setProductID(ProductApplication.generateProductID(productType));
 
-        productApplications.add(newProductApplication);
-        profiles.add(newProfile);
+        newUser.userProductApplications.add(newProductApplication);
 
-        newUser.setUserProductApplications(productApplications);
-        newUser.setUserProfile(profiles);
         users.add(newUser);
 
         saveDataToFile();
@@ -338,65 +337,87 @@ public class BankSystem {
     }
 
     protected static void saveDataToFile() {
-        BufferedWriter bufferedWriter = null;
+        BufferedWriter dataWriter = null;
 
         try {
-            bufferedWriter = new BufferedWriter(new FileWriter(dataFilePath));
-            JSONArray jsonArray = new JSONArray();
+            dataWriter = new BufferedWriter(new FileWriter(dataFilePath));
+            JSONArray dataArray = new JSONArray();
 
-            for (User user : BankSystem.users) {
-                JSONObject userJson = new JSONObject();
-                userJson.put("id", user.getUserID());
-                userJson.put("name", user.getName());
-                userJson.put("username", User.getUsername());
-                userJson.put("password", user.getPassword());
-                userJson.put("isadmin", user.isAdmin());
-                userJson.put("iscustomerservice", user.isCustomerService());
-                userJson.put("producttype", user.getProductType());
-                userJson.put("balance", user.getBalance());
+            for (User user : users) {
+                JSONObject dataClient = new JSONObject();
+                dataClient.put("id", user.getUserID());
+                dataClient.put("name", user.getName());
+                dataClient.put("username", user.getUsername());  // Use the user's username
+                dataClient.put("password", user.getPassword());
+                dataClient.put("isadmin", user.isAdmin());
+                dataClient.put("iscustomerservice", user.isCustomerService());
+                dataClient.put("producttype", user.getProductType());
+                dataClient.put("balance", user.getBalance());
 
                 JSONArray profilesJsonArray = new JSONArray();
                 for (Profile profile : user.userProfile) {
-                    JSONObject profileJson = new JSONObject();
-                    profileJson.put("email", profile.getEmail());
-                    profileJson.put("phone", profile.getPhoneNumber());
-                    profileJson.put("isTwoFactorEnabled", profile.get2FAStatus());
-                    profilesJsonArray.put(profileJson);
+                    JSONObject dataProfile = new JSONObject();
+                    dataProfile.put("email", profile.getEmail());
+                    dataProfile.put("phone", profile.getPhoneNumber());
+                    dataProfile.put("isTwoFactorEnabled", profile.get2FAStatus());
+                    profilesJsonArray.put(dataProfile);
                 }
-                userJson.put("profiles", profilesJsonArray);
+                dataClient.put("profiles", profilesJsonArray);
 
-                JSONArray transactionHistoryJsonArray = setUserTransactions(user);
-                userJson.put("transactionhistory", transactionHistoryJsonArray);
+                JSONArray transactionHistoryJsonArray = new JSONArray();
+                for (Transaction transaction : user.userTransaction) {
+                    JSONObject dataTransact = new JSONObject();
+                    dataTransact.put("transactionID", transaction.getTransactionID());
+                    dataTransact.put("transactionType", transaction.getTransactionType());
+                    dataTransact.put("amount", transaction.getAmount());
+                    dataTransact.put("timestamp", transaction.getTimeStamp());
+                    dataTransact.put("description", transaction.getDescription());
+                    transactionHistoryJsonArray.put(dataTransact);
+                }
+                dataClient.put("transactionhistory", transactionHistoryJsonArray);
 
                 JSONArray sessionsJsonArray = new JSONArray();
                 for (Session session : user.userSessions) {
-                    JSONObject sessionJson = new JSONObject();
-                    sessionJson.put("sessionID", session.getSessionID());
-                    sessionJson.put("username", User.getUsername());
-                    sessionJson.put("timestamp", session.getTimeStamp());
-                    sessionsJsonArray.put(sessionJson);
+                    JSONObject dataSession = new JSONObject();
+                    dataSession.put("sessionID", session.getSessionID());
+                    dataSession.put("username", user.getUsername());  // Use the user's username
+                    dataSession.put("timestamp", session.getTimeStamp());
+                    sessionsJsonArray.put(dataSession);
                 }
-                userJson.put("sessions", sessionsJsonArray);
+                dataClient.put("sessions", sessionsJsonArray);
 
-                JSONArray productApplicationsJsonArray = setUserProductApplications(user);
-                userJson.put("productapplications", productApplicationsJsonArray);
+                JSONArray productApplicationsJsonArray = new JSONArray();
+                for (ProductApplication productApplication : user.userProductApplications) {
+                    JSONObject dataProduct = new JSONObject();
+                    dataProduct.put("producttype", productApplication.getProductType());
+                    dataProduct.put("productID", productApplication.getProductID());
+                    productApplicationsJsonArray.put(dataProduct);
+                }
+                dataClient.put("productapplications", productApplicationsJsonArray);
 
-                JSONArray helpAndResourcesJsonArray = setUserHelpAndResources(user);
-                userJson.put("helpandresources", helpAndResourcesJsonArray);
+                JSONArray helpAndResourcesJsonArray = new JSONArray();
+                for (HelpAndResources resources : user.userHelpAndResources) {
+                    JSONObject dataHR = new JSONObject();
+                    dataHR.put("helpandresourcesID", resources.getHelpID());
+                    dataHR.put("helpandresourcesType", resources.getH_rType());
+                    dataHR.put("helpandresourcesDescription", resources.getH_rDescription());
+                    helpAndResourcesJsonArray.put(dataHR);
+                }
+                dataClient.put("helpandresources", helpAndResourcesJsonArray);
 
-                jsonArray.put(userJson);
+                dataArray.put(dataClient);
             }
 
-            bufferedWriter.write(jsonArray.toString(4));
-            bufferedWriter.close();
+            dataWriter.write(dataArray.toString(4));
+            dataWriter.close();
         } catch (JSONException e) {
             System.err.print("JSON error: " + e.getMessage());
         } catch (IOException e) {
             System.err.print(("I/O error: " + e.getMessage()));
         } finally {
-            if (bufferedWriter != null) {
+            if (dataWriter != null) {
                 try {
-                    bufferedWriter.close();
+                    dataWriter.close();
                 } catch (IOException e) {
                     System.err.print("Error closing file: " + e.getMessage());
                 }
