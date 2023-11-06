@@ -7,10 +7,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class BankSystem {
+    private static String url = "jdbc:mysql://localhost:3306/ctb_banking";
+    private static String user = "root";
+    private static String password = "Vertig@6925";
+    private static String driver = "com.mysql.cj.jdbc.Driver";
     private final SecuritySystem system = new SecuritySystem();
     private static String currentLoggedInUser;
     private static String currentProductType;
@@ -195,7 +203,7 @@ public class BankSystem {
         return false;
     }
 
-    protected static boolean createUser(String name, String username, String password, String email, String phoneNum, char twoFA, String productType) {
+    protected static boolean createUser(String fname, String mname, String lname,String username, String password, String email, String phoneNum, char twoFA, String productType) {
         if (User.isUsernameTaken(username))
         {
             System.out.print("Username is already taken. Please choose another one.");
@@ -203,7 +211,7 @@ public class BankSystem {
         }
 
         User newUser = new User();
-        newUser.setUserID(User.generateUserID());
+        /*newUser.setUserID(User.generateUserID());
         newUser.setName(name);
         newUser.setUsername(username);
         newUser.setPassword(SecuritySystem.encrypt(password));
@@ -227,7 +235,46 @@ public class BankSystem {
 
         users.add(newUser);
 
-        saveDataToFile();
+        saveDataToFile();*/ /*[Commented code block ends here]*/
+
+        try {
+            Class.forName(driver);
+        } catch (ClassNotFoundException e) {
+            System.err.print("Driver error: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+
+        try(Connection connection = DriverManager.getConnection(url, user, password)) {
+
+            String query = "INSERT INTO users (user_id, fname, mname, lname, username, password, email, phone_number, " +
+                    "is2fa, is_admin, is_customerservice, product_type, balance) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setLong(1, newUser.generateUserID());
+                statement.setString(2, fname);
+                statement.setString(3, mname);
+                statement.setString(4, lname);
+                statement.setString(5, username);
+                statement.setString(6, SecuritySystem.encrypt(password));
+                statement.setString(7, email);
+                statement.setString(8, phoneNum);
+                statement.setBoolean(9, SecuritySystem.enable2FA(twoFA));
+                statement.setBoolean(10, false);
+                statement.setBoolean(11,false);
+                statement.setString(12, productType);
+                statement.setDouble(13, 0.00);
+
+                int affectedRows = statement.executeUpdate();
+                System.out.println("Number of affected rows: " + affectedRows);
+            } catch (SQLException e) {
+                System.err.println("Error while inserting data into users table: " + e.getMessage());
+                throw new RuntimeException(e);
+            }
+        } catch (SQLException e) {
+            System.err.print("Error connecting to database: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+
         System.out.print("\nUser account created successfully.");
         return true;
     }
@@ -425,40 +472,39 @@ public class BankSystem {
         }
     }
 
-    private static JSONArray setUserHelpAndResources(User user) {
-        JSONArray helpAndResourcesJsonArray = new JSONArray();
-        for (HelpAndResources resources : user.userHelpAndResources) {
-            JSONObject helpAndResourcesJson = new JSONObject();
-            helpAndResourcesJson.put("helpandresourcesID", resources.getHelpID());
-            helpAndResourcesJson.put("helpandresourcesType", resources.getH_rType());
-            helpAndResourcesJson.put("helpandresourcesDescription", resources.getH_rDescription());
-            helpAndResourcesJsonArray.put(helpAndResourcesJson);
-        }
-        return helpAndResourcesJsonArray;
-    }
+    /*protected static void saveDataToDB() {
+        User client = new User();
 
-    private static JSONArray setUserProductApplications(User user) {
-        JSONArray productApplicationsJsonArray = new JSONArray();
-        for (ProductApplication productApplication : user.userProductApplications) {
-            JSONObject productApplicationJson = new JSONObject();
-            productApplicationJson.put("producttype", productApplication.getProductType());
-            productApplicationJson.put("productID", productApplication.getProductID());
-            productApplicationsJsonArray.put(productApplicationJson);
+        try {
+            Class.forName(driver);
+        } catch (ClassNotFoundException e) {
+            System.err.print("Driver error: " + e.getMessage());
+            throw new RuntimeException(e);z
         }
-        return productApplicationsJsonArray;
-    }
 
-    private static JSONArray setUserTransactions(User user) {
-        JSONArray transactionHistoryJsonArray = new JSONArray();
-        for (Transaction transaction : user.userTransaction) {
-            JSONObject transactionJson = new JSONObject();
-            transactionJson.put("transactionID", transaction.getTransactionID());
-            transactionJson.put("transactionType", transaction.getTransactionType());
-            transactionJson.put("amount", transaction.getAmount());
-            transactionJson.put("timestamp", transaction.getTimeStamp());
-            transactionJson.put("description", transaction.getDescription());
-            transactionHistoryJsonArray.put(transactionJson);
+        try(Connection connection = DriverManager.getConnection(url, user, password)) {
+
+            String query = "INSERT INTO users (user_id, fname, mname, lname, username, password, email, phone_number, is2fa, is_admin, is_customerservice, product_type, balance) " +
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?);" +
+                    "INSERT INTO transactions (user_id, transaction_id, transact_type, amount, timestamp) VALUES (?,?,?,?,?);" +
+                    "INSERT INTO sessions (user_id, session_id, timestamp) VALUES (?,?,?);" +
+                    "INSERT INTO  help_resources (user_id, hr_id, hr_type, hr_description) VALUES (?,?,?,?)";
+
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setLong(1, client.getUserID());
+                statement.setString(2, client.getFname());
+                statement.setString(3, client.getMname());
+                statement.setString(4, client.getLname());
+                statement.setString(5, client.getUsername());
+                statement.setString(6, client.getPassword());
+
+            } catch (SQLException e) {
+                System.err.println("Error while inserting data into users table: " + e.getMessage());
+                throw new RuntimeException(e);
+            }
+        } catch (SQLException e) {
+            System.err.print("Error connecting to database: " + e.getMessage());
+            throw new RuntimeException(e);
         }
-        return transactionHistoryJsonArray;
-    }
+    }*/ /*[Commented code block ends here]*/
 }

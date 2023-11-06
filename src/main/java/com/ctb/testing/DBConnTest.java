@@ -18,30 +18,56 @@ public class DBConnTest {
             e.printStackTrace();
         }
 
-        try (Connection connection = DriverManager.getConnection(url, user, password)) {
+//        try (Connection connection = DriverManager.getConnection(url, user, password)) {
+//
+//            String transact = "INSERT INTO users (user_id, fname, mname, lname, username, email, phone_number, password) " +
+//                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+//
+//            try (PreparedStatement statement = connection.prepareStatement(transact)) {
+//
+//                statement.setString(1, "202311051355");
+//                statement.setString(2, "Angelo");
+//                statement.setString(3, "M");
+//                statement.setString(4, "Bicomong");
+//                statement.setString(5, "xerayx");
+//                statement.setString(6, "xerayx@gmail.com");
+//                statement.setString(7, "09288650313");
+//                statement.setString(8, "Vertig@6925");
+//
+//                int affectedRows = statement.executeUpdate();
+//                System.out.println("Number of affected rows: " + affectedRows);
+//            } catch (SQLException e) {
+//                System.err.println("Error while inserting data into users table: " + e.getMessage());
+//                e.printStackTrace();
+//            }
+//        } catch (SQLException e) {
+//            System.err.println("Error while connecting to the database: " + e.getMessage());
+//            e.printStackTrace();
+//        }
 
-            String transact = "INSERT INTO users (user_id, fname, mname, lname, username, email, phone_number, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        try (Connection connection = DriverManager.getConnection(url, user, password)) {
+            String transact = "INSERT INTO transactions (transaction_id, user_id, transact_type, amount, timestamp) " +
+                    "VALUES (?, ?, ?, ?, ?)";
 
             try (PreparedStatement statement = connection.prepareStatement(transact)) {
 
-                statement.setString(1, "12345678901");
-                statement.setString(2, "John");
-                statement.setString(3, "M");
-                statement.setString(4, "Doe");
-                statement.setString(5, "john.doe");
-                statement.setString(6, "john.doe@example.com");
-                statement.setString(7, "1234567890");
-                statement.setString(8, "hashed_password");
+                statement.setString(1, "202311051401");
+                statement.setString(2, "202311051355");
+                statement.setString(3, "Deposit");
+                statement.setString(4,"$500");
+                statement.setString(5, "1405110523");
 
                 int affectedRows = statement.executeUpdate();
                 System.out.println("Number of affected rows: " + affectedRows);
             } catch (SQLException e) {
-                System.out.println("Error while inserting data into users table: " + e.getMessage());
+                System.err.println("Error while inserting data into users table: " + e.getMessage());
                 e.printStackTrace();
             }
+
         } catch (SQLException e) {
-            System.out.println("Error while connecting to the database: " + e.getMessage());
+            System.err.println("Error while connecting to the database: " + e.getMessage());
             e.printStackTrace();
         }
+
     }
 }

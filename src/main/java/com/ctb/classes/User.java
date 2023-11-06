@@ -1,10 +1,12 @@
 package com.ctb.classes;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class User {
     private static final Scanner input = new Scanner(System.in);
     private static final Calendar calendar = Calendar.getInstance();
+    private static final Date date = calendar.getTime();
     private static final Random rand = new Random();
     private static boolean isAdmin;
     private String userID;
@@ -301,7 +303,8 @@ public class User {
     }
 
     public static void applyProduct() {
-        String name, username, password, email, phone, accounttype;
+        String fname, mname, lname;
+        String username, password, email, phone, accounttype;
         int acctype;
         char enable2FA;
         while (true)
@@ -311,10 +314,15 @@ public class User {
 
                             ╔═════════════════════════════════════╗
                             ║       Product Application           ║
-                            ╚═════════════════════════════════════╝
-                            Enter your full name:\s"""
+                            ╚═════════════════════════════════════╝"""
             );
-            name = input.nextLine();
+
+            System.out.print("\nEnter your given name: ");
+            fname = input.nextLine();
+            System.out.print("Enter your middle name: ");
+            mname = input.nextLine();
+            System.out.print("Enter your surname: ");
+            lname = input.nextLine();
             System.out.print("Enter username: ");
             username = input.nextLine();
             boolean usernameTaken = isUsernameTaken(username);
@@ -357,7 +365,7 @@ public class User {
                     continue;
             }
 
-            boolean registrationSuccess = BankSystem.createUser(name, username, password, email, phone, enable2FA, accounttype);
+            boolean registrationSuccess = BankSystem.createUser(fname, mname, lname,username, password, email, phone, enable2FA, accounttype);
             if (registrationSuccess)
             {
                 System.out.print(
@@ -375,12 +383,17 @@ public class User {
         }
     }
 
-    public static String generateUserID() {
-        long time = calendar.getTimeInMillis();
-        int randomNumber = rand.nextInt();
-        String timeString = Long.toString(time);
-        String randomNumberString = Integer.toString(randomNumber);
-        return "USR" + timeString + randomNumberString;
+    public static long generateUserID() {
+//        long time = calendar.getTimeInMillis();
+//        int randomNumber = rand.nextInt();
+//        String timeString = Long.toString(time);
+//        String randomNumberString = Integer.toString(randomNumber);
+
+        String timeString = new SimpleDateFormat("YYYYMMDDHHmm").format(date);
+        String lastTwoDigitsOfTime = timeString.substring(timeString.length() - 2);
+
+        String userID = timeString + lastTwoDigitsOfTime;
+        return Long.parseLong(userID);
     }
 
 
