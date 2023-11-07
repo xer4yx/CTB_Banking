@@ -15,9 +15,9 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class BankSystem {
-    private static String url = "jdbc:mysql://localhost:3306/ctb_banking";
-    private static String user = "root";
-    private static String password = "Vertig@6925";
+    static String url = "jdbc:mysql://localhost:3306/ctb_banking";
+    static String userDB = "root";
+    static String passwordDB = "Vertig@6925";
     private static String driver = "com.mysql.cj.jdbc.Driver";
     private final SecuritySystem system = new SecuritySystem();
     private static String currentLoggedInUser;
@@ -244,7 +244,7 @@ public class BankSystem {
             throw new RuntimeException(e);
         }
 
-        try(Connection connection = DriverManager.getConnection(url, user, password)) {
+        try(Connection connection = DriverManager.getConnection(url, userDB, password)) {
 
             String query = "INSERT INTO users (user_id, fname, mname, lname, username, password, email, phone_number, " +
                     "is2fa, is_admin, is_customerservice, product_type, balance) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";

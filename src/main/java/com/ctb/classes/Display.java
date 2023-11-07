@@ -1,5 +1,6 @@
 package com.ctb.classes;
 
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
@@ -31,8 +32,7 @@ public class Display {
         );
     }
 
-     public static boolean loginUser()
-     {
+     public static boolean loginUser() throws SQLException {
         BankSystem.clearConsole();
          System.out.print(
                  """
@@ -66,8 +66,6 @@ public class Display {
                             ╚══════════════════════════════════════╝"""
             );
             System.out.print("\nPress Enter to continue...");
-            input.nextLine();
-            BankSystem.clearConsole();
             return true;
         }
         else
@@ -155,87 +153,11 @@ public class Display {
         }
     }
 
-     static void displayDashboardMenu(final String username)
-    {
-        for (final User user : BankSystem.users)
-        {
-            if (Objects.equals(User.getUsername(), username))
-            {
-                if (User.isAdmin())
-                {
-                    BankSystem.clearConsole();
-                    System.out.print(
-                            """
-                                    ╔═════════════════════════════════════╗
-                                    ║            Administrator            ║
-                                    ╚═════════════════════════════════════╝
-                                                                           
-                                    ╔═════════════════════════════════════╗
-                                    ║         Dashboard Options:          ║
-                                    ╠═════════════════════════════════════╣
-                                    ║  1. Manage Users                    ║
-                                    ║  2. Help  Resources                 ║
-                                    ║  3. Logout                          ║
-                                    ╚═════════════════════════════════════╝
-                                    Enter your choice:\s"""
-                    );
-                }
-                else if (User.isCustomerService())
-                {
-                    BankSystem.clearConsole();
-                    System.out.print(
-                            """
-                                    ╔═════════════════════════════════════╗
-                                    ║          Customer Service           ║
-                                    ╚═════════════════════════════════════╝
-                                                                           
-                                    ╔═════════════════════════════════════╗
-                                    ║         Dashboard Options:          ║
-                                    ╠═════════════════════════════════════╣
-                                    ║  1. Messages                        ║
-                                    ║  2. Logout                          ║
-                                    ╚═════════════════════════════════════╝
-                                    Enter your choice:\s"""
-                    );
-                }
-                else
-                {
-                    BankSystem.clearConsole();
-                    System.out.print(
-                            """
-                                    
-                                    ╭─────────────────────────────────────╮
-                                    │         CENTRAL TRUST BANK          │
-                                    ╰─────────────────────────────────────╯
-                                    """
-                    );
-                    System.out.print("Welcome " + BankSystem.getCurrentLoggedInUser() + "!");
-                    System.out.print("\nCurrent Balance: $" + BankSystem.getCurrentBalance(BankSystem.getCurrentLoggedInUser()));
-                    System.out.print(
-                            """
-                                    
-                                    ╔═════════════════════════════════════╗
-                                    ║         Dashboard Options:          ║
-                                    ╠═════════════════════════════════════╣
-                                    ║  1. Transaction Center              ║
-                                    ║  2. User Profile                    ║
-                                    ║  3. Data Analytics Dashboard        ║
-                                    ║  4. Help  Resources                 ║
-                                    ║  5. Logout                          ║
-                                    ╚═════════════════════════════════════╝
-                                    Enter your choice:\s"""
-                    );
-
-                }
-            }
-        }
-    }
-
     public static void handleDashboardOptions()
     {
         while (true)
         {
-            displayDashboardMenu(getCurrentLoggedInUser());
+            User.displayDashboardMenu(getCurrentLoggedInUser());
             String productType = BankSystem.getCurrentProductType(BankSystem.getCurrentLoggedInUser());
             int choice = input.nextInt();
             input.nextLine();

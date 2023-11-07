@@ -6,23 +6,38 @@ import java.util.Objects;
 import java.util.Random;
 
 public class Session extends User{
+    private static Session instance;
+    private User userData;
     private static final Calendar calendar = Calendar.getInstance();
     private static final Random rand = new Random();
     private static final Date currentTime = new Date();
     private String sessionID;
     private long timeStamp;
 
+    private Session(User userData) {
+        this.userData = userData;
+    }
+
+    protected Session() {}
+
     /*----------------------Setter Methods----------------------*/
     public void setTimeStamp(long timeStamp) {
         this.timeStamp = timeStamp;
     }
 
-    /*----------------------Class Methods----------------------*/
+    /*----------------------Getter Methods----------------------*/
+    public static Session getInstance(User userData) {
+        if(instance == null) {
+            instance = new Session(userData);
+        }
+
+        return instance;
+    }
     public void setSessionID(String sessionID) {this.sessionID = sessionID;}
     public long getTimeStamp() {return timeStamp;}
     public String getSessionID() {return sessionID;}
 
-    /*----------------------Getter Methods----------------------*/
+    /*----------------------Class Methods----------------------*/
     protected static String generateSessionID(String sessionType) {
         long time = calendar.getTimeInMillis();
         int randomNumber = rand.nextInt();
@@ -55,5 +70,9 @@ public class Session extends User{
             }
         }
         SecuritySystem.auditLog(false);
+    }
+
+    public User getUserData() {
+        return userData;
     }
 }

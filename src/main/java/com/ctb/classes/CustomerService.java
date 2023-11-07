@@ -3,8 +3,25 @@ package com.ctb.classes;
 import java.util.Objects;
 import java.util.Scanner;
 
-class CustomerService {
+class CustomerService extends User{
     private static final Scanner input = new Scanner(System.in);
+    protected static void displayDashboardMenu(final String username) {
+        BankSystem.clearConsole();
+        System.out.print(
+                """
+                        ╔═════════════════════════════════════╗
+                        ║          Customer Service           ║
+                        ╚═════════════════════════════════════╝
+                                                               
+                        ╔═════════════════════════════════════╗
+                        ║         Dashboard Options:          ║
+                        ╠═════════════════════════════════════╣
+                        ║  1. Messages                        ║
+                        ║  2. Logout                          ║
+                        ╚═════════════════════════════════════╝
+                        Enter your choice:\s"""
+        );
+    }
     
     protected static void displayHelpHistory(final String username) {
         boolean helpFound = false;

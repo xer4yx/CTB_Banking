@@ -55,6 +55,50 @@ public class User {
     }
 
     /*----------------------Class Methods----------------------*/
+    protected static void displayDashboardMenu(final String username)
+    {
+        if (Objects.equals(BankSystem.getCurrentLoggedInUser(), username))
+        {
+            if (User.isAdmin())
+            {
+                Admin.displayDashboardMenu(BankSystem.getCurrentLoggedInUser());
+            }
+            else if (User.isCustomerService())
+            {
+                CustomerService.displayDashboardMenu(BankSystem.getCurrentLoggedInUser());
+            }
+            else
+            {
+                BankSystem.clearConsole();
+                System.out.print(
+                        """
+                                
+                                ╭─────────────────────────────────────╮
+                                │         CENTRAL TRUST BANK          │
+                                ╰─────────────────────────────────────╯
+                                """
+                );
+                System.out.print("Welcome " + BankSystem.getCurrentLoggedInUser() + "!");
+                System.out.print("\nCurrent Balance: $" + BankSystem.getCurrentBalance(BankSystem.getCurrentLoggedInUser()));
+                System.out.print(
+                        """
+                                
+                                ╔═════════════════════════════════════╗
+                                ║         Dashboard Options:          ║
+                                ╠═════════════════════════════════════╣
+                                ║  1. Transaction Center              ║
+                                ║  2. User Profile                    ║
+                                ║  3. Data Analytics Dashboard        ║
+                                ║  4. Help  Resources                 ║
+                                ║  5. Logout                          ║
+                                ╚═════════════════════════════════════╝
+                                Enter your choice:\s"""
+                );
+
+            }
+        }
+    }
+
     public void displayUserSettings(String username) {
         while (true)
         {
