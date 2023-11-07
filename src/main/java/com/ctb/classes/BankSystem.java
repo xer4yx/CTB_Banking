@@ -7,15 +7,22 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.*;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class BankSystem {
+    static String url = "jdbc:mysql://localhost:3306/ctb_banking";
+    static String userDB = "root";
+    static String passwordDB = "Vertig@6925";
+    private static String driver = "com.mysql.cj.jdbc.Driver";
     private final SecuritySystem system = new SecuritySystem();
     private static String currentLoggedInUser;
     private static String currentProductType;
-    private String currentSessionID;
+    private static long currentUserID;
     private static String dataFilePath;
+
     public static final List<User> users = new LinkedList<>();
     public static final List<Profile> profiles = new LinkedList<>();
     private static final List<Transaction> transactionHistory = new LinkedList<>();
@@ -23,13 +30,74 @@ public class BankSystem {
     private static final List<Session> sessions = new LinkedList<>();
     private static final List<Dashboard> dashboards = new LinkedList<>();
 
+    /*----------------------Setter Methods----------------------*/
+    protected static void setCurrentUserID(long currentUserID) {
+        BankSystem.currentUserID = currentUserID;
+    }
+
+    protected static void setCurrentLoggedInUser(String username) {currentLoggedInUser = username;}
+
+    protected static void setCurrentProductType(String productType) {
+        if (!isValidProductType(productType))
+        {
+            System.out.print("Invalid product type.");
+            return;
+        }
+
+        currentProductType = productType;
+    }
+
+    /*----------------------Getter Methods----------------------*/
+    protected static long getCurrentUserID() {
+        return currentUserID;
+    }
+
+    protected static String getCurrentLoggedInUser() {
+        return currentLoggedInUser;
+    }
+
+    protected static String getCurrentProductType(String username) {
+        return currentProductType;
+    }
+
+    protected static double getCurrentBalance(String username) {
+        try(Connection connection = DriverManager.getConnection(url, userDB, passwordDB)) {
+            String query = "SELECT balance FROM users WHERE username = ?";
+
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, username);
+            ResultSet dataSet = statement.executeQuery();
+
+            if(dataSet.next()) {
+                return dataSet.getDouble("balance");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1.0;
+    }
+
+    @Deprecated
     protected static List<User> getUsers() {return users;}
+
+    @Deprecated
     protected List<Profile> getProfiles() {return profiles;}
+
+    @Deprecated
     protected static List<Transaction> getTransactionHistory() {return transactionHistory;}
+
+    @Deprecated
     protected List<ProductApplication> getProductApplications() {return productApplications;}
+
+    @Deprecated
     protected List<Session> getSessions() {return sessions;}
+
+    @Deprecated
     protected List<Dashboard> getDashboards() {return dashboards;}
 
+    /*----------------------Class Methods----------------------*/
+    @Deprecated
     public BankSystem(String dataFile) {
         dataFilePath = dataFile;
         loadDataFromFile();
@@ -44,6 +112,43 @@ public class BankSystem {
         AnsiConsole.systemUninstall();
     }
 
+    protected static double showInterestEarned(){
+        double interestRate = 0.05; // Annual interest rate
+        double interestEarned = 0;
+        double principal = 0;
+
+        Calendar calendar = Calendar.getInstance();
+        Date now = calendar.getTime();
+
+        try (Connection connection = DriverManager.getConnection(url, userDB, passwordDB)){
+            String query = "SELECT amount FROM transactions WHERE user_id = ? AND transact_type = ?";
+
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setLong(1, getCurrentUserID());
+            statement.setString(2, "Deposit");
+            ResultSet dataSet = statement.executeQuery();
+
+            while(dataSet.next()) {
+                principal += dataSet.getDouble("amount");
+                Date transactionDate = dataSet.getDate("timestamp");
+                long diffInMillis = Math.abs(now.getTime() - transactionDate.getTime());
+                long years = TimeUnit.DAYS.convert(diffInMillis, TimeUnit.MILLISECONDS) / 365;
+                double amount = principal * Math.pow(1 + interestRate, years);
+                double interest = amount - principal;
+
+                interestEarned += interest;
+            }
+
+            dataSet.close();
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return interestEarned;
+    }
+
+    @Deprecated
     protected static double showInterestEarned(String username) {
         double interestRate = 0.05; // Annual interest rate
         double interestEarned = 0;
@@ -72,6 +177,7 @@ public class BankSystem {
         return interestEarned;
     }
 
+    @Deprecated
     protected static double calculateTotalPaid(String username) {
         double totalPaid = 0;
 
@@ -92,6 +198,7 @@ public class BankSystem {
         return totalPaid;
     }
 
+    @Deprecated
     protected static double calculateTotalSpent(String username) {
         double totalSpent = 0;
 
@@ -112,6 +219,7 @@ public class BankSystem {
         return totalSpent;
     }
 
+    @Deprecated
     protected static double calculateTotalNet(String username) {
         double totalNet = 0;
         for (final User user : users)
@@ -135,51 +243,17 @@ public class BankSystem {
         return validProductTypes.contains(productType);
     }
 
-    protected static void setCurrentLoggedInUser(String username) {currentLoggedInUser = username;}
-
-    protected static void setCurrentProductType(String productType) {
-        if (!isValidProductType(productType))
-        {
-            System.out.print("Invalid product type.");
-            return;
-        }
-
-        currentProductType = productType;
-    }
-
-    protected static String getCurrentLoggedInUser() {
-        return currentLoggedInUser;
-    }
-
-    protected static String getCurrentProductType(String username) {
-        for (final User user : users)
-        {
-            if (Objects.equals(User.getUsername(), username))
-            {
-                return user.getProductType();
-            }
-        }
-        return "Unknown";
-    }
-
-    protected static double getCurrentBalance(String username) {
-        for (final User user : users)
-        {
-            if (Objects.equals(User.getUsername(), username))
-            {
-                return user.getBalance();
-            }
-        }
-        return -1.0;
-    }
-
     protected static boolean isAdmin(String username) {
-        for (final User user : users)
-        {
-            if (Objects.equals(User.getUsername(), username))
-            {
-                return user.isAdmin();
-            }
+        try(Connection connection = DriverManager.getConnection(url, userDB, passwordDB)) {
+            String query = "SELECT is_admin FROM users WHERE username = ?";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, username);
+            ResultSet dataSet = statement.executeQuery();
+
+            return dataSet.getBoolean("is_admin");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return false;
     }
@@ -195,7 +269,7 @@ public class BankSystem {
         return false;
     }
 
-    protected static boolean createUser(String name, String username, String password, String email, String phoneNum, char twoFA, String productType) {
+    protected static boolean createUser(String fname, String mname, String lname,String username, String password, String email, String phoneNum, char twoFA, String productType) {
         if (User.isUsernameTaken(username))
         {
             System.out.print("Username is already taken. Please choose another one.");
@@ -203,35 +277,49 @@ public class BankSystem {
         }
 
         User newUser = new User();
-        newUser.setUserID(User.generateUserID());
-        newUser.setName(name);
-        newUser.setUsername(username);
-        newUser.setPassword(SecuritySystem.encrypt(password));
-        newUser.setAdmin(false);
-        newUser.setProductType(productType);
-        newUser.setBalance(0.0);
+        try {
+            Class.forName(driver);
+        } catch (ClassNotFoundException e) {
+            System.err.print("Driver error: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
 
-        // Create a new profile for the user
-        Profile newProfile = new Profile();
-        newProfile.setEmail(email);
-        newProfile.setPhoneNumber(phoneNum);
-        newProfile.set2FAStatus(SecuritySystem.enable2FA(twoFA));
+        try(Connection connection = DriverManager.getConnection(url, userDB, passwordDB)) {
 
-        newUser.userProfile.add(newProfile);
+            String query = "INSERT INTO users (user_id, fname, mname, lname, username, password, email, phone_number, " +
+                    "is2fa, is_admin, is_customerservice, product_type, balance) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
-        ProductApplication newProductApplication = new ProductApplication();
-        newProductApplication.setProductType(productType);
-        newProductApplication.setProductID(ProductApplication.generateProductID(productType));
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setLong(1, newUser.generateUserID());
+                statement.setString(2, fname);
+                statement.setString(3, mname);
+                statement.setString(4, lname);
+                statement.setString(5, username);
+                statement.setString(6, SecuritySystem.encrypt(password));
+                statement.setString(7, email);
+                statement.setString(8, phoneNum);
+                statement.setBoolean(9, SecuritySystem.enable2FA(twoFA));
+                statement.setBoolean(10, false);
+                statement.setBoolean(11,false);
+                statement.setString(12, productType);
+                statement.setDouble(13, 0.00);
 
-        newUser.userProductApplications.add(newProductApplication);
+                int affectedRows = statement.executeUpdate();
+                System.out.println("Number of affected rows: " + affectedRows);
+            } catch (SQLException e) {
+                System.err.println("Error while inserting data into users table: " + e.getMessage());
+                throw new RuntimeException(e);
+            }
+        } catch (SQLException e) {
+            System.err.print("Error connecting to database: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
 
-        users.add(newUser);
-
-        saveDataToFile();
         System.out.print("\nUser account created successfully.");
         return true;
     }
 
+    @Deprecated
     protected void loadDataFromFile() {
         try {
             BufferedReader file = new BufferedReader(new FileReader(dataFilePath));
@@ -336,6 +424,7 @@ public class BankSystem {
         }
     }
 
+    @Deprecated
     protected static void saveDataToFile() {
         BufferedWriter dataWriter = null;
 
@@ -425,40 +514,5 @@ public class BankSystem {
         }
     }
 
-    private static JSONArray setUserHelpAndResources(User user) {
-        JSONArray helpAndResourcesJsonArray = new JSONArray();
-        for (HelpAndResources resources : user.userHelpAndResources) {
-            JSONObject helpAndResourcesJson = new JSONObject();
-            helpAndResourcesJson.put("helpandresourcesID", resources.getHelpID());
-            helpAndResourcesJson.put("helpandresourcesType", resources.getH_rType());
-            helpAndResourcesJson.put("helpandresourcesDescription", resources.getH_rDescription());
-            helpAndResourcesJsonArray.put(helpAndResourcesJson);
-        }
-        return helpAndResourcesJsonArray;
-    }
 
-    private static JSONArray setUserProductApplications(User user) {
-        JSONArray productApplicationsJsonArray = new JSONArray();
-        for (ProductApplication productApplication : user.userProductApplications) {
-            JSONObject productApplicationJson = new JSONObject();
-            productApplicationJson.put("producttype", productApplication.getProductType());
-            productApplicationJson.put("productID", productApplication.getProductID());
-            productApplicationsJsonArray.put(productApplicationJson);
-        }
-        return productApplicationsJsonArray;
-    }
-
-    private static JSONArray setUserTransactions(User user) {
-        JSONArray transactionHistoryJsonArray = new JSONArray();
-        for (Transaction transaction : user.userTransaction) {
-            JSONObject transactionJson = new JSONObject();
-            transactionJson.put("transactionID", transaction.getTransactionID());
-            transactionJson.put("transactionType", transaction.getTransactionType());
-            transactionJson.put("amount", transaction.getAmount());
-            transactionJson.put("timestamp", transaction.getTimeStamp());
-            transactionJson.put("description", transaction.getDescription());
-            transactionHistoryJsonArray.put(transactionJson);
-        }
-        return transactionHistoryJsonArray;
-    }
 }

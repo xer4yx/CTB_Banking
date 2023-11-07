@@ -16,6 +16,25 @@ class Admin extends User{
     private String getAdminID() {return adminID;}
 
     /*----------------------Class Methods----------------------*/
+    protected static void displayDashboardMenu(final String username) {
+        BankSystem.clearConsole();
+        System.out.print(
+                """
+                        ╔═════════════════════════════════════╗
+                        ║            Administrator            ║
+                        ╚═════════════════════════════════════╝
+                                                               
+                        ╔═════════════════════════════════════╗
+                        ║         Dashboard Options:          ║
+                        ╠═════════════════════════════════════╣
+                        ║  1. Manage Users                    ║
+                        ║  2. Help  Resources                 ║
+                        ║  3. Logout                          ║
+                        ╚═════════════════════════════════════╝
+                        Enter your choice:\s"""
+        );
+    }
+
     private static boolean deleteUserByUsername(String userToDelete) {
         var userIterator = BankSystem.getUsers().iterator();
         while(userIterator.hasNext()) {
