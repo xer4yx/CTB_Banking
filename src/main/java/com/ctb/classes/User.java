@@ -440,7 +440,6 @@ public class User {
         return Long.parseLong(userID);
     }
 
-
     public static boolean isUsernameTaken(String username) {
         return BankSystem.users.stream()
                 .anyMatch(user -> Objects.equals(getUsername(), username));

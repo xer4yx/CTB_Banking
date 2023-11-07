@@ -7,11 +7,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class BankSystem {
@@ -22,8 +20,9 @@ public class BankSystem {
     private final SecuritySystem system = new SecuritySystem();
     private static String currentLoggedInUser;
     private static String currentProductType;
-    private String currentSessionID;
+    private static long currentUserID;
     private static String dataFilePath;
+
     public static final List<User> users = new LinkedList<>();
     public static final List<Profile> profiles = new LinkedList<>();
     private static final List<Transaction> transactionHistory = new LinkedList<>();
@@ -31,13 +30,74 @@ public class BankSystem {
     private static final List<Session> sessions = new LinkedList<>();
     private static final List<Dashboard> dashboards = new LinkedList<>();
 
+    /*----------------------Setter Methods----------------------*/
+    protected static void setCurrentUserID(long currentUserID) {
+        BankSystem.currentUserID = currentUserID;
+    }
+
+    protected static void setCurrentLoggedInUser(String username) {currentLoggedInUser = username;}
+
+    protected static void setCurrentProductType(String productType) {
+        if (!isValidProductType(productType))
+        {
+            System.out.print("Invalid product type.");
+            return;
+        }
+
+        currentProductType = productType;
+    }
+
+    /*----------------------Getter Methods----------------------*/
+    protected static long getCurrentUserID() {
+        return currentUserID;
+    }
+
+    protected static String getCurrentLoggedInUser() {
+        return currentLoggedInUser;
+    }
+
+    protected static String getCurrentProductType(String username) {
+        return currentProductType;
+    }
+
+    protected static double getCurrentBalance(String username) {
+        try(Connection connection = DriverManager.getConnection(url, userDB, passwordDB)) {
+            String query = "SELECT balance FROM users WHERE username = ?";
+
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, username);
+            ResultSet dataSet = statement.executeQuery();
+
+            if(dataSet.next()) {
+                return dataSet.getDouble("balance");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1.0;
+    }
+
+    @Deprecated
     protected static List<User> getUsers() {return users;}
+
+    @Deprecated
     protected List<Profile> getProfiles() {return profiles;}
+
+    @Deprecated
     protected static List<Transaction> getTransactionHistory() {return transactionHistory;}
+
+    @Deprecated
     protected List<ProductApplication> getProductApplications() {return productApplications;}
+
+    @Deprecated
     protected List<Session> getSessions() {return sessions;}
+
+    @Deprecated
     protected List<Dashboard> getDashboards() {return dashboards;}
 
+    /*----------------------Class Methods----------------------*/
+    @Deprecated
     public BankSystem(String dataFile) {
         dataFilePath = dataFile;
         loadDataFromFile();
@@ -52,6 +112,43 @@ public class BankSystem {
         AnsiConsole.systemUninstall();
     }
 
+    protected static double showInterestEarned(){
+        double interestRate = 0.05; // Annual interest rate
+        double interestEarned = 0;
+        double principal = 0;
+
+        Calendar calendar = Calendar.getInstance();
+        Date now = calendar.getTime();
+
+        try (Connection connection = DriverManager.getConnection(url, userDB, passwordDB)){
+            String query = "SELECT amount FROM transactions WHERE user_id = ? AND transact_type = ?";
+
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setLong(1, getCurrentUserID());
+            statement.setString(2, "Deposit");
+            ResultSet dataSet = statement.executeQuery();
+
+            while(dataSet.next()) {
+                principal += dataSet.getDouble("amount");
+                Date transactionDate = dataSet.getDate("timestamp");
+                long diffInMillis = Math.abs(now.getTime() - transactionDate.getTime());
+                long years = TimeUnit.DAYS.convert(diffInMillis, TimeUnit.MILLISECONDS) / 365;
+                double amount = principal * Math.pow(1 + interestRate, years);
+                double interest = amount - principal;
+
+                interestEarned += interest;
+            }
+
+            dataSet.close();
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return interestEarned;
+    }
+
+    @Deprecated
     protected static double showInterestEarned(String username) {
         double interestRate = 0.05; // Annual interest rate
         double interestEarned = 0;
@@ -80,6 +177,7 @@ public class BankSystem {
         return interestEarned;
     }
 
+    @Deprecated
     protected static double calculateTotalPaid(String username) {
         double totalPaid = 0;
 
@@ -100,6 +198,7 @@ public class BankSystem {
         return totalPaid;
     }
 
+    @Deprecated
     protected static double calculateTotalSpent(String username) {
         double totalSpent = 0;
 
@@ -120,6 +219,7 @@ public class BankSystem {
         return totalSpent;
     }
 
+    @Deprecated
     protected static double calculateTotalNet(String username) {
         double totalNet = 0;
         for (final User user : users)
@@ -143,51 +243,17 @@ public class BankSystem {
         return validProductTypes.contains(productType);
     }
 
-    protected static void setCurrentLoggedInUser(String username) {currentLoggedInUser = username;}
-
-    protected static void setCurrentProductType(String productType) {
-        if (!isValidProductType(productType))
-        {
-            System.out.print("Invalid product type.");
-            return;
-        }
-
-        currentProductType = productType;
-    }
-
-    protected static String getCurrentLoggedInUser() {
-        return currentLoggedInUser;
-    }
-
-    protected static String getCurrentProductType(String username) {
-        for (final User user : users)
-        {
-            if (Objects.equals(User.getUsername(), username))
-            {
-                return user.getProductType();
-            }
-        }
-        return "Unknown";
-    }
-
-    protected static double getCurrentBalance(String username) {
-        for (final User user : users)
-        {
-            if (Objects.equals(User.getUsername(), username))
-            {
-                return user.getBalance();
-            }
-        }
-        return -1.0;
-    }
-
     protected static boolean isAdmin(String username) {
-        for (final User user : users)
-        {
-            if (Objects.equals(User.getUsername(), username))
-            {
-                return user.isAdmin();
-            }
+        try(Connection connection = DriverManager.getConnection(url, userDB, passwordDB)) {
+            String query = "SELECT is_admin FROM users WHERE username = ?";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, username);
+            ResultSet dataSet = statement.executeQuery();
+
+            return dataSet.getBoolean("is_admin");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return false;
     }
@@ -211,32 +277,6 @@ public class BankSystem {
         }
 
         User newUser = new User();
-        /*newUser.setUserID(User.generateUserID());
-        newUser.setName(name);
-        newUser.setUsername(username);
-        newUser.setPassword(SecuritySystem.encrypt(password));
-        newUser.setAdmin(false);
-        newUser.setProductType(productType);
-        newUser.setBalance(0.0);
-
-        // Create a new profile for the user
-        Profile newProfile = new Profile();
-        newProfile.setEmail(email);
-        newProfile.setPhoneNumber(phoneNum);
-        newProfile.set2FAStatus(SecuritySystem.enable2FA(twoFA));
-
-        newUser.userProfile.add(newProfile);
-
-        ProductApplication newProductApplication = new ProductApplication();
-        newProductApplication.setProductType(productType);
-        newProductApplication.setProductID(ProductApplication.generateProductID(productType));
-
-        newUser.userProductApplications.add(newProductApplication);
-
-        users.add(newUser);
-
-        saveDataToFile();*/ /*[Commented code block ends here]*/
-
         try {
             Class.forName(driver);
         } catch (ClassNotFoundException e) {
@@ -244,7 +284,7 @@ public class BankSystem {
             throw new RuntimeException(e);
         }
 
-        try(Connection connection = DriverManager.getConnection(url, userDB, password)) {
+        try(Connection connection = DriverManager.getConnection(url, userDB, passwordDB)) {
 
             String query = "INSERT INTO users (user_id, fname, mname, lname, username, password, email, phone_number, " +
                     "is2fa, is_admin, is_customerservice, product_type, balance) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
@@ -279,6 +319,7 @@ public class BankSystem {
         return true;
     }
 
+    @Deprecated
     protected void loadDataFromFile() {
         try {
             BufferedReader file = new BufferedReader(new FileReader(dataFilePath));
@@ -383,6 +424,7 @@ public class BankSystem {
         }
     }
 
+    @Deprecated
     protected static void saveDataToFile() {
         BufferedWriter dataWriter = null;
 
@@ -472,39 +514,5 @@ public class BankSystem {
         }
     }
 
-    /*protected static void saveDataToDB() {
-        User client = new User();
 
-        try {
-            Class.forName(driver);
-        } catch (ClassNotFoundException e) {
-            System.err.print("Driver error: " + e.getMessage());
-            throw new RuntimeException(e);z
-        }
-
-        try(Connection connection = DriverManager.getConnection(url, user, password)) {
-
-            String query = "INSERT INTO users (user_id, fname, mname, lname, username, password, email, phone_number, is2fa, is_admin, is_customerservice, product_type, balance) " +
-                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?);" +
-                    "INSERT INTO transactions (user_id, transaction_id, transact_type, amount, timestamp) VALUES (?,?,?,?,?);" +
-                    "INSERT INTO sessions (user_id, session_id, timestamp) VALUES (?,?,?);" +
-                    "INSERT INTO  help_resources (user_id, hr_id, hr_type, hr_description) VALUES (?,?,?,?)";
-
-            try (PreparedStatement statement = connection.prepareStatement(query)) {
-                statement.setLong(1, client.getUserID());
-                statement.setString(2, client.getFname());
-                statement.setString(3, client.getMname());
-                statement.setString(4, client.getLname());
-                statement.setString(5, client.getUsername());
-                statement.setString(6, client.getPassword());
-
-            } catch (SQLException e) {
-                System.err.println("Error while inserting data into users table: " + e.getMessage());
-                throw new RuntimeException(e);
-            }
-        } catch (SQLException e) {
-            System.err.print("Error connecting to database: " + e.getMessage());
-            throw new RuntimeException(e);
-        }
-    }*/ /*[Commented code block ends here]*/
 }

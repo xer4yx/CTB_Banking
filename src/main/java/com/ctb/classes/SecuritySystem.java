@@ -49,7 +49,7 @@ class SecuritySystem {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
+    } /*Unused Method*/
 
     public static String generateOTP() {
         int length = 6;
@@ -72,18 +72,17 @@ class SecuritySystem {
 
         lastAttempt = currTime;
         return true;
-    }
+    } /*Unused Method*/
 
     // Attempts to log in and tracks failed attempts.
-    protected static boolean attemptLogin(String password, String verifyPass)
-    {
+    protected static boolean attemptLogin(String password, String verifyPass) {
         if (Objects.equals(verifyPass, password))
             return true;
 
         attempts++;
         lastAttempt = System.currentTimeMillis();
         return false;
-    }
+    } /*Unused Method*/
 
     protected static void sendOTP()
     {
@@ -105,16 +104,19 @@ class SecuritySystem {
 
     public static boolean authenticateUser(String username, String password) throws SQLException {
         Connection connection = DriverManager.getConnection(BankSystem.url, BankSystem.userDB, BankSystem.passwordDB);
-        String query = "SELECT user_id, username, password FROM users WHERE username = ?";
+        String query = "SELECT user_id, username, password, is2fa, product_type FROM users WHERE username = ?";
 
-        PreparedStatement preparedStatement = connection.prepareStatement(query);
-        preparedStatement.setString(1, username);
-        ResultSet dataSet = preparedStatement.executeQuery();
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setString(1, username);
+        ResultSet dataSet = statement.executeQuery();
 
         if (dataSet.next()) {
             long user_id = dataSet.getLong("user_id");
             String name = dataSet.getString("username");
             String pass = dataSet.getString("password");
+            boolean twoFA = dataSet.getBoolean("is2fa");
+            String prodType = dataSet.getString("product_type");
+
             String formPass = encrypt(password);
 
             if (!name.equals(username)) {
@@ -125,12 +127,45 @@ class SecuritySystem {
                     System.out.print("\n Invalid Login Credentials");
                     return false;
                 }
+
+                if (twoFA) {
+                    if (perform2FA()) return false;
+                }
+
+                BankSystem.setCurrentUserID(user_id);
+                BankSystem.setCurrentLoggedInUser(name);
+                BankSystem.setCurrentProductType(prodType);
+
+                dataSet.close();
+                statement.close();
+                connection.close();
+
                 return true;
             }
         } else {
             System.out.print("\n Invalid Login Credentials");
             return false;
         }
+    }
+
+    private static boolean perform2FA() {
+        System.out.print("\n---Sending an OTP for 2 Factor Authentication---");
+        sendOTP();
+
+        String inputOTP;
+        System.out.print("\nEnter your OTP: ");
+        inputOTP = new Scanner(System.in).nextLine();
+
+        if (!verifyOTP(inputOTP)) {
+            System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                System.err.print("\n" + e.getMessage());
+            }
+            return true;
+        }
+        return false;
     }
 
     /*public static boolean authenticateUser(String username, String password) {
@@ -177,7 +212,7 @@ class SecuritySystem {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         return currTime.format(formatter);
-    }
+    } /*Unused Method*/
 
     protected static boolean securityStatus(final boolean status) {
         return status;

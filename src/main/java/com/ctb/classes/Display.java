@@ -55,9 +55,6 @@ public class Display {
 
         if (SecuritySystem.authenticateUser(username, password))
         {
-
-            BankSystem.setCurrentLoggedInUser(username);
-            BankSystem.setCurrentProductType(username);
             System.out.print(
                     """
                             
@@ -87,15 +84,14 @@ public class Display {
     protected static void logout(String username)
     {
         System.out.print("\nLogging out...");
-        for (User user : BankSystem.users)
-        {
-            if (User.getUsername().equals(username))
-            {
-                Session.saveSession(username, "Logout");
-                System.out.print("\nLogged out successfully.");
-                break;
-            }
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
+        Session.saveSession(BankSystem.getCurrentLoggedInUser(), "Logout");
+        setCurrentLoggedInUser(null);
+        System.out.print("\nLogged out successfully.");
     }
 
      public static void forgotPassword()
@@ -176,7 +172,6 @@ public class Display {
                         break;
                     case 3:
                         logout(getCurrentLoggedInUser());
-                        setCurrentLoggedInUser("");
                         System.out.print("\nPress Enter to continue...");
                         input.nextLine();
                         BankSystem.clearConsole();
@@ -195,7 +190,6 @@ public class Display {
                         CustomerService.replyToHelp();
                         break;
                     case 2:
-                        System.out.print("Logging out...");
                         logout(getCurrentLoggedInUser());
                         setCurrentLoggedInUser("");
                         System.out.print("Press Enter to continue...");
@@ -223,9 +217,7 @@ public class Display {
                         handleHelpAndResources(getCurrentLoggedInUser());
                         break;
                     case 5:
-                        System.out.print("\nLogging out...");
                         logout(getCurrentLoggedInUser());
-                        setCurrentLoggedInUser("");
                         System.out.print(
                                 """
                                         
@@ -266,26 +258,23 @@ public class Display {
 
     protected static void displayTransactionMenu(final String username)
     {
-        BankSystem.clearConsole();
         System.out.print(
                 """
                         
-                        ╔═════════════════════════════════════╗\s
-                        ║         Transaction Center:         ║\s
-                        ╠═════════════════════════════════════╣\s
-                        ║  1. Deposit Funds                   ║ \s
+                        ╔═════════════════════════════════════╗
+                        ║         Transaction Center:         ║
+                        ╠═════════════════════════════════════╣
+                        ║  1. Deposit Funds                   ║
                         ║  2. Withdraw Funds                  ║
-                        ║  3. View Transaction History        ║ \s
-                        ║  4. Back to Dashboard               ║\s
+                        ║  3. View Transaction History        ║
+                        ║  4. Back to Dashboard               ║
                         ╚═════════════════════════════════════╝
                         Enter your choice:\s"""
         );
-        setCurrentLoggedInUser(username);
     }
 
     protected static void displayTransactionCredit(final String username)
     {
-    BankSystem.clearConsole();
         System.out.print(
                 """
                         ╔═════════════════════════════════════╗
@@ -298,7 +287,6 @@ public class Display {
                         ╚═════════════════════════════════════╝
                         Enter your choice:\s"""
         );
-        setCurrentLoggedInUser(username);
     }
 
     protected static void displayTransactionHistory(final String username)
@@ -496,8 +484,7 @@ public class Display {
                 {
                     System.out.print(
                             "\nTotal Net worth: " + BankSystem.calculateTotalNet(BankSystem.getCurrentLoggedInUser()) +
-                            "\nTotal Interest Earned: " + BankSystem.showInterestEarned(BankSystem.getCurrentLoggedInUser()) +
-                            "\nTotal Interest Earned: " + BankSystem.showInterestEarned(BankSystem.getCurrentLoggedInUser())
+                            "\nTotal Interest Earned: " + BankSystem.showInterestEarned()
                     );
                 }
                 else if (Objects.equals(getCurrentProductType(getCurrentLoggedInUser()), "Credit Account"))
