@@ -1,5 +1,6 @@
 package com.ctb.classes;
 
+import com.ctb.exceptions.InvalidLoginCredentialsException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -42,6 +43,7 @@ class SecuritySystem {
         }
     }
 
+    @Deprecated
     protected static String decrypt(String hashedPassword) {
         try {
             byte[] bytesOfMessage = new BigInteger(hashedPassword, 16).toByteArray();
@@ -62,6 +64,7 @@ class SecuritySystem {
         return otp.toString();
     }
 
+    @Deprecated
     protected static boolean canAttempt() {
         long currTime = Calendar.getInstance().getTimeInMillis();
         if (attempts > 3 && (currTime - lastAttempt) < 30000)
@@ -102,49 +105,57 @@ class SecuritySystem {
         return toUpperCase(answer) == 'Y';
     }
 
-    public static boolean authenticateUser(String username, String password) throws SQLException {
-        Connection connection = DriverManager.getConnection(BankSystem.url, BankSystem.userDB, BankSystem.passwordDB);
-        String query = "SELECT user_id, username, password, is2fa, product_type FROM users WHERE username = ?";
+    public static boolean authenticateUser(String username, String password) {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet dataSet = null;
 
-        PreparedStatement statement = connection.prepareStatement(query);
-        statement.setString(1, username);
-        ResultSet dataSet = statement.executeQuery();
+        try {
+            connection = DriverManager.getConnection(BankSystem.url, BankSystem.userDB, BankSystem.passwordDB);
+            String query = "SELECT user_id, username, password, is2fa, product_type FROM users WHERE username = ?";
+            statement = connection.prepareStatement(query);
+            statement.setString(1, username);
+            dataSet = statement.executeQuery();
 
-        if (dataSet.next()) {
-            long user_id = dataSet.getLong("user_id");
-            String name = dataSet.getString("username");
-            String pass = dataSet.getString("password");
-            boolean twoFA = dataSet.getBoolean("is2fa");
-            String prodType = dataSet.getString("product_type");
+            if (dataSet.next()) {
+                long user_id = dataSet.getLong("user_id");
+                String name = dataSet.getString("username");
+                String pass = dataSet.getString("password");
+                boolean twoFA = dataSet.getBoolean("is2fa");
+                String prodType = dataSet.getString("product_type");
 
-            String formPass = encrypt(password);
+                String formPass = encrypt(password);
 
-            if (!name.equals(username)) {
-                System.out.print("\n Invalid Login Credentials");
-                return false;
-            } else {
-                if (!pass.equals(formPass)) {
-                    System.out.print("\n Invalid Login Credentials");
-                    return false;
+                if (!name.equals(username)) {
+                    throw new InvalidLoginCredentialsException("Invalid username");
+                } else if (!pass.equals(formPass)) {
+                    throw new InvalidLoginCredentialsException("Invalid password");
+                } else if (!BankSystem.isValidProductType(prodType)) {
+                    throw new InvalidLoginCredentialsException("Invalid product type");
                 }
 
                 if (twoFA) {
-                    if (perform2FA()) return false;
+                    if (perform2FA()) {
+                        return false;
+                    }
                 }
 
                 BankSystem.setCurrentUserID(user_id);
                 BankSystem.setCurrentLoggedInUser(name);
                 BankSystem.setCurrentProductType(prodType);
 
-                dataSet.close();
-                statement.close();
-                connection.close();
-
                 return true;
+            } else {
+                throw new InvalidLoginCredentialsException("User not found in database");
             }
-        } else {
-            System.out.print("\n Invalid Login Credentials");
+        } catch (SQLException e) {
+            e.printStackTrace();
             return false;
+        } catch (InvalidLoginCredentialsException e) {
+            System.out.println(e.getMessage());
+            return false;
+        } finally {
+            BankSystem.closeResources(connection, statement, dataSet);
         }
     }
 

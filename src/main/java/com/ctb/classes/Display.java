@@ -1,6 +1,5 @@
 package com.ctb.classes;
 
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
@@ -32,7 +31,7 @@ public class Display {
         );
     }
 
-     public static boolean loginUser() throws SQLException {
+     public static boolean loginUser() {
         BankSystem.clearConsole();
          System.out.print(
                  """
@@ -483,15 +482,15 @@ public class Display {
                 if (Objects.equals(user.getProductType(), "Savings Account"))
                 {
                     System.out.print(
-                            "\nTotal Net worth: " + BankSystem.calculateTotalNet(BankSystem.getCurrentLoggedInUser()) +
+                            "\nTotal Net worth: " + BankSystem.calculateTotalNet() +
                             "\nTotal Interest Earned: " + BankSystem.showInterestEarned()
                     );
                 }
                 else if (Objects.equals(getCurrentProductType(getCurrentLoggedInUser()), "Credit Account"))
                 {
                     System.out.print(
-                            "\nTotal Spent: " + calculateTotalSpent(getCurrentLoggedInUser()) +
-                            "\nTotal Paid: " + calculateTotalPaid(username) +
+                            "\nTotal Spent: " + calculateTotalSpent() +
+                            "\nTotal Paid: " + calculateTotalPaid() +
                             "───────────────────────────────────────"
                     );
                 }

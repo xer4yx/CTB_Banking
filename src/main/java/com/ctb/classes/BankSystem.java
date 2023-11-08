@@ -1,5 +1,7 @@
 package com.ctb.classes;
 
+import com.ctb.exceptions.DataInsertionException;
+import com.ctb.exceptions.InvalidProductTypeException;
 import org.fusesource.jansi.Ansi;
 import org.fusesource.jansi.AnsiConsole;
 import org.json.JSONArray;
@@ -8,8 +10,8 @@ import org.json.JSONObject;
 
 import java.io.*;
 import java.sql.*;
-import java.util.*;
 import java.util.Date;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class BankSystem {
@@ -38,13 +40,15 @@ public class BankSystem {
     protected static void setCurrentLoggedInUser(String username) {currentLoggedInUser = username;}
 
     protected static void setCurrentProductType(String productType) {
-        if (!isValidProductType(productType))
-        {
-            System.out.print("Invalid product type.");
-            return;
-        }
+        try {
+            if (!isValidProductType(productType)) {
+                throw new InvalidProductTypeException("Invalid Product Type");
+            }
 
-        currentProductType = productType;
+            currentProductType = productType;
+        } catch (InvalidProductTypeException e) {
+            System.err.println("Error: " + e.getMessage());
+        }
     }
 
     /*----------------------Getter Methods----------------------*/
@@ -103,6 +107,7 @@ public class BankSystem {
         loadDataFromFile();
     }
 
+    @Deprecated
     protected static void clearConsole() {
         AnsiConsole.systemInstall();
         Ansi ansi = Ansi.ansi();
@@ -110,6 +115,35 @@ public class BankSystem {
         ansi.cursor(0, 0);
         System.out.print(ansi.toString());
         AnsiConsole.systemUninstall();
+    }
+
+    protected static void closeResources(Connection connection, PreparedStatement statement, ResultSet dataSet) {
+        try {
+            if (dataSet != null) {
+                dataSet.close();
+            }
+            if (statement != null) {
+                statement.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    protected static void closeResources(Connection connection, PreparedStatement statement) {
+        try {
+            if (statement != null) {
+                statement.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     protected static double showInterestEarned(){
@@ -146,6 +180,78 @@ public class BankSystem {
         }
 
         return interestEarned;
+    }
+
+    protected static double calculateTotalPaid() {
+        double totalPaid = 0;
+
+        try (Connection connection = DriverManager.getConnection(url, userDB, passwordDB)){
+            String query = "SELECT amount FROM transactions WHERE user_id = ? AND transact_type = ?";
+
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setLong(1, getCurrentUserID());
+            statement.setString(2, "Bill Payment");
+            ResultSet dataSet = statement.executeQuery();
+
+            while(dataSet.next()) {
+                totalPaid += dataSet.getDouble("amount");
+            }
+
+            dataSet.close();
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return totalPaid;
+    }
+
+    protected static double calculateTotalSpent() {
+        double totalSpent = 0;
+
+        try (Connection connection = DriverManager.getConnection(url, userDB, passwordDB)){
+            String query = "SELECT amount FROM transactions WHERE user_id = ? AND transact_type = ?";
+
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setLong(1, getCurrentUserID());
+            statement.setString(2, "Purchase");
+
+            ResultSet dataSet = statement.executeQuery();
+            while(dataSet.next()) {
+                totalSpent += dataSet.getDouble("amount");
+            }
+
+            dataSet.close();
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return totalSpent;
+    }
+
+    protected static double calculateTotalNet() {
+        double totalNet = 0;
+
+        try (Connection connection = DriverManager.getConnection(url, userDB, passwordDB)){
+            String query = "SELECT amount FROM transactions WHERE user_id = ? AND transact_type = ? ";
+
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setLong(1, getCurrentUserID());
+            statement.setString(2, "Deposit");
+
+            ResultSet dataSet = statement.executeQuery();
+            while(dataSet.next()) {
+                totalNet += dataSet.getDouble("amount");
+            }
+
+            dataSet.close();
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return totalNet;
     }
 
     @Deprecated
@@ -284,12 +390,18 @@ public class BankSystem {
             throw new RuntimeException(e);
         }
 
-        try(Connection connection = DriverManager.getConnection(url, userDB, passwordDB)) {
+        Connection connection = null;
+        PreparedStatement statement = null;
+
+        try {
+            connection = DriverManager.getConnection(url, userDB, passwordDB);
 
             String query = "INSERT INTO users (user_id, fname, mname, lname, username, password, email, phone_number, " +
                     "is2fa, is_admin, is_customerservice, product_type, balance) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
-            try (PreparedStatement statement = connection.prepareStatement(query)) {
+            try {
+                statement = connection.prepareStatement(query);
+
                 statement.setLong(1, newUser.generateUserID());
                 statement.setString(2, fname);
                 statement.setString(3, mname);
@@ -305,14 +417,15 @@ public class BankSystem {
                 statement.setDouble(13, 0.00);
 
                 int affectedRows = statement.executeUpdate();
-                System.out.println("Number of affected rows: " + affectedRows);
+                System.out.println("Number of affected rows: " + affectedRows); // [DEBUGGER]
             } catch (SQLException e) {
-                System.err.println("Error while inserting data into users table: " + e.getMessage());
-                throw new RuntimeException(e);
+                throw new DataInsertionException("Error while inserting data into users table: " + e.getMessage());
             }
         } catch (SQLException e) {
             System.err.print("Error connecting to database: " + e.getMessage());
             throw new RuntimeException(e);
+        } finally {
+            closeResources(connection, statement);
         }
 
         System.out.print("\nUser account created successfully.");
