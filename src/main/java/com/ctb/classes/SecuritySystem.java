@@ -51,7 +51,7 @@ class SecuritySystem {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    } /*Unused Method*/
+    }
 
     public static String generateOTP() {
         int length = 6;
@@ -75,9 +75,9 @@ class SecuritySystem {
 
         lastAttempt = currTime;
         return true;
-    } /*Unused Method*/
+    }
 
-    // Attempts to log in and tracks failed attempts.
+    @Deprecated
     protected static boolean attemptLogin(String password, String verifyPass) {
         if (Objects.equals(verifyPass, password))
             return true;
@@ -85,10 +85,9 @@ class SecuritySystem {
         attempts++;
         lastAttempt = System.currentTimeMillis();
         return false;
-    } /*Unused Method*/
+    }
 
-    protected static void sendOTP()
-    {
+    protected static void sendOTP() {
         OTP = generateOTP();
         System.out.print("\nYour One-time Password is: " + OTP + ". Do not give or send this to other people.");
     }
@@ -127,11 +126,11 @@ class SecuritySystem {
                 String formPass = encrypt(password);
 
                 if (!name.equals(username)) {
-                    throw new InvalidLoginCredentialsException("Invalid username");
+                    throw new InvalidLoginCredentialsException("\nInvalid username");
                 } else if (!pass.equals(formPass)) {
-                    throw new InvalidLoginCredentialsException("Invalid password");
+                    throw new InvalidLoginCredentialsException("\nInvalid password");
                 } else if (!BankSystem.isValidProductType(prodType)) {
-                    throw new InvalidLoginCredentialsException("Invalid product type");
+                    throw new InvalidLoginCredentialsException("\nInvalid product type");
                 }
 
                 if (twoFA) {
@@ -146,7 +145,7 @@ class SecuritySystem {
 
                 return true;
             } else {
-                throw new InvalidLoginCredentialsException("User not found in database");
+                throw new InvalidLoginCredentialsException("\nUser not found or not yet registered");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -179,51 +178,13 @@ class SecuritySystem {
         return false;
     }
 
-    /*public static boolean authenticateUser(String username, String password) {
-        Optional<User> user = users.stream()
-                .filter(u -> User.getUsername().equals(username))
-                .findFirst();
-
-        if (user.isEmpty()) {
-            return false;
-        }
-
-        String decryptedPass = encrypt(password);
-
-        if (!attemptLogin(decryptedPass, user.get().getPassword())) {
-            return false;
-        }
-
-        for (Profile profile : user.get().userProfile) {
-            if (profile.get2FAStatus()) {
-                System.out.print("\n---Sending an OTP for 2 Factor Authentication---");
-                sendOTP();
-
-                String inputOTP;
-                System.out.print("\nEnter your OTP: ");
-                inputOTP = new Scanner(System.in).nextLine();
-
-                if (!verifyOTP(inputOTP)) {
-                    System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
-                    try {
-                        Thread.sleep(30000);
-                    } catch (InterruptedException e) {
-                        System.err.print("\n" + e.getMessage());
-                    }
-                    return false;
-                }
-            }
-        }
-        Session.saveSession(username, "Login");
-        return true;
-    }*/ /*[Commented code block ends here.]*/
-
+    @Deprecated
     protected static String getCurrentDate() {
         LocalDate currTime = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         return currTime.format(formatter);
-    } /*Unused Method*/
+    }
 
     protected static boolean securityStatus(final boolean status) {
         return status;

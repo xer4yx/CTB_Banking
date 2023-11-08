@@ -68,8 +68,7 @@ public class Display {
         {
             System.out.print(
                     """
-                            
-                            *Invalid username or password. Please try again.
+                            Please try again.
                             
                             """
             );

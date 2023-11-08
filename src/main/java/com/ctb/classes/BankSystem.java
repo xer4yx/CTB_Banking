@@ -1,6 +1,7 @@
 package com.ctb.classes;
 
 import com.ctb.exceptions.DataInsertionException;
+import com.ctb.exceptions.DataRetrievalException;
 import com.ctb.exceptions.InvalidProductTypeException;
 import org.fusesource.jansi.Ansi;
 import org.fusesource.jansi.AnsiConsole;
@@ -20,9 +21,10 @@ public class BankSystem {
     static String passwordDB = "Vertig@6925";
     private static String driver = "com.mysql.cj.jdbc.Driver";
     private final SecuritySystem system = new SecuritySystem();
+    private static long currentUserID;
     private static String currentLoggedInUser;
     private static String currentProductType;
-    private static long currentUserID;
+    private static long currentBalance;
     private static String dataFilePath;
 
     public static final List<User> users = new LinkedList<>();
@@ -65,20 +67,32 @@ public class BankSystem {
     }
 
     protected static double getCurrentBalance(String username) {
-        try(Connection connection = DriverManager.getConnection(url, userDB, passwordDB)) {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet dataSet = null;
+
+        try {
+            connection = DriverManager.getConnection(url, userDB, passwordDB);
+
             String query = "SELECT balance FROM users WHERE username = ?";
 
-            PreparedStatement statement = connection.prepareStatement(query);
+            statement = connection.prepareStatement(query);
             statement.setString(1, username);
-            ResultSet dataSet = statement.executeQuery();
+
+            dataSet = statement.executeQuery();
 
             if(dataSet.next()) {
                 return dataSet.getDouble("balance");
+            } else {
+                throw new DataRetrievalException("Balance Irretrievable");
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.print("Error on Data Retrieval: " + e.getMessage());
+        } finally {
+            closeResources(connection, statement, dataSet);
         }
+
         return -1.0;
     }
 
@@ -147,21 +161,27 @@ public class BankSystem {
     }
 
     protected static double showInterestEarned(){
-        double interestRate = 0.05; // Annual interest rate
+        double interestRate = 0.05;
         double interestEarned = 0;
         double principal = 0;
 
         Calendar calendar = Calendar.getInstance();
         Date now = calendar.getTime();
 
-        try (Connection connection = DriverManager.getConnection(url, userDB, passwordDB)){
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet dataSet = null;
+
+        try {
+            connection = DriverManager.getConnection(url, userDB, passwordDB);
+
             String query = "SELECT amount FROM transactions WHERE user_id = ? AND transact_type = ?";
 
-            PreparedStatement statement = connection.prepareStatement(query);
+            statement = connection.prepareStatement(query);
             statement.setLong(1, getCurrentUserID());
             statement.setString(2, "Deposit");
-            ResultSet dataSet = statement.executeQuery();
 
+            dataSet = statement.executeQuery();
             while(dataSet.next()) {
                 principal += dataSet.getDouble("amount");
                 Date transactionDate = dataSet.getDate("timestamp");
@@ -184,6 +204,10 @@ public class BankSystem {
 
     protected static double calculateTotalPaid() {
         double totalPaid = 0;
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet dataSet = null;
 
         try (Connection connection = DriverManager.getConnection(url, userDB, passwordDB)){
             String query = "SELECT amount FROM transactions WHERE user_id = ? AND transact_type = ?";
@@ -209,6 +233,10 @@ public class BankSystem {
     protected static double calculateTotalSpent() {
         double totalSpent = 0;
 
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet dataSet = null;
+
         try (Connection connection = DriverManager.getConnection(url, userDB, passwordDB)){
             String query = "SELECT amount FROM transactions WHERE user_id = ? AND transact_type = ?";
 
@@ -232,6 +260,10 @@ public class BankSystem {
 
     protected static double calculateTotalNet() {
         double totalNet = 0;
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet dataSet = null;
 
         try (Connection connection = DriverManager.getConnection(url, userDB, passwordDB)){
             String query = "SELECT amount FROM transactions WHERE user_id = ? AND transact_type = ? ";
@@ -350,12 +382,17 @@ public class BankSystem {
     }
 
     protected static boolean isAdmin(String username) {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet dataSet = null;
+
         try(Connection connection = DriverManager.getConnection(url, userDB, passwordDB)) {
             String query = "SELECT is_admin FROM users WHERE username = ?";
+
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, username);
-            ResultSet dataSet = statement.executeQuery();
 
+            ResultSet dataSet = statement.executeQuery();
             return dataSet.getBoolean("is_admin");
 
         } catch (SQLException e) {
@@ -365,12 +402,21 @@ public class BankSystem {
     }
 
     protected static boolean isCustomerService(String username) {
-        for (final User user : users)
-        {
-            if (Objects.equals(User.getUsername(), username))
-            {
-                return user.isCustomerService();
-            }
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet dataSet = null;
+
+        try(Connection connection = DriverManager.getConnection(url, userDB, passwordDB)) {
+            String query = "SELECT is_customerservice FROM users WHERE username = ?";
+
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, username);
+
+            ResultSet dataSet = statement.executeQuery();
+            return dataSet.getBoolean("is_customerservice");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return false;
     }
