@@ -26,7 +26,8 @@ public class User {
     /*----------------------Constructor Methods----------------------*/
     public User() {}
 
-    User(String name, String username, String productType) {
+    @Deprecated
+    User(String name, String username, String productType) { //TODO: delete this
         this.name = name;
         User.username = username;
         this.productType = productType;
@@ -55,21 +56,14 @@ public class User {
     }
 
     /*----------------------Class Methods----------------------*/
-    protected static void displayDashboardMenu(final String username)
-    {
-        if (Objects.equals(BankSystem.getCurrentLoggedInUser(), username))
-        {
-            if (User.isAdmin())
-            {
+    protected static void displayDashboardMenu(final String username) {
+        if (Objects.equals(BankSystem.getCurrentLoggedInUser(), username)) {
+            if (User.isAdmin()) {
                 Admin.displayDashboardMenu(BankSystem.getCurrentLoggedInUser());
-            }
-            else if (User.isCustomerService())
-            {
+            } else if (User.isCustomerService()) {
                 CustomerService.displayDashboardMenu(BankSystem.getCurrentLoggedInUser());
-            }
-            else
-            {
-                BankSystem.clearConsole();
+            } else {
+                BankSystem.clearConsole(); //TODO: delete this
                 System.out.print(
                         """
                                 
@@ -100,8 +94,7 @@ public class User {
     }
 
     public void displayUserSettings(String username) {
-        while (true)
-        {
+        while (true) {
             System.out.print(
                     """
 
@@ -114,8 +107,7 @@ public class User {
                             """);
             System.out.print("Enter: ");
             int settingChoice = input.nextInt();
-            switch (settingChoice)
-            {
+            switch (settingChoice) {
                 case 1:
                     handleSettings(username);
                     break;
@@ -144,17 +136,16 @@ public class User {
         System.out.print("\nEnter: ");
         int choice = input.nextInt();
 
-        switch (choice)
-        {
+        switch (choice) {
             case 1:
-                BankSystem.clearConsole();
+                BankSystem.clearConsole(); //TODO: delete this
                 Display.displayTransactionHistory(username);
                 break;
             case 2:
                 displaySessions(username);
                 break;
             case 3:
-                BankSystem.clearConsole();
+                BankSystem.clearConsole(); //TODO: delete this
                 CustomerService.displayHelpHistory(username);
                 break;
             default:
@@ -164,11 +155,11 @@ public class User {
     }
 
     public static void displaySessions(String username) {
-        for (final User user : BankSystem.users)
-        {
-            if (Objects.equals(User.username, username))
-            {
-            BankSystem.clearConsole();
+        //TODO: Separate method of interface and data retrieval
+        //CONVERT: List -> Database
+        for (final User user : BankSystem.users) {
+            if (Objects.equals(User.username, username)) {
+            BankSystem.clearConsole(); //TODO: delete this
                 System.out.print(
                         "\n╔════════════════════════════════════════════╗" +
                         "\n║               Session History              ║" +
@@ -176,8 +167,7 @@ public class User {
                         "\n User: " + User.username +
                         "\n──────────────────────────────────────────────"
                 );
-                for (final Session session : user.userSessions)
-                {
+                for (final Session session : user.userSessions) {
                     System.out.print(
                             "\nSession ID: " + session.getSessionID() +
                             "\nUsername: " + getUsername() +
@@ -208,8 +198,7 @@ public class User {
                         ╚═════════════════════════════════════╝""");
         System.out.print("\nEnter: ");
         int accChoice = input.nextInt();
-        switch (accChoice)
-        {
+        switch (accChoice) {
             case 1:
                 System.out.print("\nEnter new password: ");
                 newPassword = input.nextLine();
@@ -258,18 +247,12 @@ public class User {
         System.out.print("\nEnter the amount to deposit: $");
         double depositAmount = input.nextDouble();
         input.nextLine();
-        if (depositAmount <= 0.0)
-        {
+        if (depositAmount <= 0.0) {
             System.out.print("*Invalid deposit amount. Please enter a positive amount.");
             return;
-        }
-
-        if (Transaction.depositFunds(username, depositAmount))
-        {
+        } else if (Transaction.depositFunds(username, depositAmount)) {
             System.out.print("Deposit of $" + depositAmount + " successful.");
-        }
-        else
-        {
+        } else {
             System.out.print("*Deposit failed. Please try again.");
         }
         System.out.print("\nPress Enter to continue...");
@@ -280,18 +263,12 @@ public class User {
         System.out.print("\nEnter the amount to withdraw: $");
         double withdrawAmount = input.nextDouble(); // Clear the newline character
 
-        if (withdrawAmount <= 0.0)
-        {
+        if (withdrawAmount <= 0.0) {
             System.out.print("*Invalid withdrawal amount. Please enter a positive amount.");
             return;
-        }
-
-        if (Transaction.withdrawFunds(username, withdrawAmount))
-        {
+        } else if (Transaction.withdrawFunds(username, withdrawAmount)) {
             System.out.print("\nWithdrawal of $" + withdrawAmount + " successful.");
-        }
-        else
-        {
+        } else {
             System.out.print("*Withdrawal failed. Please try again.");
         }
         System.out.print("\nPress Enter to continue...");
@@ -303,22 +280,17 @@ public class User {
         double purchaseAmount = input.nextDouble();
         System.out.print("\nEnter the purchase description: ");
         String purchaseDescription = input.nextLine();
-        if (input.hasNextDouble())
-        {
+        if (input.hasNextDouble()) {
             input.nextDouble();
             System.out.print("*Invalid amount. Please enter a valid number.");
         }
         input.nextLine();
-        if (purchaseAmount <= 0.0)
-        {
+
+        if (purchaseAmount <= 0.0) {
             System.out.print("*Invalid transaction amount. Please enter a positive amount.");
-        }
-        if (Transaction.makePurchase(username, purchaseAmount, purchaseDescription))
-        {
+        } else if (Transaction.makePurchase(username, purchaseAmount, purchaseDescription)) {
             System.out.print("\nPurchase of $" + purchaseAmount + " successful.");
-        }
-        else
-        {
+        } else {
             System.out.print("*Purchase failed. Please try again.");
         }
         System.out.print("Press Enter to continue...");
@@ -334,9 +306,7 @@ public class User {
 
         if (billAmount <= 0.0) {
             System.out.print("*Invalid amount. Please enter a positive amount.");
-        }
-
-        if (Transaction.payBills(username, billAmount, billDescription)) {
+        } else if (Transaction.payBills(username, billAmount, billDescription)) {
             System.out.print("\nPayment of $" + billAmount + " successful.");
         } else {
             System.out.print("*Payment failed. Please try again.");
@@ -351,8 +321,7 @@ public class User {
         String username, password, email, phone, accounttype;
         int acctype;
         char enable2FA;
-        while (true)
-        {
+        while (true) {
             System.out.print(
                     """
 
@@ -370,14 +339,14 @@ public class User {
             System.out.print("Enter username: ");
             username = input.nextLine();
             boolean usernameTaken = isUsernameTaken(username);
-            if (usernameTaken)
-            {
+            if (usernameTaken) {
                 System.out.print("\n*Username is already taken. Please choose another one.");
                 System.out.print("Press Enter to continue...");
                 input.nextLine();
-            BankSystem.clearConsole();
+                BankSystem.clearConsole(); //TODO: delete this
                 continue;
             }
+
             System.out.print("Enter password: ");
             password = input.nextLine();
             System.out.print("Enter email: ");
@@ -396,8 +365,7 @@ public class User {
             System.out.print("\nChoose your account type: ");
             acctype = input.nextInt();
 
-            switch (acctype)
-            {
+            switch (acctype) {
                 case 1:
                     accounttype = "Savings Account";
                     break;
@@ -410,8 +378,7 @@ public class User {
             }
 
             boolean registrationSuccess = BankSystem.createUser(fname, mname, lname,username, password, email, phone, enable2FA, accounttype);
-            if (registrationSuccess)
-            {
+            if (registrationSuccess) {
                 System.out.print(
                         """
                                 Registration successful!
@@ -419,20 +386,13 @@ public class User {
                 );
                 input.nextLine();
                 break;
-            }
-            else
-            {
+            } else {
                 System.out.print("*Registration failed. Please try again.");
             }
         }
     }
 
     public static long generateUserID() {
-//        long time = calendar.getTimeInMillis();
-//        int randomNumber = rand.nextInt();
-//        String timeString = Long.toString(time);
-//        String randomNumberString = Integer.toString(randomNumber);
-
         String timeString = new SimpleDateFormat("YYYYMMDDHHmm").format(date);
         String lastTwoDigitsOfTime = timeString.substring(timeString.length() - 2);
 
@@ -441,17 +401,16 @@ public class User {
     }
 
     public static boolean isUsernameTaken(String username) {
+        //CONVERT: List -> Database
         return BankSystem.users.stream()
                 .anyMatch(user -> Objects.equals(getUsername(), username));
     }
 
     public static void changePassword(String username) {
-        for (User user : BankSystem.users)
-        {
-            if (Objects.equals(getUsername(), username))
-            {
-                for (Profile profile : user.userProfile)
-                {
+        //CONVERT: List -> Database
+        for (User user : BankSystem.users) {
+            if (Objects.equals(getUsername(), username)) {
+                for (Profile profile : user.userProfile) {
                     if (profile.get2FAStatus())
                     {
                         System.out.print("\nSending an OTP for 2 Factor Authentication.");
@@ -484,6 +443,7 @@ public class User {
     }
 
     public static void changeEmail(String username) {
+        //CONVERT: List -> Database
         for (User user : BankSystem.users)
         {
             if (Objects.equals(getUsername(), username))
@@ -520,6 +480,7 @@ public class User {
     }
 
     public static void changePhoneNum(String username) {
+        //CONVERT: List -> Database
         for (User user : BankSystem.users)
         {
             if (Objects.equals(getUsername(), username))
@@ -557,6 +518,7 @@ public class User {
     }
 
     public static void changeUsername(String username) {
+        //CONVERT: List -> Database
         for (User user : BankSystem.users)
         {
             if (Objects.equals(getUsername(), username))
@@ -595,6 +557,7 @@ public class User {
     }
 
     public static void change2FAStatus(String username) {
+        //CONVERT: List -> Database
         for (User user : BankSystem.users)
         {
             if (Objects.equals(getUsername(), username))
@@ -640,53 +603,66 @@ public class User {
         HelpAndResources.saveHelpAndResources(username, "Help", message, "");
     }
 
+    @Deprecated
     protected void setUserProfile(List<Profile> userProfile) {
         this.userProfile = userProfile;
     }
 
+    @Deprecated
     protected void setUserTransaction(List<Transaction> userTransaction) {
         this.userTransaction = userTransaction;
     }
 
+    @Deprecated
     protected void setUserProductApplications(List<ProductApplication> userProductApplications) {
         this.userProductApplications = userProductApplications;
     }
 
+    @Deprecated
     protected void setUserSessions(List<Session> userSessions) {
         this.userSessions = userSessions;
     }
 
+    @Deprecated
     protected void setUserHelpAndResources(List<HelpAndResources> userHelpAndResources) {
         this.userHelpAndResources = userHelpAndResources;
     }
 
+    @Deprecated
     protected void setUserDashboard(List<Dashboard> userDashboard) {
         this.userDashboard = userDashboard;
     }
 
+    @Deprecated
     protected List<Profile> getUserProfile() {
         return userProfile;
     }
 
+    @Deprecated
     protected List<Transaction> getUserTransaction() {
         return userTransaction;
     }
 
+    @Deprecated
     protected List<ProductApplication> getUserProductApplications() {
         return userProductApplications;
     }
 
+    @Deprecated
     protected List<Session> getUserSessions() {
         return userSessions;
     }
 
+    @Deprecated
     protected List<HelpAndResources> getUserHelpAndResources() {
         return userHelpAndResources;
     }
 
+    @Deprecated
     protected List<Dashboard> getUserDashboard() {
         return userDashboard;
     }
+
 
     public static boolean isAdmin() {
         return isAdmin;
