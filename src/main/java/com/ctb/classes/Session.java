@@ -5,12 +5,12 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.Random;
 
-public class Session extends User{
-    private static Session instance;
-    private User userData;
+public class Session extends User{ //TODO: transfer session methods to this class
     private static final Calendar calendar = Calendar.getInstance();
     private static final Random rand = new Random();
     private static final Date currentTime = new Date();
+    private static Session instance;
+    private User userData;
     private String sessionID;
     private long timeStamp;
 

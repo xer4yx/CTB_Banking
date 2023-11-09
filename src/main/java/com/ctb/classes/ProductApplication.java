@@ -4,7 +4,7 @@ import java.util.Calendar;
 import java.util.Objects;
 import java.util.Random;
 
-public class ProductApplication {
+public class ProductApplication { //TODO: obsolete file
     private static final Calendar calendar = Calendar.getInstance();
     private static final Random rand = new Random();
     private String productID;
@@ -24,16 +24,11 @@ public class ProductApplication {
         int randomNumber = rand.nextInt();
         String timeString = Long.toString(time);
         String randomNumberString = Integer.toString(randomNumber);
-        if (Objects.equals(productType, "Savings Account"))
-        {
+        if (Objects.equals(productType, "Savings Account")) {
             return "SAV" + timeString + randomNumberString;
-        }
-        if (Objects.equals(productType, "Credit Account"))
-        {
+        } else if (Objects.equals(productType, "Credit Account")) {
             return "CRD" + timeString + randomNumberString;
-        }
-        else
-        {
+        } else {
             return "PRD" + timeString + randomNumberString;
         }
     }

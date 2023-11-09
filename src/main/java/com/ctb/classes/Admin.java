@@ -35,7 +35,7 @@ class Admin extends User{
         );
     }
 
-    private static boolean deleteUserByUsername(String userToDelete) {
+    private static boolean deleteUserByUsername(String userToDelete) { //CONVERT: List -> Database
         var userIterator = BankSystem.getUsers().iterator();
         while(userIterator.hasNext()) {
             User user = userIterator.next();
@@ -48,7 +48,7 @@ class Admin extends User{
         return false;
     }
 
-    protected static void handleManageUsers(String username) {
+    protected static void handleManageUsers(String username) { //FIXME: Remove unused/obsolete parameter
         BankSystem.clearConsole();
         System.out.print(
                 """
@@ -134,6 +134,8 @@ class Admin extends User{
     }
 
     private static void handleUserData(User user) {
+        //TODO: Separate method for displaying user info
+        //CONVERT: List -> Database
         System.out.print(
                 "\n──────────────────────────────────────────────────────────────────" +
                 "\n                          Information:                            " +
@@ -240,6 +242,8 @@ class Admin extends User{
     }
 
     private static void displayAllUserData() {
+        //TODO: Separate method for displaying user info
+        //CONVERT: List -> Database
         BankSystem.clearConsole();
         System.out.print(
                 """
@@ -255,7 +259,7 @@ class Admin extends User{
         System.out.print("\nPress enter to continue...");
     }
 
-    private static void makeUserAdmin(String username) {
+    private static void makeUserAdmin(String username) { //CONVERT: List -> Database
         for (final User user : BankSystem.users) {
             if (getUsername().equals(username)) {
                 user.setAdminStatus(true);
@@ -265,7 +269,7 @@ class Admin extends User{
         }
     }
 
-    private static void makeUserCustomerService(String username) {
+    private static void makeUserCustomerService(String username) { //CONVERT: List -> Database
         for (final User user : BankSystem.users) {
             if (getUsername().equals(username)) {
                 user.setCSStatus(true);
@@ -276,8 +280,8 @@ class Admin extends User{
     }
 
     public static void handleSettings(String username) {
-        while (true)
-        {
+        while (true) {
+            //FIXME: Remove unused vars
             String newPassword, newEmail, newPhoneNumber, newUsername;
             char new2FA;
             displayUserData(username);
@@ -380,12 +384,9 @@ class Admin extends User{
         System.out.print("Enter the amount to deposit: ");
         amount = input.nextInt();
         input.nextLine();
-        if (Transaction.depositFunds(username, amount))
-        {
+        if (Transaction.depositFunds(username, amount)) {
             System.out.print("Funds deposited successfully.");
-        }
-        else
-        {
+        } else {
             System.out.print("Error: Unable to deposit funds.");
         }
     }
@@ -399,12 +400,9 @@ class Admin extends User{
         System.out.print("Enter the amount to withdraw: ");
         amount = input.nextInt();
         input.nextLine();
-        if (Transaction.withdrawFunds(username, amount))
-        {
+        if (Transaction.withdrawFunds(username, amount)) {
             System.out.print("Funds withdrawn successfully.");
-        }
-        else
-        {
+        } else {
             System.out.print("Error: Unable to withdraw funds.");
         }
     }
@@ -421,12 +419,9 @@ class Admin extends User{
         System.out.print("Enter the description of the purchase: ");
         purchaseDescription =  input.nextLine();
         input.nextLine();
-        if (Transaction.makePurchase(username, amount, purchaseDescription))
-        {
+        if (Transaction.makePurchase(username, amount, purchaseDescription)) {
             System.out.print("Purchase made successfully.");
-        }
-        else
-        {
+        } else {
             System.out.print("Error: Unable to make purchase.");
         }
     }
@@ -443,12 +438,9 @@ class Admin extends User{
         System.out.print("Enter the description of the bill: ");
         billDescription = input.nextLine();
         input.nextLine();
-        if (Transaction.payBills(username, amount, billDescription))
-        {
+        if (Transaction.payBills(username, amount, billDescription)) {
             System.out.print("Bill paid successfully.");
-        }
-        else
-        {
+        } else {
             System.out.print("Error: Unable to pay bill.");
         }
     }

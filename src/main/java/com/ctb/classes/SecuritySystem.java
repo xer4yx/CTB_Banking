@@ -1,5 +1,6 @@
 package com.ctb.classes;
 
+import com.ctb.exceptions.InvalidLoginCredentialsException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -42,14 +43,15 @@ class SecuritySystem {
         }
     }
 
-    protected static String decrypt(String hashedPassword) {
+    @Deprecated
+    protected static String decrypt(String hashedPassword) { //TODO: delete this
         try {
             byte[] bytesOfMessage = new BigInteger(hashedPassword, 16).toByteArray();
             return new String(bytesOfMessage, StandardCharsets.UTF_8);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    } /*Unused Method*/
+    }
 
     public static String generateOTP() {
         int length = 6;
@@ -62,7 +64,8 @@ class SecuritySystem {
         return otp.toString();
     }
 
-    protected static boolean canAttempt() {
+    @Deprecated
+    protected static boolean canAttempt() { //TODO: delete this
         long currTime = Calendar.getInstance().getTimeInMillis();
         if (attempts > 3 && (currTime - lastAttempt) < 30000)
             return false;
@@ -72,20 +75,19 @@ class SecuritySystem {
 
         lastAttempt = currTime;
         return true;
-    } /*Unused Method*/
+    }
 
-    // Attempts to log in and tracks failed attempts.
-    protected static boolean attemptLogin(String password, String verifyPass) {
+    @Deprecated
+    protected static boolean attemptLogin(String password, String verifyPass) { //TODO: delete this
         if (Objects.equals(verifyPass, password))
             return true;
 
         attempts++;
         lastAttempt = System.currentTimeMillis();
         return false;
-    } /*Unused Method*/
+    }
 
-    protected static void sendOTP()
-    {
+    protected static void sendOTP() {
         OTP = generateOTP();
         System.out.print("\nYour One-time Password is: " + OTP + ". Do not give or send this to other people.");
     }
@@ -102,49 +104,57 @@ class SecuritySystem {
         return toUpperCase(answer) == 'Y';
     }
 
-    public static boolean authenticateUser(String username, String password) throws SQLException {
-        Connection connection = DriverManager.getConnection(BankSystem.url, BankSystem.userDB, BankSystem.passwordDB);
-        String query = "SELECT user_id, username, password, is2fa, product_type FROM users WHERE username = ?";
+    public static boolean authenticateUser(String username, String password) {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet dataSet = null;
 
-        PreparedStatement statement = connection.prepareStatement(query);
-        statement.setString(1, username);
-        ResultSet dataSet = statement.executeQuery();
+        try {
+            connection = DriverManager.getConnection(BankSystem.url, BankSystem.userDB, BankSystem.passwordDB);
+            String query = "SELECT user_id, username, password, is2fa, product_type FROM users WHERE username = ?";
+            statement = connection.prepareStatement(query);
+            statement.setString(1, username);
+            dataSet = statement.executeQuery();
 
-        if (dataSet.next()) {
-            long user_id = dataSet.getLong("user_id");
-            String name = dataSet.getString("username");
-            String pass = dataSet.getString("password");
-            boolean twoFA = dataSet.getBoolean("is2fa");
-            String prodType = dataSet.getString("product_type");
+            if (dataSet.next()) {
+                long user_id = dataSet.getLong("user_id");
+                String name = dataSet.getString("username");
+                String pass = dataSet.getString("password");
+                boolean twoFA = dataSet.getBoolean("is2fa");
+                String prodType = dataSet.getString("product_type");
 
-            String formPass = encrypt(password);
+                String formPass = encrypt(password);
 
-            if (!name.equals(username)) {
-                System.out.print("\n Invalid Login Credentials");
-                return false;
-            } else {
-                if (!pass.equals(formPass)) {
-                    System.out.print("\n Invalid Login Credentials");
-                    return false;
+                if (!name.equals(username)) {
+                    throw new InvalidLoginCredentialsException("\nInvalid username");
+                } else if (!pass.equals(formPass)) {
+                    throw new InvalidLoginCredentialsException("\nInvalid password");
+                } else if (!BankSystem.isValidProductType(prodType)) {
+                    throw new InvalidLoginCredentialsException("\nInvalid product type");
                 }
 
                 if (twoFA) {
-                    if (perform2FA()) return false;
+                    if (perform2FA()) {
+                        return false;
+                    }
                 }
 
                 BankSystem.setCurrentUserID(user_id);
                 BankSystem.setCurrentLoggedInUser(name);
                 BankSystem.setCurrentProductType(prodType);
 
-                dataSet.close();
-                statement.close();
-                connection.close();
-
                 return true;
+            } else {
+                throw new InvalidLoginCredentialsException("\nUser not found or not yet registered");
             }
-        } else {
-            System.out.print("\n Invalid Login Credentials");
+        } catch (SQLException e) {
+            e.printStackTrace();
             return false;
+        } catch (InvalidLoginCredentialsException e) {
+            System.out.println(e.getMessage());
+            return false;
+        } finally {
+            BankSystem.closeResources(connection, statement, dataSet);
         }
     }
 
@@ -168,53 +178,16 @@ class SecuritySystem {
         return false;
     }
 
-    /*public static boolean authenticateUser(String username, String password) {
-        Optional<User> user = users.stream()
-                .filter(u -> User.getUsername().equals(username))
-                .findFirst();
-
-        if (user.isEmpty()) {
-            return false;
-        }
-
-        String decryptedPass = encrypt(password);
-
-        if (!attemptLogin(decryptedPass, user.get().getPassword())) {
-            return false;
-        }
-
-        for (Profile profile : user.get().userProfile) {
-            if (profile.get2FAStatus()) {
-                System.out.print("\n---Sending an OTP for 2 Factor Authentication---");
-                sendOTP();
-
-                String inputOTP;
-                System.out.print("\nEnter your OTP: ");
-                inputOTP = new Scanner(System.in).nextLine();
-
-                if (!verifyOTP(inputOTP)) {
-                    System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
-                    try {
-                        Thread.sleep(30000);
-                    } catch (InterruptedException e) {
-                        System.err.print("\n" + e.getMessage());
-                    }
-                    return false;
-                }
-            }
-        }
-        Session.saveSession(username, "Login");
-        return true;
-    }*/ /*[Commented code block ends here.]*/
-
-    protected static String getCurrentDate() {
+    @Deprecated
+    protected static String getCurrentDate() { //TODO: delete this
         LocalDate currTime = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         return currTime.format(formatter);
-    } /*Unused Method*/
+    }
 
     protected static boolean securityStatus(final boolean status) {
+        //TODO: add functionalities on the code
         return status;
     }
 

@@ -3,15 +3,14 @@ package com.ctb.banking;
 import com.ctb.classes.BankSystem;
 import com.ctb.classes.Display;
 
-import java.sql.SQLException;
 import java.util.Scanner;
 
 public class DriverCode {
 
     public static Scanner input = new Scanner(System.in);
 
-    public static void main(String[] args) throws SQLException {
-        new BankSystem("bank_data.json");
+    public static void main(String[] args) {
+        new BankSystem("bank_data.json"); //TODO: delete this
         boolean isRunning = true;
         while (isRunning) {
             Display.displayMainMenu();

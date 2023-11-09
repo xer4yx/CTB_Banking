@@ -1,6 +1,5 @@
 package com.ctb.classes;
 
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
@@ -10,8 +9,7 @@ import static com.ctb.classes.BankSystem.*;
 
 public class Display {
     private static final Scanner input = new Scanner(System.in);
-    public static void displayMainMenu()
-    {
+    public static void displayMainMenu() {
         System.out.print(
                 """
                         
@@ -32,8 +30,8 @@ public class Display {
         );
     }
 
-     public static boolean loginUser() throws SQLException {
-        BankSystem.clearConsole();
+     public static boolean loginUser() {
+        BankSystem.clearConsole(); //TODO: delete this
          System.out.print(
                  """
       
@@ -53,8 +51,7 @@ public class Display {
         System.out.print("Enter password: ");
         password = input.nextLine();
 
-        if (SecuritySystem.authenticateUser(username, password))
-        {
+        if (SecuritySystem.authenticateUser(username, password)) {
             System.out.print(
                     """
                             
@@ -64,25 +61,21 @@ public class Display {
             );
             System.out.print("\nPress Enter to continue...");
             return true;
-        }
-        else
-        {
+        } else {
             System.out.print(
                     """
-                            
-                            *Invalid username or password. Please try again.
+                            Please try again.
                             
                             """
             );
             System.out.print("Press Enter to continue...");
             input.nextLine();
-            BankSystem.clearConsole();
+            BankSystem.clearConsole(); //TODO: delete this
             return false;
         }
     }
 
-    protected static void logout(String username)
-    {
+    protected static void logout(String username) {
         System.out.print("\nLogging out...");
         try {
             Thread.sleep(1000);
@@ -94,9 +87,8 @@ public class Display {
         System.out.print("\nLogged out successfully.");
     }
 
-     public static void forgotPassword()
-     {
-         BankSystem.clearConsole();
+     public static void forgotPassword() {
+         BankSystem.clearConsole(); //TODO: delete this
          System.out.print(
                  """
                          ╭────────────────────────────────────────────────────────────╮
@@ -106,21 +98,20 @@ public class Display {
          char choice;
          System.out.print("\nEnter your email: ");
          String email = input.nextLine();
-         boolean emailFound = false; // To track whether the email was found or not
+         boolean emailFound = false;
 
-         for (User user : BankSystem.users)
-         {
-            for (Profile profile : user.userProfile)
-            {
-                if (Objects.equals(profile.getEmail(), email))
-                {
+         //TODO: Separate method for handling forgot pass (should be inside User)
+         //CONVERT: List -> Database
+
+         for (User user : BankSystem.users) {
+            for (Profile profile : user.userProfile) {
+                if (Objects.equals(profile.getEmail(), email)) {
                     System.out.print("---Email found!---");
                     System.out.print("\nSending an OTP for " + profile.getEmail() + " 2 Factor Authentication.");
                     SecuritySystem.sendOTP();
                     System.out.print("\nEnter your OTP: ");
                     String inputOTP = input.nextLine();
-                    if (!SecuritySystem.verifyOTP(inputOTP))
-                    {
+                    if (!SecuritySystem.verifyOTP(inputOTP)) {
                         System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
                         try {
                             Thread.sleep(30000);
@@ -143,67 +134,56 @@ public class Display {
             }
          }
 
-        if (!emailFound)
-        {
+        if (!emailFound) {
             System.out.print("\n*Email not found. Please try again.");
         }
     }
 
-    public static void handleDashboardOptions()
-    {
-        while (true)
-        {
+    public static void handleDashboardOptions() {
+        while (true) {
             User.displayDashboardMenu(getCurrentLoggedInUser());
-            String productType = BankSystem.getCurrentProductType(BankSystem.getCurrentLoggedInUser());
+            String productType = BankSystem.getCurrentProductType(BankSystem.getCurrentLoggedInUser()); //TODO: delete this
             int choice = input.nextInt();
             input.nextLine();
-            if (User.isAdmin())
-            {
-                switch (choice)
-                {
+            if (User.isAdmin()) { //TODO: modularize
+                switch (choice) {
                     case 1:
                         Admin.handleManageUsers(getCurrentLoggedInUser());
                         input.nextLine();
                         break;
                     case 2:
-                        BankSystem.clearConsole();
+                        BankSystem.clearConsole(); //TODO: delete this
                         CustomerService.displayAllHR();
                         CustomerService.replyToHelp();
                         break;
                     case 3:
                         logout(getCurrentLoggedInUser());
-                        System.out.print("\nPress Enter to continue...");
+                        System.out.print("\nPress Enter to continue..."); //TODO: implement inside logout()
                         input.nextLine();
-                        BankSystem.clearConsole();
+                        BankSystem.clearConsole(); //TODO: delete this
                         return;
                     default:
                         System.out.print("*Invalid choice. Please select a valid option.");
                 }
-            }
-            else if (User.isCustomerService())
-            {
-                switch (choice)
-                {
+            } else if (User.isCustomerService()) { //TODO: modularize
+                switch (choice) {
                     case 1:
-                        BankSystem.clearConsole();
+                        BankSystem.clearConsole(); //TODO: delete this
                         CustomerService.displayAllHR();
                         CustomerService.replyToHelp();
                         break;
                     case 2:
                         logout(getCurrentLoggedInUser());
                         setCurrentLoggedInUser("");
-                        System.out.print("Press Enter to continue...");
+                        System.out.print("Press Enter to continue..."); //TODO: implement inside logout()
                         input.nextLine();
-                        BankSystem.clearConsole();
+                        BankSystem.clearConsole(); //TODO: delete this
                         return;
                     default:
                         System.out.print("*Invalid choice. Please select a valid option.");
                 }
-            }
-            else
-            {
-                switch (choice)
-                {
+            } else { //TODO: modularize
+                switch (choice) {
                     case 1:
                         handleProductOptions(getCurrentProductType(getCurrentLoggedInUser()), getCurrentLoggedInUser());
                         break;
@@ -225,7 +205,7 @@ public class Display {
                                         Press Enter to continue..."""
                         );
                         input.nextLine();
-                        BankSystem.clearConsole();
+                        BankSystem.clearConsole(); //TODO: delete this
                         return;
                     default:
                         System.out.print("*Invalid choice. Please select a valid option.");
@@ -234,30 +214,23 @@ public class Display {
         }
     }
 
-    public static void handleProductOptions(final String producttype, final String username)
-    {
-        if (Objects.equals(producttype, "Savings Account"))
-        {
+    public static void handleProductOptions(final String producttype, final String username) {
+        if (Objects.equals(producttype, "Savings Account")) {
             displaySavingsMenu(username);
-        }
-        else if (Objects.equals(producttype, "Credit Account"))
-        {
+        } else if (Objects.equals(producttype, "Credit Account")) {
             displayCreditMenu(username);
         }
     }
 
-    protected static void displaySavingsMenu(final String username)
-    {
+    protected static void displaySavingsMenu(final String username) {
         handleTransactionCenter(username);
     }
 
-    protected static void displayCreditMenu(final String username)
-    {
+    protected static void displayCreditMenu(final String username) {
         handleCreditCenter(username);
     }
 
-    protected static void displayTransactionMenu(final String username)
-    {
+    protected static void displayTransactionMenu(final String username) { //TODO: delete parameter
         System.out.print(
                 """
                         
@@ -273,8 +246,7 @@ public class Display {
         );
     }
 
-    protected static void displayTransactionCredit(final String username)
-    {
+    protected static void displayTransactionCredit(final String username) { //TODO: delete parameter
         System.out.print(
                 """
                         ╔═════════════════════════════════════╗
@@ -289,8 +261,10 @@ public class Display {
         );
     }
 
-    protected static void displayTransactionHistory(final String username)
-    {
+    protected static void displayTransactionHistory(final String username) {
+        //TODO: Make method for printing and displaying data from database
+        //CONVERT: List -> Database
+
         for (final User user : BankSystem.users)
         {
             if (Objects.equals(User.getUsername(), username))
@@ -322,16 +296,13 @@ public class Display {
         }
     }
 
-    protected static void handleTransactionCenter(final String username)
-    {
-        while (true)
-        {
+    protected static void handleTransactionCenter(final String username) {
+        while (true) {
             displayTransactionMenu(username);
             int transactionChoice = input.nextInt();
             input.nextLine();
 
-            switch (transactionChoice)
-            {
+            switch (transactionChoice) {
                 case 1:
                     User.processDeposit(username);
                     break;
@@ -339,7 +310,7 @@ public class Display {
                     User.processWithdrawal(username);
                     break;
                 case 3:;
-            BankSystem.clearConsole();
+            BankSystem.clearConsole(); //TODO: delete this
                     displayTransactionHistory(username);
                     System.out.print("Press Enter to continue...");
                     input.nextLine();
@@ -352,27 +323,24 @@ public class Display {
         }
     }
 
-    protected static void handleCreditCenter(final String username)
-    {
-        while (true)
-        {
+    protected static void handleCreditCenter(final String username) {
+        while (true) {
             displayTransactionCredit(username);
 
             int transactionChoice = input.nextInt();
             input.nextLine();
 
-            switch (transactionChoice)
-            {
+            switch (transactionChoice) {
                 case 1:
                     User.processPurchase(username);
-            BankSystem.clearConsole();
+            BankSystem.clearConsole(); //TODO: delete this
                     break;
                 case 2:
                     User.processBills(username);
-            BankSystem.clearConsole();
+                    BankSystem.clearConsole(); //TODO: delete this
                     break;
                 case 3:
-                    BankSystem.clearConsole();
+                    BankSystem.clearConsole(); //TODO: delete this
                     displayTransactionHistory(username);
                     System.out.print("Press Enter to continue...");
                     input.nextLine();
@@ -385,9 +353,8 @@ public class Display {
         }
     }
 
-     public static void handleHelpAndResources(final String username)
-     {
-        BankSystem.clearConsole();
+     public static void handleHelpAndResources(final String username) { //TODO: delete parameter
+        BankSystem.clearConsole(); //TODO: delete this
         System.out.print(
                 """
                         ╔═════════════════════════════════════╗
@@ -402,8 +369,7 @@ public class Display {
 
         int jhchoice = input.nextInt();
         input.nextLine();
-        switch (jhchoice)
-        {
+        switch (jhchoice) { //TODO: modularize
             case 1:
                 System.out.print(
                         """
@@ -416,7 +382,7 @@ public class Display {
                 input.nextLine();
                 break;
             case 2:
-                BankSystem.clearConsole();
+                BankSystem.clearConsole(); //TODO: delete this
                 System.out.print(
                         """
                                 ╭────────────────────────────────────────────────╮
@@ -434,8 +400,7 @@ public class Display {
                 );
 
                 int schoice = input.nextInt();
-                if (schoice == 1)
-                {
+                if (schoice == 1) {
                     User.askHelp(getCurrentLoggedInUser());
                     System.out.print(
                             """
@@ -444,13 +409,9 @@ public class Display {
                                     """
                     );
                     input.nextLine();
-                }
-                else if (schoice == 2)
-                {
+                } else if (schoice == 2) {
                     break;
-                }
-                else
-                {
+                } else {
                     System.out.print("*Invalid choice. Please select a valid option.");
                     return;
                 }
@@ -463,13 +424,15 @@ public class Display {
         }
      }
 
-    public static void viewAnalyticsDashBoard(final String username)
-    {
+    public static void viewAnalyticsDashBoard(final String username) {
+        //TODO: modularize
+        //CONVERT: List -> Database
+
         for (final User user : BankSystem.users)
         {
             if (Objects.equals(BankSystem.getCurrentLoggedInUser(), username))
             {
-                BankSystem.clearConsole();
+                BankSystem.clearConsole(); //TODO: delete this
                 System.out.print(
                         """
                                 ╔═════════════════════════════════════╗
@@ -483,15 +446,15 @@ public class Display {
                 if (Objects.equals(user.getProductType(), "Savings Account"))
                 {
                     System.out.print(
-                            "\nTotal Net worth: " + BankSystem.calculateTotalNet(BankSystem.getCurrentLoggedInUser()) +
+                            "\nTotal Net worth: " + BankSystem.calculateTotalNet() +
                             "\nTotal Interest Earned: " + BankSystem.showInterestEarned()
                     );
                 }
                 else if (Objects.equals(getCurrentProductType(getCurrentLoggedInUser()), "Credit Account"))
                 {
                     System.out.print(
-                            "\nTotal Spent: " + calculateTotalSpent(getCurrentLoggedInUser()) +
-                            "\nTotal Paid: " + calculateTotalPaid(username) +
+                            "\nTotal Spent: " + calculateTotalSpent() +
+                            "\nTotal Paid: " + calculateTotalPaid() +
                             "───────────────────────────────────────"
                     );
                 }
@@ -501,8 +464,7 @@ public class Display {
         input.nextLine();
     }
 
-    public static void handleProductApplication()
-    {
+    public static void handleProductApplication() {
         User.applyProduct();
     }
 

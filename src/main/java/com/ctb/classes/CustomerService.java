@@ -3,6 +3,7 @@ package com.ctb.classes;
 import java.util.Objects;
 import java.util.Scanner;
 
+//TODO: Add more codes and functionalities to customer service
 class CustomerService extends User{
     private static final Scanner input = new Scanner(System.in);
     protected static void displayDashboardMenu(final String username) {
@@ -24,6 +25,9 @@ class CustomerService extends User{
     }
     
     protected static void displayHelpHistory(final String username) {
+        //TODO: Make method for printing and displaying data from database
+        //CONVERT: List -> Database
+
         boolean helpFound = false;
 
         for (final User user : BankSystem.users)
@@ -70,6 +74,9 @@ class CustomerService extends User{
     }
 
     protected static void displayAllHR() {
+        //TODO: Make method for printing and displaying data from database
+        //CONVERT: List -> Database
+
         System.out.print(
                 """
 
@@ -107,6 +114,8 @@ class CustomerService extends User{
     }
 
     protected static void replyToHelp() {
+        //CONVERT: List -> Database
+
         String helpID;
         System.out.print("\nEnter the help ID of the help and resources to reply to: ");
         helpID = input.nextLine();

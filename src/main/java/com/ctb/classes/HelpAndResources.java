@@ -23,7 +23,7 @@ public class HelpAndResources {
     public String getFeedback() {return feedback;}
 
     /*----------------------Class Methods----------------------*/
-    protected static String generateHelpID(final String h_rType) {
+    protected static String generateHelpID(final String h_rType) { //TODO: Refactor method String -> long
         long time = calendar.getTimeInMillis();
         int randomNumber = rand.nextInt();
         String timeString = Long.toString(time);
@@ -41,11 +41,20 @@ public class HelpAndResources {
 
     protected static void chatBot(final String message, final String username) {
         Map<String, String> keywordToFeedback = new HashMap<>();
-        keywordToFeedback.put("forgot password", "It seems like you've forgotten your password. Don't worry, you can reset it by clicking the 'Forgot Password?' button and following the instructions provided.");
-        keywordToFeedback.put("guide", "Looking for a guide? We have comprehensive documentation and tutorials available to help you navigate through our system.");
-        keywordToFeedback.put("transact", "You're interested in making a transaction? At the moment, we don't have a specific answer for this. Please refer to our transaction guide for more details.");
-        keywordToFeedback.put("contact", "Need to get in touch? Our customer service team is always ready to help. You can reach us through our Contact Us page.");
-        keywordToFeedback.put("credit limit", "Inquiring about your credit limit? You can check this information in your account settings under the 'Credit Limit' section.");
+        keywordToFeedback.put("forgot password", "It seems like you've forgotten your password. Don't worry, you can " +
+                "reset it by clicking the 'Forgot Password?' button and following the instructions provided.");
+
+        keywordToFeedback.put("guide", "Looking for a guide? We have comprehensive documentation and tutorials available " +
+                "to help you navigate through our system.");
+
+        keywordToFeedback.put("transact", "You're interested in making a transaction? At the moment, we don't have a " +
+                "specific answer for this. Please refer to our transaction guide for more details.");
+
+        keywordToFeedback.put("contact", "Need to get in touch? Our customer service team is always ready to help. " +
+                "You can reach us through our Contact Us page.");
+
+        keywordToFeedback.put("credit limit", "Inquiring about your credit limit? You can check this information in your " +
+                "account settings under the 'Credit Limit' section.");
 
         for (Map.Entry<String, String> entry : keywordToFeedback.entrySet()) {
             if (message.toLowerCase().contains(entry.getKey())) {
@@ -57,8 +66,8 @@ public class HelpAndResources {
         }
     }
 
-    protected static void saveHelpAndResources(final String username, final String h_rType,
-                              final String h_rDescription, final String feedback) {
+    protected static void saveHelpAndResources(final String username, final String h_rType, final String h_rDescription, final String feedback) {
+        //CONVERT: List -> Database
         for (User user : BankSystem.users)
         {
             if (Objects.equals(User.getUsername(), username))
@@ -70,7 +79,7 @@ public class HelpAndResources {
                 helpandresources.setFeedback(feedback);
                 user.userHelpAndResources.add(helpandresources);
                 
-                BankSystem.saveDataToFile();
+                BankSystem.saveDataToFile(); //TODO: Delete this
                 
                 SecuritySystem.auditLog(true);
                 return;

@@ -2,6 +2,7 @@ package com.ctb.classes;
 
 import java.util.Objects;
 
+//TODO: Obsolete file
 public class Dashboard {
     private String dashboardID;
     private String dashboardContent;
