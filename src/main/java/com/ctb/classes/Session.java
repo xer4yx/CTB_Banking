@@ -26,7 +26,7 @@ public class Session extends User{ //TODO: transfer session methods to this clas
     }
 
     /*----------------------Getter Methods----------------------*/
-    public static Session getInstance(User userData) {
+    public static Session getInstance(User userData) { //TODO: implement this
         if(instance == null) {
             instance = new Session(userData);
         }
@@ -38,7 +38,7 @@ public class Session extends User{ //TODO: transfer session methods to this clas
     public String getSessionID() {return sessionID;}
 
     /*----------------------Class Methods----------------------*/
-    protected static String generateSessionID(String sessionType) {
+    protected static String generateSessionID(String sessionType) { //TODO: change structure String -> long
         long time = calendar.getTimeInMillis();
         int randomNumber = rand.nextInt();
         String timeString = Long.toString(time);
@@ -55,6 +55,7 @@ public class Session extends User{ //TODO: transfer session methods to this clas
     }
 
     public static void saveSession(final String username, final String sessionType) {
+        //CONVERT: List -> Database
         long currentTimeInSeconds = currentTime.getTime() / 1000;
         for (User user : BankSystem.users) {
             if (Objects.equals(getUsername(), username)) {
