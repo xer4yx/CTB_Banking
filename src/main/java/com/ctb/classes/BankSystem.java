@@ -1,8 +1,6 @@
 package com.ctb.classes;
 
-import com.ctb.exceptions.DataInsertionException;
-import com.ctb.exceptions.DataRetrievalException;
-import com.ctb.exceptions.InvalidProductTypeException;
+import com.ctb.exceptions.*;
 import org.fusesource.jansi.Ansi;
 import org.fusesource.jansi.AnsiConsole;
 import org.json.JSONArray;
@@ -97,29 +95,29 @@ public class BankSystem {
     }
 
     @Deprecated
-    protected static List<User> getUsers() {return users;}
+    protected static List<User> getUsers() {return users;} //TODO: delete obsolete
 
     @Deprecated
-    protected List<Profile> getProfiles() {return profiles;}
+    protected List<Profile> getProfiles() {return profiles;} //TODO: delete obsolete
 
     @Deprecated
-    protected static List<Transaction> getTransactionHistory() {return transactionHistory;}
+    protected static List<Transaction> getTransactionHistory() {return transactionHistory;} //TODO: delete obsolete
 
     @Deprecated
-    protected List<ProductApplication> getProductApplications() {return productApplications;}
+    protected List<ProductApplication> getProductApplications() {return productApplications;} //TODO: delete obsolete
 
     @Deprecated
-    protected List<Session> getSessions() {return sessions;}
+    protected List<Session> getSessions() {return sessions;} //TODO: delete obsolete
 
     @Deprecated
-    protected List<Dashboard> getDashboards() {return dashboards;}
+    protected List<Dashboard> getDashboards() {return dashboards;} //TODO: delete obsolete
 
     /*----------------------Class Methods----------------------*/
     @Deprecated
     public BankSystem(String dataFile) {
         dataFilePath = dataFile;
         loadDataFromFile();
-    }
+    } //TODO: delete obsolete
 
     @Deprecated
     protected static void clearConsole() {
@@ -129,7 +127,7 @@ public class BankSystem {
         ansi.cursor(0, 0);
         System.out.print(ansi.toString());
         AnsiConsole.systemUninstall();
-    }
+    } //TODO: delete obsolete
 
     protected static void closeResources(Connection connection, PreparedStatement statement, ResultSet dataSet) {
         try {
@@ -192,11 +190,10 @@ public class BankSystem {
 
                 interestEarned += interest;
             }
-
-            dataSet.close();
-            statement.close();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeResources(connection, statement, dataSet);
         }
 
         return interestEarned;
@@ -209,14 +206,15 @@ public class BankSystem {
         PreparedStatement statement = null;
         ResultSet dataSet = null;
 
-        try (Connection connection = DriverManager.getConnection(url, userDB, passwordDB)){
+        try {
+            connection = DriverManager.getConnection(url, userDB, passwordDB);
             String query = "SELECT amount FROM transactions WHERE user_id = ? AND transact_type = ?";
 
-            PreparedStatement statement = connection.prepareStatement(query);
+            statement = connection.prepareStatement(query);
             statement.setLong(1, getCurrentUserID());
             statement.setString(2, "Bill Payment");
-            ResultSet dataSet = statement.executeQuery();
 
+            dataSet = statement.executeQuery();
             while(dataSet.next()) {
                 totalPaid += dataSet.getDouble("amount");
             }
@@ -225,6 +223,8 @@ public class BankSystem {
             statement.close();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeResources(connection, statement, dataSet);
         }
 
         return totalPaid;
@@ -237,14 +237,15 @@ public class BankSystem {
         PreparedStatement statement = null;
         ResultSet dataSet = null;
 
-        try (Connection connection = DriverManager.getConnection(url, userDB, passwordDB)){
+        try {
+            connection = DriverManager.getConnection(url, userDB, passwordDB);
             String query = "SELECT amount FROM transactions WHERE user_id = ? AND transact_type = ?";
 
-            PreparedStatement statement = connection.prepareStatement(query);
+            statement = connection.prepareStatement(query);
             statement.setLong(1, getCurrentUserID());
             statement.setString(2, "Purchase");
 
-            ResultSet dataSet = statement.executeQuery();
+            dataSet = statement.executeQuery();
             while(dataSet.next()) {
                 totalSpent += dataSet.getDouble("amount");
             }
@@ -253,6 +254,8 @@ public class BankSystem {
             statement.close();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeResources(connection, statement, dataSet);
         }
 
         return totalSpent;
@@ -265,14 +268,15 @@ public class BankSystem {
         PreparedStatement statement = null;
         ResultSet dataSet = null;
 
-        try (Connection connection = DriverManager.getConnection(url, userDB, passwordDB)){
+        try {
+            connection = DriverManager.getConnection(url, userDB, passwordDB);
             String query = "SELECT amount FROM transactions WHERE user_id = ? AND transact_type = ? ";
 
-            PreparedStatement statement = connection.prepareStatement(query);
+            statement = connection.prepareStatement(query);
             statement.setLong(1, getCurrentUserID());
             statement.setString(2, "Deposit");
 
-            ResultSet dataSet = statement.executeQuery();
+            dataSet = statement.executeQuery();
             while(dataSet.next()) {
                 totalNet += dataSet.getDouble("amount");
             }
@@ -281,13 +285,15 @@ public class BankSystem {
             statement.close();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeResources(connection, statement, dataSet);
         }
 
         return totalNet;
     }
 
     @Deprecated
-    protected static double showInterestEarned(String username) {
+    protected static double showInterestEarned(String username) { //TODO: delete obsolete
         double interestRate = 0.05; // Annual interest rate
         double interestEarned = 0;
 
@@ -316,7 +322,7 @@ public class BankSystem {
     }
 
     @Deprecated
-    protected static double calculateTotalPaid(String username) {
+    protected static double calculateTotalPaid(String username) { //TODO: delete obsolete
         double totalPaid = 0;
 
         for (final User user : users)
@@ -337,7 +343,7 @@ public class BankSystem {
     }
 
     @Deprecated
-    protected static double calculateTotalSpent(String username) {
+    protected static double calculateTotalSpent(String username) { //TODO: delete obsolete
         double totalSpent = 0;
 
         for (final User user : users)
@@ -358,7 +364,7 @@ public class BankSystem {
     }
 
     @Deprecated
-    protected static double calculateTotalNet(String username) {
+    protected static double calculateTotalNet(String username) { //TODO: delete obsolete
         double totalNet = 0;
         for (final User user : users)
         {
@@ -386,17 +392,20 @@ public class BankSystem {
         PreparedStatement statement = null;
         ResultSet dataSet = null;
 
-        try(Connection connection = DriverManager.getConnection(url, userDB, passwordDB)) {
+        try {
+            connection = DriverManager.getConnection(url, userDB, passwordDB);
             String query = "SELECT is_admin FROM users WHERE username = ?";
 
-            PreparedStatement statement = connection.prepareStatement(query);
+            statement = connection.prepareStatement(query);
             statement.setString(1, username);
 
-            ResultSet dataSet = statement.executeQuery();
+            dataSet = statement.executeQuery();
             return dataSet.getBoolean("is_admin");
 
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeResources(connection, statement, dataSet);
         }
         return false;
     }
@@ -406,17 +415,20 @@ public class BankSystem {
         PreparedStatement statement = null;
         ResultSet dataSet = null;
 
-        try(Connection connection = DriverManager.getConnection(url, userDB, passwordDB)) {
+        try {
+            connection = DriverManager.getConnection(url, userDB, passwordDB);
             String query = "SELECT is_customerservice FROM users WHERE username = ?";
 
-            PreparedStatement statement = connection.prepareStatement(query);
+            statement = connection.prepareStatement(query);
             statement.setString(1, username);
 
-            ResultSet dataSet = statement.executeQuery();
+            dataSet = statement.executeQuery();
             return dataSet.getBoolean("is_customerservice");
 
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeResources(connection, statement, dataSet);
         }
         return false;
     }
@@ -479,7 +491,7 @@ public class BankSystem {
     }
 
     @Deprecated
-    protected void loadDataFromFile() {
+    protected void loadDataFromFile() { //TODO: delete obsolete
         try {
             BufferedReader file = new BufferedReader(new FileReader(dataFilePath));
             StringBuilder data = new StringBuilder();
@@ -584,7 +596,7 @@ public class BankSystem {
     }
 
     @Deprecated
-    protected static void saveDataToFile() {
+    protected static void saveDataToFile() { //TODO: delete obsolete
         BufferedWriter dataWriter = null;
 
         try {

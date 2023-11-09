@@ -19,6 +19,8 @@ public class Profile{
 
     /*----------------------Class Methods----------------------*/
     public static void displayProfile(String username) {
+        //TODO: transfer to User
+        //CONVERT: List -> Database
         for (final User user : BankSystem.users)
         {
             if (Objects.equals(User.getUsername(), username))

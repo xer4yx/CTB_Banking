@@ -44,7 +44,7 @@ class SecuritySystem {
     }
 
     @Deprecated
-    protected static String decrypt(String hashedPassword) {
+    protected static String decrypt(String hashedPassword) { //TODO: delete this
         try {
             byte[] bytesOfMessage = new BigInteger(hashedPassword, 16).toByteArray();
             return new String(bytesOfMessage, StandardCharsets.UTF_8);
@@ -65,7 +65,7 @@ class SecuritySystem {
     }
 
     @Deprecated
-    protected static boolean canAttempt() {
+    protected static boolean canAttempt() { //TODO: delete this
         long currTime = Calendar.getInstance().getTimeInMillis();
         if (attempts > 3 && (currTime - lastAttempt) < 30000)
             return false;
@@ -78,7 +78,7 @@ class SecuritySystem {
     }
 
     @Deprecated
-    protected static boolean attemptLogin(String password, String verifyPass) {
+    protected static boolean attemptLogin(String password, String verifyPass) { //TODO: delete this
         if (Objects.equals(verifyPass, password))
             return true;
 
@@ -179,7 +179,7 @@ class SecuritySystem {
     }
 
     @Deprecated
-    protected static String getCurrentDate() {
+    protected static String getCurrentDate() { //TODO: delete this
         LocalDate currTime = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -187,6 +187,7 @@ class SecuritySystem {
     }
 
     protected static boolean securityStatus(final boolean status) {
+        //TODO: add functionalities on the code
         return status;
     }
 

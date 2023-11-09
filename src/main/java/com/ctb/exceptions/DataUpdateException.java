@@ -1,4 +1,6 @@
 package com.ctb.exceptions;
 
-public class DataUpdateException {
+import java.sql.SQLException;
+
+public class DataUpdateException extends SQLException {
 }
