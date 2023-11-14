@@ -59,7 +59,7 @@ public class User {
     protected static void displayDashboardMenu(final String username) {
         if (Objects.equals(BankSystem.getCurrentLoggedInUser(), username)) {
             if (User.isAdmin()) {
-                Admin.displayDashboardMenu(BankSystem.getCurrentLoggedInUser());
+                Admin.displayDashboardMenu();
             } else if (User.isCustomerService()) {
                 CustomerService.displayDashboardMenu(BankSystem.getCurrentLoggedInUser());
             } else {
@@ -664,7 +664,7 @@ public class User {
     }
 
 
-    public static boolean isAdmin() {
+    public static boolean isAdmin() { //CONVERT Database
         return isAdmin;
     }
 
@@ -672,7 +672,7 @@ public class User {
         isAdmin = admin;
     }
 
-    public static boolean isCustomerService() {
+    public static boolean isCustomerService() { //CONVERT Database
         return isCustomerService;
     }
 

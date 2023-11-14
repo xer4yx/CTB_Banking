@@ -148,7 +148,7 @@ public class Display {
             if (User.isAdmin()) { //TODO: modularize
                 switch (choice) {
                     case 1:
-                        Admin.handleManageUsers(getCurrentLoggedInUser());
+                        Admin.handleManageUsers();
                         input.nextLine();
                         break;
                     case 2:
