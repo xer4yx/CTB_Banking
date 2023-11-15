@@ -112,43 +112,41 @@ public class BankSystem {
         char choice;
         System.out.print("\nEnter your email: ");
         String email = input.nextLine();
-        boolean emailFound = false;
 
-        // TODO: Separate method for handling forgot pass (should be inside User)
-        // CONVERT: List -> Database
-
-        for (User user : BankSystem.users) {
-            for (Profile profile : user.userProfile) {
-                if (Objects.equals(profile.getEmail(), email)) {
-                    System.out.print("---Email found!---");
-                    System.out.print("\nSending an OTP for " + profile.getEmail() + " 2 Factor Authentication.");
-                    SecuritySystem.sendOTP();
-                    System.out.print("\nEnter your OTP: ");
-                    String inputOTP = input.nextLine();
-                    if (!SecuritySystem.verifyOTP(inputOTP)) {
-                        System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
-                        try {
-                            Thread.sleep(30000);
-                        } catch (InterruptedException e) {
-                            System.err.print(e.getMessage());
-                        }
-                        return;
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT * FROM users WHERE email = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, email);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                System.out.print("---Email found!---");
+                System.out.print("\nSending an OTP for " + rs.getString("email") + " 2 Factor Authentication.");
+                SecuritySystem.sendOTP();
+                System.out.print("\nEnter your OTP: ");
+                String inputOTP = input.nextLine();
+                if (!SecuritySystem.verifyOTP(inputOTP)) {
+                    System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
+                    try {
+                        Thread.sleep(30000);
+                    } catch (InterruptedException e) {
+                        System.err.print(e.getMessage());
                     }
-                    System.out.print(
-                            """
-                                    ──────────────────────────────────────────────────────────────
-                                    Enter new password:\s
-                                    """);
-                    String newpass = input.nextLine();
-                    User.changePassword(User.getUsername());
-                    System.out.print("---Password changed successfully!---");
-                    emailFound = true;
+                    return;
                 }
+                System.out.print(
+                        """
+                                ──────────────────────────────────────────────────────────────
+                                Enter new password:\s
+                                """);
+                String newpass = input.nextLine();
+                User.changePassword(rs.getString("username"), newpass);
+                System.out.print("---Password changed successfully!---");
+            } else {
+                System.out.print("\n*Email not found. Please try again.");
             }
-        }
-
-        if (!emailFound) {
-            System.out.print("\n*Email not found. Please try again.");
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 

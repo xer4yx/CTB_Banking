@@ -8,7 +8,6 @@ import java.util.*;
 import java.util.Date;
 
 import static com.ctb.classes.BankSystem.*;
-import static com.ctb.classes.BankSystem.calculateTotalPaid;
 
 public class User {
     private static final Scanner input = new Scanner(System.in);
@@ -283,8 +282,6 @@ public class User {
     }
 
     public static void handleSettings(String username) {
-        String newPassword, newEmail, newPhoneNumber, newUsername;
-        char new2FA;
         System.out.print(
                 """
 
@@ -301,35 +298,37 @@ public class User {
                         ╚═════════════════════════════════════╝""");
         System.out.print("\nEnter: ");
         int accChoice = input.nextInt();
+        input.nextLine(); // Move cursor to next line
         switch (accChoice) {
             case 1:
                 System.out.print("\nEnter new password: ");
-                newPassword = input.nextLine();
-                changePassword(username);
+                String newPassword = input.nextLine();
+                changePassword(username, newPassword);
                 break;
 
             case 2:
                 System.out.print("\nEnter new email: ");
-                newEmail = input.nextLine();
-                changeEmail(username);
+                String newEmail = input.nextLine();
+                changeEmail(username, newEmail);
                 break;
 
             case 3:
                 System.out.print("\nEnter new phone: ");
-                newPhoneNumber = input.nextLine();
-                changePhoneNum(username);
+                String newPhoneNumber = input.nextLine();
+                changePhoneNum(username, newPhoneNumber);
                 break;
 
             case 4:
                 System.out.print("\nEnter new username: ");
-                newUsername = input.nextLine();
-                changeUsername(username);
+                String newUsername = input.nextLine();
+                changeUsername(username, newUsername);
                 break;
 
             case 5:
                 System.out.print("\nDo you want to enable 2FA?(Y/N): ");
-                new2FA = input.next().charAt(0);
-                change2FAStatus(username);
+                char new2FA = input.next().charAt(0);
+                input.nextLine(); // Move cursor to next line
+                change2FAStatus(username, new2FA);
                 break;
 
             case 6:
@@ -343,7 +342,6 @@ public class User {
                 System.out.print("*Invalid choice. Please select a valid option.");
                 break;
         }
-
     }
 
     protected static void displayTransaction(final String username) {
@@ -377,31 +375,35 @@ public class User {
     }
 
     public static void displayAnalytics(final String username) {
-        // TODO: modularize
-        // CONVERT: List -> Database
-
-        for (final User user : BankSystem.users) {
-            if (Objects.equals(BankSystem.getCurrentLoggedInUser(), username)) {
-                BankSystem.clearConsole(); // TODO: delete this
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT * FROM users WHERE username = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                BankSystem.clearConsole();
                 System.out.print(
                         """
                                 ╔═════════════════════════════════════╗
                                 ║           Data Analytics            ║
                                 ╚═════════════════════════════════════╝""");
                 System.out.print(
-                        "\nName: " + user.getName() +
+                        "\nName: " + rs.getString("name") +
                                 "\n───────────────────────────────────────");
-                if (Objects.equals(user.getProductType(), "Savings Account")) {
+                if (Objects.equals(rs.getString("productType"), "Savings Account")) {
                     System.out.print(
                             "\nTotal Net worth: " + BankSystem.calculateTotalNet() +
                                     "\nTotal Interest Earned: " + BankSystem.showInterestEarned());
-                } else if (Objects.equals(getCurrentProductType(getCurrentLoggedInUser()), "Credit Account")) {
+                } else if (Objects.equals(rs.getString("productType"), "Credit Account")) {
                     System.out.print(
                             "\nTotal Spent: " + calculateTotalSpent() +
                                     "\nTotal Paid: " + calculateTotalPaid() +
                                     "───────────────────────────────────────");
                 }
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         System.out.print("Press Enter to continue...");
         input.nextLine();
@@ -506,7 +508,7 @@ public class User {
                 System.out.print("\n*Username is already taken. Please choose another one.");
                 System.out.print("Press Enter to continue...");
                 input.nextLine();
-                BankSystem.clearConsole(); // TODO: delete this
+                BankSystem.clearConsole();
                 continue;
             }
 
@@ -563,176 +565,227 @@ public class User {
     }
 
     public static boolean isUsernameTaken(String username) {
-        // CONVERT: List -> Database
-        return BankSystem.users.stream()
-                .anyMatch(user -> Objects.equals(getUsername(), username));
-    }
-
-    public static void changePassword(String username) {
-        // CONVERT: List -> Database
-        for (User user : BankSystem.users) {
-            if (Objects.equals(getUsername(), username)) {
-                for (Profile profile : user.userProfile) {
-                    if (profile.get2FAStatus()) {
-                        System.out.print("\nSending an OTP for 2 Factor Authentication.");
-                        SecuritySystem.sendOTP();
-
-                        System.out.print("\nEnter your OTP: ");
-                        String inputOTP = input.nextLine();
-
-                        if (!SecuritySystem.verifyOTP(inputOTP)) {
-                            System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
-                            try {
-                                Thread.sleep(30000);
-                            } catch (InterruptedException e) {
-                                System.err.print("\n" + e.getMessage());
-                            }
-                            return;
-                        }
-                    }
-
-                    String password = input.nextLine();
-
-                    user.setPassword(SecuritySystem.encrypt(password));
-                    String decryptPass = SecuritySystem.decrypt(user.password);
-                    System.out.print("Password changed to " + decryptPass + " successfully.");
-                    BankSystem.saveDataToFile();
-                }
-            }
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT * FROM users WHERE username = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
-    public static void changeEmail(String username) {
-        // CONVERT: List -> Database
-        for (User user : BankSystem.users) {
-            if (Objects.equals(getUsername(), username)) {
-                for (Profile profile : user.userProfile) {
-                    if (profile.get2FAStatus()) {
-                        System.out.print("\nSending an OTP for 2 Factor Authentication.");
-                        SecuritySystem.sendOTP();
-                        System.out.print("\nEnter your OTP: ");
-                        String inputOTP = input.nextLine();
+    public static void changePassword(String username, String newPassword) {
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT * FROM users WHERE username = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                if (rs.getBoolean("2FAStatus")) {
+                    System.out.print("\nSending an OTP for 2 Factor Authentication.");
+                    SecuritySystem.sendOTP();
 
-                        if (!SecuritySystem.verifyOTP(inputOTP)) {
-                            System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
-                            try {
-                                Thread.sleep(30000);
-                            } catch (InterruptedException e) {
-                                System.err.print("\n" + e.getMessage());
-                            }
-                            return;
+                    System.out.print("\nEnter your OTP: ");
+                    String inputOTP = input.nextLine();
+                    input.nextLine();
+
+                    if (!SecuritySystem.verifyOTP(inputOTP)) {
+                        System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
+                        try {
+                            Thread.sleep(30000);
+                        } catch (InterruptedException e) {
+                            System.err.print("\n" + e.getMessage());
                         }
+                        return;
                     }
-
-                    String email = input.nextLine();
-
-                    profile.setEmail(email);
-                    System.out.print("Email changed to " + profile.getEmail() + " successfully.");
-                    BankSystem.saveDataToFile();
                 }
+
+                String encryptedPassword = SecuritySystem.encrypt(newPassword);
+
+                sql = "UPDATE users SET password = ? WHERE username = ?";
+                pstmt = conn.prepareStatement(sql);
+                pstmt.setString(1, encryptedPassword);
+                pstmt.setString(2, username);
+                pstmt.executeUpdate();
+
+                String decryptPass = SecuritySystem.decrypt(encryptedPassword);
+                System.out.print("Password changed to " + decryptPass + " successfully.");
+                BankSystem.saveDataToFile();
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
-    public static void changePhoneNum(String username) {
-        // CONVERT: List -> Database
-        for (User user : BankSystem.users) {
-            if (Objects.equals(getUsername(), username)) {
-                for (Profile profile : user.userProfile) {
-                    if (profile.get2FAStatus()) {
-                        System.out.print("\nSending an OTP for 2 Factor Authentication.");
-                        SecuritySystem.sendOTP();
+    public static void changeEmail(String username, String newEmail) {
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT * FROM users WHERE username = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                if (rs.getBoolean("2FAStatus")) {
+                    System.out.print("\nSending an OTP for 2 Factor Authentication.");
+                    SecuritySystem.sendOTP();
 
-                        System.out.print("\nEnter your OTP: ");
-                        String inputOTP = input.nextLine();
+                    System.out.print("\nEnter your OTP: ");
+                    String inputOTP = input.nextLine();
+                    input.nextLine();
 
-                        if (!SecuritySystem.verifyOTP(inputOTP)) {
-                            System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
-                            try {
-                                Thread.sleep(30000);
-                            } catch (InterruptedException e) {
-                                System.err.print("\n" + e.getMessage());
-                            }
-                            return;
+                    if (!SecuritySystem.verifyOTP(inputOTP)) {
+                        System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
+                        try {
+                            Thread.sleep(30000);
+                        } catch (InterruptedException e) {
+                            System.err.print("\n" + e.getMessage());
                         }
+                        return;
                     }
-
-                    String phoneNum = input.nextLine();
-
-                    profile.setPhoneNumber(phoneNum);
-                    System.out.print("Phone changed to " + profile.getPhoneNumber() + " successfully.");
-                    BankSystem.saveDataToFile();
                 }
+
+                sql = "UPDATE users SET email = ? WHERE username = ?";
+                pstmt = conn.prepareStatement(sql);
+                pstmt.setString(1, newEmail);
+                pstmt.setString(2, username);
+                pstmt.executeUpdate();
+
+                System.out.print("Email changed to " + newEmail + " successfully.");
+                BankSystem.saveDataToFile();
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
-    public static void changeUsername(String username) {
-        // CONVERT: List -> Database
-        for (User user : BankSystem.users) {
-            if (Objects.equals(getUsername(), username)) {
-                for (Profile profile : user.userProfile) {
-                    if (profile.get2FAStatus()) {
-                        System.out.print("\nSending an OTP for 2 Factor Authentication.");
-                        SecuritySystem.sendOTP();
+    public static void changePhoneNum(String username, String newPhoneNumber) {
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT * FROM users WHERE username = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                if (rs.getBoolean("2FAStatus")) {
+                    System.out.print("\nSending an OTP for 2 Factor Authentication.");
+                    SecuritySystem.sendOTP();
 
-                        System.out.print("\nEnter your OTP: ");
-                        String inputOTP = input.nextLine();
-                        input.nextLine();
+                    System.out.print("\nEnter your OTP: ");
+                    String inputOTP = input.nextLine();
+                    input.nextLine();
 
-                        if (!SecuritySystem.verifyOTP(inputOTP)) {
-                            System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
-                            try {
-                                Thread.sleep(30000);
-                            } catch (InterruptedException e) {
-                                System.err.print("\n" + e.getMessage());
-                            }
-                            return;
+                    if (!SecuritySystem.verifyOTP(inputOTP)) {
+                        System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
+                        try {
+                            Thread.sleep(30000);
+                        } catch (InterruptedException e) {
+                            System.err.print("\n" + e.getMessage());
                         }
+                        return;
                     }
-
-                    String newUsername = input.nextLine();
-
-                    user.setUsername(newUsername);
-                    System.out.print("Username changed to " + getUsername() + " successfully.");
-                    BankSystem.saveDataToFile();
                 }
+
+                sql = "UPDATE users SET phone_number = ? WHERE username = ?";
+                pstmt = conn.prepareStatement(sql);
+                pstmt.setString(1, newPhoneNumber);
+                pstmt.setString(2, username);
+                pstmt.executeUpdate();
+
+                System.out.print("Phone number changed to " + newPhoneNumber + " successfully.");
+                BankSystem.saveDataToFile();
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
-    public static void change2FAStatus(String username) {
-        // CONVERT: List -> Database
-        for (User user : BankSystem.users) {
-            if (Objects.equals(getUsername(), username)) {
-                for (Profile profile : user.userProfile) {
-                    if (profile.get2FAStatus()) {
-                        System.out.print("\nSending an OTP for 2 Factor Authentication.");
-                        SecuritySystem.sendOTP();
+    public static void changeUsername(String username, String newUsername) {
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT * FROM users WHERE username = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                if (rs.getBoolean("2FAStatus")) {
+                    System.out.print("\nSending an OTP for 2 Factor Authentication.");
+                    SecuritySystem.sendOTP();
 
-                        System.out.print("\nEnter your OTP: ");
-                        String inputOTP = input.nextLine();
-                        input.nextLine();
+                    System.out.print("\nEnter your OTP: ");
+                    String inputOTP = input.nextLine();
+                    input.nextLine();
 
-                        if (!SecuritySystem.verifyOTP(inputOTP)) {
-                            System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
-                            try {
-                                Thread.sleep(30000);
-                            } catch (InterruptedException e) {
-                                System.err.print("\n" + e.getMessage());
-                            }
-                            return;
+                    if (!SecuritySystem.verifyOTP(inputOTP)) {
+                        System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
+                        try {
+                            Thread.sleep(30000);
+                        } catch (InterruptedException e) {
+                            System.err.print("\n" + e.getMessage());
                         }
+                        return;
                     }
-
-                    char twoFA = input.next().charAt(0);
-
-                    profile.set2FAStatus(SecuritySystem.enable2FA(twoFA));
-                    String show2FAStatus = profile.get2FAStatus() ? "Enabled" : "Disabled";
-                    System.out.print("Two Factor Authentication: " + show2FAStatus);
-                    BankSystem.saveDataToFile();
                 }
+
+                sql = "UPDATE users SET username = ? WHERE username = ?";
+                pstmt = conn.prepareStatement(sql);
+                pstmt.setString(1, newUsername);
+                pstmt.setString(2, username);
+                pstmt.executeUpdate();
+
+                System.out.print("Username changed to " + newUsername + " successfully.");
+                BankSystem.saveDataToFile();
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void change2FAStatus(String username, char new2FA) {
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT * FROM users WHERE username = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                if (rs.getBoolean("2FAStatus")) {
+                    System.out.print("\nSending an OTP for 2 Factor Authentication.");
+                    SecuritySystem.sendOTP();
+
+                    System.out.print("\nEnter your OTP: ");
+                    String inputOTP = input.nextLine();
+                    input.nextLine();
+
+                    if (!SecuritySystem.verifyOTP(inputOTP)) {
+                        System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
+                        try {
+                            Thread.sleep(30000);
+                        } catch (InterruptedException e) {
+                            System.err.print("\n" + e.getMessage());
+                        }
+                        return;
+                    }
+                }
+
+                boolean new2FAStatus = SecuritySystem.enable2FA(new2FA);
+
+                sql = "UPDATE users SET 2FAStatus = ? WHERE username = ?";
+                pstmt = conn.prepareStatement(sql);
+                pstmt.setBoolean(1, new2FAStatus);
+                pstmt.setString(2, username);
+                pstmt.executeUpdate();
+
+                String show2FAStatus = new2FAStatus ? "Enabled" : "Disabled";
+                System.out.print("Two Factor Authentication: " + show2FAStatus);
+                BankSystem.saveDataToFile();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -740,7 +793,16 @@ public class User {
         System.out.print("Enter your message: ");
         String message = input.nextLine();
 
-        HelpAndResources.saveHelpAndResources(username, "Help", message, "");
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "INSERT INTO help_and_resources (username, type, message) VALUES (?, 'Help', ?)";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            pstmt.setString(2, message);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public static boolean isAdmin() { // CONVERT Database
