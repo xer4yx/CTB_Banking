@@ -27,7 +27,6 @@ public class BankSystem {
     private static final List<Transaction> transactionHistory = new LinkedList<>();
     private static final List<ProductApplication> productApplications = new LinkedList<>();
     private static final List<Session> sessions = new LinkedList<>();
-    private static final List<Dashboard> dashboards = new LinkedList<>();
 
     /*----------------------Setter Methods----------------------*/
     protected static void setCurrentUserID(long currentUserID) {
@@ -60,7 +59,25 @@ public class BankSystem {
     }
 
     protected static String getCurrentProductType(String username) {
-        return currentProductType; // TODO: Set up database
+        String productType = null;
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT product_type FROM users WHERE username = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                productType = rs.getString("product_type");
+            }
+
+            rs.close();
+            pstmt.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return productType;
     }
 
     protected static double getCurrentBalance(String username) {

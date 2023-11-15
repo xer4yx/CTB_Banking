@@ -27,7 +27,6 @@ public class User {
     public List<ProductApplication> userProductApplications = new LinkedList<>();
     public List<Session> userSessions = new LinkedList<>();
     public List<HelpAndResources> userHelpAndResources = new LinkedList<>();
-    private List<Dashboard> userDashboard = new LinkedList<>();
 
     /*----------------------Constructor Methods----------------------*/
     public User() {
@@ -345,32 +344,52 @@ public class User {
     }
 
     protected static void displayTransaction(final String username) {
-        // TODO: Make method for printing and displaying data from database
-        // CONVERT: List -> Database
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT product_type FROM users WHERE username = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
 
-        for (final User user : BankSystem.users) {
-            if (Objects.equals(User.getUsername(), username)) {
-                System.out.print(
-                        """
-                                ╔═════════════════════════════════════╗
-                                ║        Transaction History          ║
-                                ╚═════════════════════════════════════╝""");
-                System.out.print(
-                        "User: " + User.getUsername() +
-                                "\n───────────────────────────────────────");
-                for (final Transaction transaction : user.userTransaction) {
-                    SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-                    Date date = new Date(transaction.getTimeStamp());
-                    String formattedDate = sdf.format(date);
-                    System.out.print(
-                            "\nTransaction ID: " + transaction.getTransactionID() +
-                                    "\nTransaction Type: " + transaction.getTransactionType() +
-                                    "\nAmount: $" + transaction.getAmount() +
-                                    "\nTimestamp: " + formattedDate +
-                                    "\nDescription: " + transaction.getDescription() +
-                                    "\n───────────────────────────────────────");
-                }
+            String productType = null;
+            if (rs.next()) {
+                productType = rs.getString("product_type");
             }
+
+            sql = "SELECT * FROM transactions WHERE user_id = (SELECT user_id FROM users WHERE username = ?)";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            rs = pstmt.executeQuery();
+
+            System.out.print(
+                    """
+                            ╔═════════════════════════════════════╗
+                            ║        Transaction History          ║
+                            ╚═════════════════════════════════════╝""");
+            System.out.print(
+                    "User: " + username +
+                            "\n───────────────────────────────────────");
+
+            while (rs.next()) {
+                SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+                Timestamp timestamp = rs.getTimestamp("timestamp");
+                String formattedDate = sdf.format(timestamp);
+                System.out.print(
+                        "\nTransaction ID: " + rs.getString("transaction_id") +
+                                "\nTransaction Type: " + rs.getString("transact_type") +
+                                "\nAmount: $" + rs.getDouble("amount") +
+                                "\nTimestamp: " + formattedDate);
+                if (!"Savings Account".equals(productType)) {
+                    System.out.print("\nDescription: " + rs.getString("description"));
+                }
+                System.out.print("\n───────────────────────────────────────");
+            }
+
+            rs.close();
+            pstmt.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 

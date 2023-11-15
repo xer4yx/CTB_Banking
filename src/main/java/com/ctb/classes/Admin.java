@@ -2,7 +2,6 @@ package com.ctb.classes;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Objects;
 import java.util.Scanner;
 
 import com.ctb.exceptions.DataDeletionException;
@@ -10,7 +9,6 @@ import com.ctb.exceptions.DataRetrievalException;
 import com.ctb.exceptions.DataUpdateException;
 
 import java.sql.*;
-import java.util.Scanner;
 
 class Admin extends User {
     private String adminID;
