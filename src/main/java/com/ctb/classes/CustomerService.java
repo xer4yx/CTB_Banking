@@ -1,13 +1,16 @@
 package com.ctb.classes;
 
+import com.ctb.exceptions.DataRetrievalException;
+import com.ctb.exceptions.DataUpdateException;
+
+import java.sql.*;
 import java.util.Objects;
 import java.util.Scanner;
 
 //TODO: Add more codes and functionalities to customer service
 class CustomerService extends User{
     private static final Scanner input = new Scanner(System.in);
-    protected static void displayDashboardMenu(final String username) {
-        BankSystem.clearConsole();
+    protected static void displayDashboardMenu() {
         System.out.print(
                 """
                         ╔═════════════════════════════════════╗
@@ -24,34 +27,40 @@ class CustomerService extends User{
         );
     }
     
-    protected static void displayHelpHistory(final String username) {
-        //TODO: Make method for printing and displaying data from database
-        //CONVERT: List -> Database
-
+    protected static void displayHelpHistory(long userID) { //TODO: Transfer to User
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet dataSet = null;
         boolean helpFound = false;
 
-        for (final User user : BankSystem.users)
-        {
-            if (Objects.equals(User.getUsername(), username))
-            {
-                System.out.print(
-                        """
+        try {
+            connection = DriverManager.getConnection(BankSystem.url, BankSystem.userDB, BankSystem.passwordDB);
+            String query = "SELECT * FROM help_resources WHERE user_id = ?";
 
-                                ╔═════════════════════════════════════════════════════════════╗
-                                ║                        Help History                         ║
-                                ╚═════════════════════════════════════════════════════════════╝
-                                ───────────────────────────────────────────────────────────────"""
-                );
-                for (final HelpAndResources resources : user.userHelpAndResources)
-                {
+            statement = connection.prepareStatement(query);
+            statement.setLong(1, userID);
+
+            dataSet = statement.executeQuery();
+
+            if (dataSet.next()) {
+                long user_id = dataSet.getLong("user_id");
+                if(Objects.equals(user_id, userID)) {
                     System.out.print(
-                            "\nHelp ID: " + resources.getHelpID() +
-                            "\nType: " + resources.getH_rType() +
-                            "\nDescription: " + resources.getH_rDescription()
+                            """
+    
+                                    ╔═════════════════════════════════════════════════════════════╗
+                                    ║                        Help History                         ║
+                                    ╚═════════════════════════════════════════════════════════════╝
+                                    ───────────────────────────────────────────────────────────────"""
                     );
-                    if (!Objects.equals(resources.getFeedback(), "")) {
+                    System.out.print(
+                            "\nHelp ID: " + dataSet.getLong("hr_id") +
+                            "\nType: " + dataSet.getString("hr_type") +
+                            "\nDescription: " + dataSet.getString("hr_description")
+                    );
+                    if (!Objects.equals(dataSet.getString("feedback"), null)) {
                         System.out.print(
-                                "\nFeedback: " + resources.getFeedback() +
+                                "\nFeedback: " + dataSet.getString("feedback") +
                                 "\n───────────────────────────────────────────────────────────────"
                         );
 
@@ -65,79 +74,93 @@ class CustomerService extends User{
                     }
                     helpFound = true;
                 }
+            } else {
+                throw new DataRetrievalException("User ID does not exist");
             }
-        }
-        if (!helpFound)
-        {
-            System.out.print("No Help history is available for the user " + username + ".");
+        } catch (SQLException e) {
+            System.out.print("\nError on Data Retrieval: " + e.getMessage());
+        } finally {
+            if (!helpFound) {
+                System.out.print("No help history available for the user.");
+            }
+
+            BankSystem.closeResources(connection, statement, dataSet);
         }
     }
 
     protected static void displayAllHR() {
-        //TODO: Make method for printing and displaying data from database
-        //CONVERT: List -> Database
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet dataSet = null;
+        boolean helpFound = false;
 
-        System.out.print(
-                """
+        try {
+            connection = DriverManager.getConnection(BankSystem.url, BankSystem.userDB, BankSystem.passwordDB);
+            String query = "SELECT * FROM help_resources";
 
-                        ╭───────────────────────────────────────────╮
-                        │             Help & Resources              │
-                        ╰───────────────────────────────────────────╯
-                        ────────────────────────────────────────────"""
-        );
+            statement = connection.prepareStatement(query);
+            dataSet = statement.executeQuery();
 
-        final String desiredType = "Help"; // Change this to the type you want to display
-        boolean helpFound = false;            // Initialize a boolean flag to check if any Help is found
+            System.out.print(
+                    """
+    
+                            ╭───────────────────────────────────────────╮
+                            │             Help & Resources              │
+                            ╰───────────────────────────────────────────╯
+                            ────────────────────────────────────────────"""
+            );
 
-        for (final User user : BankSystem.users)
-        {
-            for (final HelpAndResources resources : user.userHelpAndResources)
-            {
-                if (Objects.equals(resources.getH_rType(), desiredType))
-                {
-                    System.out.print(
-                            "\nHelp ID: " + resources.getHelpID() +
-                            "\nType: " + resources.getH_rType() +
-                            "\nDescription: " + resources.getH_rDescription() +
-                            "\nFeedback: " + resources.getFeedback() +
-                            "────────────────────────────────────────────"
-                    );
-                    helpFound = true; // Set the flag to true if Help is found
-                }
+            while (dataSet.next()) {
+                System.out.print(
+                        "\nHelp ID: " + dataSet.getLong("hr_id") +
+                        "\nType: " + dataSet.getString("hr_type") +
+                        "\nDescription: " + dataSet.getString("hr_description") +
+                        "\nFeedback: " + dataSet.getString("feedback") +
+                        "────────────────────────────────────────────"
+                );
+
+                helpFound = true;
             }
-        }
 
-        if (!helpFound)
-        {
-            System.out.print("\nNo Help is available.");
+        } catch (SQLException e) {
+            System.out.print("\nError on Data Retrieval: " + e.getMessage());
+        } finally {
+            if (!helpFound) {
+                System.out.print("\nNo Help is available.");
+            }
+
+            BankSystem.closeResources(connection, statement, dataSet);
         }
     }
 
     protected static void replyToHelp() {
-        //CONVERT: List -> Database
+        Connection connection = null;
+        PreparedStatement statement = null;
 
-        String helpID;
         System.out.print("\nEnter the help ID of the help and resources to reply to: ");
-        helpID = input.nextLine();
-        input.nextLine();
+        long helpID = input.nextLong();
         
         System.out.print("Enter your feedback: ");
         String feedback = input.nextLine();
-        
 
-        for (final User user : BankSystem.users)
-        {
-            for (final HelpAndResources resources : user.userHelpAndResources)
-            {
-                if (Objects.equals(resources.getHelpID(), helpID))
-                {
-                    resources.setFeedback(feedback);
-                    System.out.print("Feedback saved successfully.");
-                    BankSystem.saveDataToFile();
-                    return;
-                }
+        try {
+            connection = DriverManager.getConnection(BankSystem.url, BankSystem.userDB, BankSystem.passwordDB);
+            String query = "UPDATE help_resources SET feedback = ? WHERE hr_id = ?";
+
+            statement = connection.prepareStatement(query);
+            statement.setString(1, feedback);
+            statement.setLong(2, helpID);
+
+            int updatedRows = statement.executeUpdate();
+            if(updatedRows > 0) {
+                System.out.print("\nFeedback has been sent.");
+            } else {
+                throw new DataUpdateException("Help ID not found");
             }
+        } catch (SQLException e) {
+            System.err.print("\nError on Data Update: " + e.getMessage());
+        } finally {
+            BankSystem.closeResources(connection, statement);
         }
-        System.out.print("Help and resources with ID '" + helpID + "' not found.");
     }
 }

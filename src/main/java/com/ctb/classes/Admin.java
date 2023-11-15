@@ -1,6 +1,10 @@
 package com.ctb.classes;
 
-import java.util.Objects;
+import com.ctb.exceptions.DataDeletionException;
+import com.ctb.exceptions.DataRetrievalException;
+import com.ctb.exceptions.DataUpdateException;
+
+import java.sql.*;
 import java.util.Scanner;
 
 class Admin extends User{
@@ -16,8 +20,7 @@ class Admin extends User{
     private String getAdminID() {return adminID;}
 
     /*----------------------Class Methods----------------------*/
-    protected static void displayDashboardMenu(final String username) {
-        BankSystem.clearConsole();
+    protected static void displayDashboardMenu() {
         System.out.print(
                 """
                         ╔═════════════════════════════════════╗
@@ -35,21 +38,7 @@ class Admin extends User{
         );
     }
 
-    private static boolean deleteUserByUsername(String userToDelete) { //CONVERT: List -> Database
-        var userIterator = BankSystem.getUsers().iterator();
-        while(userIterator.hasNext()) {
-            User user = userIterator.next();
-            if (getUsername().equals(userToDelete)) {
-                userIterator.remove();
-                BankSystem.saveDataToFile();
-                return true;
-            }
-        }
-        return false;
-    }
-
-    protected static void handleManageUsers(String username) { //FIXME: Remove unused/obsolete parameter
-        BankSystem.clearConsole();
+    protected static void handleManageUsers() {
         System.out.print(
                 """
 
@@ -88,23 +77,33 @@ class Admin extends User{
         }
     }
 
-    private static void updateUser() {
-        BankSystem.clearConsole();
-        System.out.print(
-                """
+    private static void deleteUserByUsername(String userToDelete) {
+        Connection connection = null;
+        PreparedStatement statement = null;
 
-                        ╭────────────────────────────────────────────────────────────────╮
-                        │                         Update User                            │
-                        ╰────────────────────────────────────────────────────────────────╯"""
-        );
-        System.out.print("\nEnter the username of the user you want to update: ");
-        String pickedUsername = input.nextLine();
-        input.nextLine();
-        handleSettings(pickedUsername);
+        try {
+            connection = DriverManager.getConnection(BankSystem.url, BankSystem.userDB, BankSystem.passwordDB);
+            String query = "DELETE FROM users WHERE username = ?";
+
+            statement = connection.prepareStatement(query);
+            statement.setString(1, userToDelete);
+
+            int rowsAffected = statement.executeUpdate();
+
+            if(rowsAffected > 0) {
+                System.out.print("\nUser data safely deleted");
+            } else {
+                throw new DataDeletionException("\nUsername " + userToDelete + "is not found.");
+            }
+
+        } catch (SQLException e) {
+            System.err.print("\nError on Data Deletion: " + e.getMessage());
+        } finally {
+            BankSystem.closeResources(connection, statement);
+        }
     }
 
     private static void deleteUser() {
-        BankSystem.clearConsole();
         System.out.print(
                 """
 
@@ -115,168 +114,7 @@ class Admin extends User{
         System.out.print("\nEnter the username of the user to delete: ");
         String user = input.nextLine();
         input.nextLine();
-        if (deleteUserByUsername(user)) {
-            System.out.printf("User with username '%s' has been deleted.", user);
-        } else {
-            System.out.printf("User with username '%s' not found.", user);
-        }
-    }
-    private static void displayUserData(String username) {
-        for (final User user : BankSystem.users)
-        {
-            if (Objects.equals(getUsername(), username))
-            {
-                handleUserData(user);
-                return; // Exit the loop once the user is found and displayed
-            }
-        }
-        System.out.printf("User with username '%s' not found.", username);
-    }
-
-    private static void handleUserData(User user) {
-        //TODO: Separate method for displaying user info
-        //CONVERT: List -> Database
-        System.out.print(
-                "\n──────────────────────────────────────────────────────────────────" +
-                "\n                          Information:                            " +
-                "\n──────────────────────────────────────────────────────────────────" +
-                "\n  User ID                : " + user.getUserID() +
-                "\n  Name                   : " + user.getName() +
-                "\n  Username               : " + getUsername() +
-                "\n  Is Admin               : " + (BankSystem.isAdmin(getUsername()) ? "Yes" : "No") +
-                "\n  Is Customer Service    : " + (BankSystem.isCustomerService(getUsername()) ? "Yes" : "No") +
-                "\n  Product Type           : " + user.getProductType() +
-                "\n  Balance                : " + user.getBalance()
-        );
-
-        System.out.print(
-                """
-
-                        ──────────────────────────────────────────────────────────────────
-                                                   Profiles:                             \s
-                        ──────────────────────────────────────────────────────────────────"""
-        );
-        for (final Profile profile : user.userProfile)
-        {
-            System.out.print(
-                    "\n Email                  : " + profile.getEmail() +
-                    "\n  Phone                  : " + profile.getPhoneNumber() +
-                    "\n  Two-Factor Enabled     : " + (profile.get2FAStatus() ? "Yes" : "No")
-            );
-        }
-
-        System.out.print(
-                """
-
-                        ──────────────────────────────────────────────────────────────────
-                                              Transaction History:
-                        ──────────────────────────────────────────────────────────────────"""
-        );
-        for (final Transaction transaction : user.userTransaction)
-        {
-            System.out.print(
-                    "\n  Transaction ID         : " + transaction.getTransactionID() +
-                    "\n  Transaction Type       : " + transaction.getTransactionType() +
-                    "\n  Amount                 : " + transaction.getAmount() +
-                    "\n  Timestamp              : " + transaction.getTimeStamp()
-            );
-        }
-
-        System.out.print(
-                """
-
-                        ──────────────────────────────────────────────────────────────────
-                                                  Sessions:
-                        ──────────────────────────────────────────────────────────────────"""
-        );
-
-        for (final Session session : user.userSessions)
-        {
-            System.out.print(
-                    "\n  Session ID             : " + session.getSessionID() +
-                    "\n  Username               : " + getUsername() +
-                    "\n  Timestamp              : " + session.getTimeStamp()
-            );
-        }
-
-        System.out.print(
-                """
-
-                        ──────────────────────────────────────────────────────────────────
-                                             Product Applications:
-                        ──────────────────────────────────────────────────────────────────"""
-        );
-        for (final ProductApplication productApp : user.userProductApplications)
-        {
-            System.out.print(
-                "\n  Product ID             : " + productApp.getProductID() +
-                "\n  Product Type           : " + productApp.getProductType()
-            );
-
-        }
-
-        System.out.print(
-                """
-
-                        ──────────────────────────────────────────────────────────────────
-                                              Help and Resources:
-                        ──────────────────────────────────────────────────────────────────"""
-        );
-        for (final HelpAndResources resources : user.userHelpAndResources)
-        {
-            System.out.print(
-                "\n  Help ID                : " + resources.getHelpID() +
-                "\n  Type                   : " + resources.getH_rType() +
-                "\n  Description            : " + resources.getH_rDescription() +
-                "\n  Feedback               : " + resources.getFeedback() +
-                "\n──────────────────────────────────────────────────────────────────"
-            );
-        }
-        System.out.print(
-                """
-
-                        ╔═══════════════════════════════════════════════════════════════════════════╗
-                        ║╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳║
-                        ╚═══════════════════════════════════════════════════════════════════════════╝"""
-        );
-    }
-
-    private static void displayAllUserData() {
-        //TODO: Separate method for displaying user info
-        //CONVERT: List -> Database
-        BankSystem.clearConsole();
-        System.out.print(
-                """
-
-                        ╔════════════════════════════════════════════════════════╗
-                        ║                   View Users Data                      ║
-                        ╚════════════════════════════════════════════════════════╝"""
-        );
-        for (final User user : BankSystem.users)
-        {
-            handleUserData(user);
-        }
-        System.out.print("\nPress enter to continue...");
-    }
-
-    private static void makeUserAdmin(String username) { //CONVERT: List -> Database
-        for (final User user : BankSystem.users) {
-            if (getUsername().equals(username)) {
-                user.setAdminStatus(true);
-                System.out.printf("User %s is now an admin.", getUsername());
-                BankSystem.saveDataToFile();
-            }
-        }
-    }
-
-    private static void makeUserCustomerService(String username) { //CONVERT: List -> Database
-        for (final User user : BankSystem.users) {
-            if (getUsername().equals(username)) {
-                user.setCSStatus(true);
-                System.out.printf("User %s is now a customer service.", getUsername());
-                BankSystem.saveDataToFile();
-            }
-        }
+        deleteUserByUsername(user);
     }
 
     public static void handleSettings(String username) {
@@ -371,7 +209,159 @@ class Admin extends User{
                     System.out.print("*Invalid choice. Please select a valid option.");
                     break;
             }
-            BankSystem.clearConsole();
+        }
+    }
+    private static void updateUser() {
+        System.out.print(
+                """
+
+                        ╭────────────────────────────────────────────────────────────────╮
+                        │                         Update User                            │
+                        ╰────────────────────────────────────────────────────────────────╯"""
+        );
+        System.out.print("\nEnter the username of the user you want to update: ");
+        String pickedUsername = input.nextLine();
+        input.nextLine();
+        handleSettings(pickedUsername);
+    }
+
+    private static void displayUserData(String username) {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet dataSet = null;
+
+        try {
+            connection = DriverManager.getConnection(BankSystem.url, BankSystem.userDB, BankSystem.passwordDB);
+            String query = "SELECT * FROM users WHERE username = ?";
+
+            statement = connection.prepareStatement(query);
+            statement.setString(1, username);
+
+            dataSet = statement.executeQuery();
+            if (dataSet.next()) {
+                String name = dataSet.getString("username");
+                if (name.equals(username)) {
+                    System.out.print(
+                            "\n──────────────────────────────────────────────────────────────────" +
+                            "\n                          Information:                            " +
+                            "\n──────────────────────────────────────────────────────────────────" +
+                            "\n  User ID                : " + dataSet.getLong("user_id") +
+                            "\n  Name                   : " + dataSet.getString("fname") +
+                            "\n  Username               : " + name +
+                            "\n  Email                  : " + dataSet.getString("email") +
+                            "\n  Phone                  : " + dataSet.getString("phone_number") +
+                            "\n  Two-Factor Enabled     : " + (dataSet.getBoolean("is2fa") ? "Yes" : "No") +
+                            "\n  Is Admin               : " + (dataSet.getBoolean("is_admin") ? "Yes" : "No") +
+                            "\n  Is Customer Service    : " + (dataSet.getBoolean("is_customerservice") ? "Yes" : "No") +
+                            "\n  Product Type           : " + dataSet.getString("product_type") +
+                            "\n  Balance                : " + dataSet.getDouble("balance") +
+                            "\n──────────────────────────────────────────────────────────────────"
+                    );
+                }
+            } else {
+                throw new DataRetrievalException("User with username " + username + " not found.");
+            }
+
+        } catch (SQLException e){
+            System.err.print("Error in Data Retrieving: " + e.getMessage());
+        } finally {
+            BankSystem.closeResources(connection, statement, dataSet);
+        }
+    }
+
+    private static void displayAllUserData() {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet dataSet = null;
+
+        try {
+            connection = DriverManager.getConnection(BankSystem.url, BankSystem.userDB, BankSystem.passwordDB);
+            String query = "SELECT * FROM users";
+
+            statement = connection.prepareStatement(query);
+            dataSet = statement.executeQuery();
+
+            System.out.print(
+                    """
+    
+                            ╔════════════════════════════════════════════════════════╗
+                            ║                   View Users Data                      ║
+                            ╚════════════════════════════════════════════════════════╝"""
+            );
+
+            while (dataSet.next()) {
+                System.out.print(
+                        "\n──────────────────────────────────────────────────────────────────" +
+                        "\n                          Information:                            " +
+                        "\n──────────────────────────────────────────────────────────────────" +
+                        "\n  User ID                : " + dataSet.getLong("user_id") +
+                        "\n  Name                   : " + dataSet.getString("fname") +
+                        "\n  Username               : " + dataSet.getString("username") +
+                        "\n  Email                  : " + dataSet.getString("email") +
+                        "\n  Phone                  : " + dataSet.getString("phone_number") +
+                        "\n  Two-Factor Enabled     : " + (dataSet.getBoolean("is2fa") ? "Yes" : "No") +
+                        "\n  Is Admin               : " + (dataSet.getBoolean("is_admin") ? "Yes" : "No") +
+                        "\n  Is Customer Service    : " + (dataSet.getBoolean("is_customerservice") ? "Yes" : "No") +
+                        "\n  Product Type           : " + dataSet.getString("product_type") +
+                        "\n  Balance                : " + dataSet.getDouble("balance") +
+                        "\n──────────────────────────────────────────────────────────────────"
+                );
+            }
+        } catch (SQLException e){
+            System.err.print("Error in Data Retrieving: " + e.getMessage());
+        } finally {
+            BankSystem.closeResources(connection, statement, dataSet);
+        }
+        System.out.print("\nPress enter to continue...");
+    }
+
+    private static void makeUserAdmin(String username) {
+        Connection connection = null;
+        PreparedStatement statement = null;
+
+        try {
+            connection = DriverManager.getConnection(BankSystem.url, BankSystem.userDB, BankSystem.passwordDB);
+            String query = "UPDATE users SET is_admin = ? WHERE username = ?";
+
+            statement = connection.prepareStatement(query);
+            statement.setBoolean(1, true);
+            statement.setString(2, username);
+
+            int updatedRows = statement.executeUpdate();
+            if(updatedRows > 0) {
+                System.out.print("\nUser status updated");
+            } else {
+                throw new DataUpdateException("Username " + username + "not found.");
+            }
+        } catch (SQLException e) {
+            System.err.print("\nError on Data Update: " + e.getMessage());
+        } finally {
+            BankSystem.closeResources(connection, statement);
+        }
+    }
+
+    private static void makeUserCustomerService(String username) {
+        Connection connection = null;
+        PreparedStatement statement = null;
+
+        try {
+            connection = DriverManager.getConnection(BankSystem.url, BankSystem.userDB, BankSystem.passwordDB);
+            String query = "UPDATE users SET is_customerservice = ? WHERE username = ?";
+
+            statement = connection.prepareStatement(query);
+            statement.setBoolean(1, true);
+            statement.setString(2, username);
+
+            int updatedRows = statement.executeUpdate();
+            if(updatedRows > 0) {
+                System.out.print("\nUser status updated");
+            } else {
+                throw new DataUpdateException("Username " + username + "not found.");
+            }
+        } catch (SQLException e) {
+            System.err.print("\nError on Data Update: " + e.getMessage());
+        } finally {
+            BankSystem.closeResources(connection, statement);
         }
     }
 

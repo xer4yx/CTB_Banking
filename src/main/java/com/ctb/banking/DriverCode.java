@@ -6,11 +6,9 @@ import com.ctb.classes.Display;
 import java.util.Scanner;
 
 public class DriverCode {
-
     public static Scanner input = new Scanner(System.in);
 
     public static void main(String[] args) {
-        new BankSystem("bank_data.json"); //TODO: delete this
         boolean isRunning = true;
         while (isRunning) {
             Display.displayMainMenu();
@@ -27,7 +25,7 @@ public class DriverCode {
                     break;
 
                 case 3:
-                    Display.forgotPassword();
+                    BankSystem.forgotPassword();
                     break;
 
                 case 4:
