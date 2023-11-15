@@ -176,27 +176,20 @@ class Admin extends User {
     }
 
     private static void displayUserData(String username) {
-        try {
-            Connection conn = BankSystem.getConnection();
-            String sql = "SELECT * FROM users WHERE username = ?";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, username);
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                handleUserData(rs.getString("username"));
-            } else {
-                System.out.printf("User with username '%s' not found.", username);
+        for (final User user : BankSystem.users) {
+            if (Objects.equals(getUsername(), username)) {
+                handleUserData(user);
+                return; // Exit the loop once the user is found and displayed
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
+        System.out.printf("User with username '%s' not found.", username);
     }
 
-    private static void handleUserData(String username) {
+    private static void handleUserData(User user) {
         try (Connection connection = BankSystem.getConnection()) {
             PreparedStatement statement = connection
-                    .prepareStatement("SELECT * FROM ctb_banking.users WHERE username = ?");
-            statement.setNString(1, username);
+                    .prepareStatement("SELECT * FROM ctb_banking.users WHERE user_id = ?");
+            statement.setNString(1, user.getUserID());
             ResultSet resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
@@ -216,7 +209,7 @@ class Admin extends User {
                 // Retrieving profiles
                 PreparedStatement profileStatement = connection
                         .prepareStatement("SELECT * FROM ctb_banking.profiles WHERE user_id = ?");
-                profileStatement.setNString(1, username);
+                profileStatement.setNString(1, user.getUserID());
                 ResultSet profileResult = profileStatement.executeQuery();
                 System.out.print(
                         """
@@ -235,7 +228,7 @@ class Admin extends User {
                 // Retrieving transactions
                 PreparedStatement transactionStatement = connection
                         .prepareStatement("SELECT * FROM ctb_banking.transactions WHERE user_id = ?");
-                transactionStatement.setNString(1, username);
+                transactionStatement.setNString(1, user.getUserID());
                 ResultSet transactionResult = transactionStatement.executeQuery();
                 System.out.print(
                         """
@@ -253,7 +246,7 @@ class Admin extends User {
                 // Retrieving sessions
                 PreparedStatement sessionStatement = connection
                         .prepareStatement("SELECT * FROM ctb_banking.sessions WHERE user_id = ?");
-                sessionStatement.setNString(1, username);
+                sessionStatement.setNString(1, user.getUserID());
                 ResultSet sessionResult = sessionStatement.executeQuery();
                 System.out.print(
                         """
@@ -269,7 +262,7 @@ class Admin extends User {
                 // Retrieving product applications
                 PreparedStatement productAppStatement = connection
                         .prepareStatement("SELECT * FROM ctb_banking.product_applications WHERE user_id = ?");
-                productAppStatement.setNString(1, username);
+                productAppStatement.setNString(1, user.getUserID());
                 ResultSet productAppResult = productAppStatement.executeQuery();
                 System.out.print(
                         """
@@ -286,7 +279,7 @@ class Admin extends User {
                 // Retrieving help and resources
                 PreparedStatement helpStatement = connection
                         .prepareStatement("SELECT * FROM ctb_banking.help_resources WHERE user_id = ?");
-                helpStatement.setNString(1, username);
+                helpStatement.setNString(1, user.getUserID());
                 ResultSet helpResult = helpStatement.executeQuery();
                 System.out.print(
                         """
@@ -317,6 +310,8 @@ class Admin extends User {
     }
 
     private static void displayAllUserData() {
+        // TODO: Separate method for displaying user info
+        // CONVERT: List -> Database
         System.out.print("\033[H\033[2J");
         System.out.print(
                 """
@@ -324,16 +319,8 @@ class Admin extends User {
                         ╔════════════════════════════════════════════════════════╗
                         ║                   View Users Data                      ║
                         ╚════════════════════════════════════════════════════════╝""");
-        try {
-            Connection conn = BankSystem.getConnection();
-            String sql = "SELECT * FROM users";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
-                handleUserData(rs.getString("username"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        for (final User user : BankSystem.users) {
+            handleUserData(user);
         }
         System.out.print("\nPress enter to continue...");
     }
