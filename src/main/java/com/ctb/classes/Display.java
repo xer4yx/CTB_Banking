@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.Objects;
 import java.util.Scanner;
 
@@ -137,8 +138,7 @@ public class Display {
                     } else {
                         switch (choice) {
                             case 1:
-                                handleProductOptions(getCurrentProductType(getCurrentLoggedInUser()),
-                                        getCurrentLoggedInUser());
+                                handleProductOptions(getCurrentLoggedInUser());
                                 break;
                             case 2:
                                 User.displayProfile();
@@ -172,11 +172,29 @@ public class Display {
     private static void displayAnalytics(String currentLoggedInUser) {
     }
 
-    public static void handleProductOptions(final String producttype, final String username) {
-        if (Objects.equals(producttype, "Savings Account")) {
-            displaySavingsMenu(username);
-        } else if (Objects.equals(producttype, "Credit Account")) {
-            displayCreditMenu(username);
+    public static void handleProductOptions(final String username) {
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT product_type FROM users WHERE username = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                String producttype = rs.getString("product_type");
+
+                if (Objects.equals(producttype, "Savings Account")) {
+                    displaySavingsMenu(username);
+                } else if (Objects.equals(producttype, "Credit Account")) {
+                    displayCreditMenu(username);
+                }
+            }
+
+            rs.close();
+            pstmt.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -231,8 +249,7 @@ public class Display {
                     User.processWithdrawal(username);
                     break;
                 case 3:
-                    ;
-                    BankSystem.clearConsole(); // TODO: delete this
+
                     displayTransaction(username);
                     System.out.print("Press Enter to continue...");
                     input.nextLine();
@@ -275,7 +292,43 @@ public class Display {
         }
     }
 
-    private static void displayTransaction(String username) {
+    protected static void displayTransaction(final String username) {
+
+        try {
+            Connection conn = BankSystem.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(
+                    "SELECT * FROM transactions WHERE user_id = (SELECT user_id FROM users WHERE username = ?)");
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+
+            System.out.print(
+                    """
+                            ╔═════════════════════════════════════╗
+                            ║        Transaction History          ║
+                            ╚═════════════════════════════════════╝""");
+            System.out.print(
+                    "User: " + username +
+                            "\n───────────────────────────────────────");
+
+            while (rs.next()) {
+                SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+                java.sql.Timestamp timestamp = rs.getTimestamp("timestamp");
+                String formattedDate = sdf.format(timestamp);
+                System.out.print(
+                        "\nTransaction ID: " + rs.getString("transaction_id") +
+                                "\nTransaction Type: " + rs.getString("transact_type") +
+                                "\nAmount: $" + rs.getDouble("amount") +
+                                "\nTimestamp: " + formattedDate +
+                                "\nDescription: " + rs.getString("description") +
+                                "\n───────────────────────────────────────");
+            }
+
+            rs.close();
+            pstmt.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void handleHelpAndResources(final String username) { // TODO: delete parameter

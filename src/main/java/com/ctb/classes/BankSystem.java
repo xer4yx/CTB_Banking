@@ -8,6 +8,7 @@ import java.sql.*;
 import java.util.Date;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.Scanner;
 
 public class BankSystem {
     static String url = "jdbc:mysql://localhost:3306/ctb_banking";
@@ -26,7 +27,6 @@ public class BankSystem {
     private static final List<Transaction> transactionHistory = new LinkedList<>();
     private static final List<ProductApplication> productApplications = new LinkedList<>();
     private static final List<Session> sessions = new LinkedList<>();
-    private static final List<Dashboard> dashboards = new LinkedList<>();
 
     /*----------------------Setter Methods----------------------*/
     protected static void setCurrentUserID(long currentUserID) {
@@ -59,7 +59,25 @@ public class BankSystem {
     }
 
     protected static String getCurrentProductType(String username) {
-        return currentProductType; // TODO: Set up database
+        String productType = null;
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT product_type FROM users WHERE username = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                productType = rs.getString("product_type");
+            }
+
+            rs.close();
+            pstmt.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return productType;
     }
 
     protected static double getCurrentBalance(String username) {
@@ -111,43 +129,41 @@ public class BankSystem {
         char choice;
         System.out.print("\nEnter your email: ");
         String email = input.nextLine();
-        boolean emailFound = false;
 
-        // TODO: Separate method for handling forgot pass (should be inside User)
-        // CONVERT: List -> Database
-
-        for (User user : BankSystem.users) {
-            for (Profile profile : user.userProfile) {
-                if (Objects.equals(profile.getEmail(), email)) {
-                    System.out.print("---Email found!---");
-                    System.out.print("\nSending an OTP for " + profile.getEmail() + " 2 Factor Authentication.");
-                    SecuritySystem.sendOTP();
-                    System.out.print("\nEnter your OTP: ");
-                    String inputOTP = input.nextLine();
-                    if (!SecuritySystem.verifyOTP(inputOTP)) {
-                        System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
-                        try {
-                            Thread.sleep(30000);
-                        } catch (InterruptedException e) {
-                            System.err.print(e.getMessage());
-                        }
-                        return;
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT * FROM users WHERE email = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, email);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                System.out.print("---Email found!---");
+                System.out.print("\nSending an OTP for " + rs.getString("email") + " 2 Factor Authentication.");
+                SecuritySystem.sendOTP();
+                System.out.print("\nEnter your OTP: ");
+                String inputOTP = input.nextLine();
+                if (!SecuritySystem.verifyOTP(inputOTP)) {
+                    System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
+                    try {
+                        Thread.sleep(30000);
+                    } catch (InterruptedException e) {
+                        System.err.print(e.getMessage());
                     }
-                    System.out.print(
-                            """
-                                    ──────────────────────────────────────────────────────────────
-                                    Enter new password:\s
-                                    """);
-                    String newpass = input.nextLine();
-                    User.changePassword(User.getUsername());
-                    System.out.print("---Password changed successfully!---");
-                    emailFound = true;
+                    return;
                 }
+                System.out.print(
+                        """
+                                ──────────────────────────────────────────────────────────────
+                                Enter new password:\s
+                                """);
+                String newpass = input.nextLine();
+                User.changePassword(rs.getString("username"), newpass);
+                System.out.print("---Password changed successfully!---");
+            } else {
+                System.out.print("\n*Email not found. Please try again.");
             }
-        }
-
-        if (!emailFound) {
-            System.out.print("\n*Email not found. Please try again.");
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -453,8 +469,7 @@ public class BankSystem {
     }
 
     public static void clearConsole() {
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
+
     }
 
     public static void saveDataToFile() {

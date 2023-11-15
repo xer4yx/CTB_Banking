@@ -26,7 +26,7 @@ class SecuritySystem {
     static int attempts;
     static long lastAttempt;
     static String OTP;
-    
+
     protected static String encrypt(String password) {
         try {
             final MessageDigest md5 = MessageDigest.getInstance("MD5");
@@ -34,7 +34,7 @@ class SecuritySystem {
             BigInteger signum = new BigInteger(1, messageDigest);
             StringBuilder hashPass = new StringBuilder(signum.toString(16));
 
-            while(hashPass.length() < 32) {
+            while (hashPass.length() < 32) {
                 hashPass.insert(0, "0");
             }
             return hashPass.toString();
@@ -43,8 +43,7 @@ class SecuritySystem {
         }
     }
 
-    @Deprecated
-    protected static String decrypt(String hashedPassword) { //TODO: delete this
+    protected static String decrypt(String hashedPassword) {
         try {
             byte[] bytesOfMessage = new BigInteger(hashedPassword, 16).toByteArray();
             return new String(bytesOfMessage, StandardCharsets.UTF_8);
@@ -64,8 +63,7 @@ class SecuritySystem {
         return otp.toString();
     }
 
-    @Deprecated
-    protected static boolean canAttempt() { //TODO: delete this
+    protected static boolean canAttempt() {
         long currTime = Calendar.getInstance().getTimeInMillis();
         if (attempts > 3 && (currTime - lastAttempt) < 30000)
             return false;
@@ -78,7 +76,7 @@ class SecuritySystem {
     }
 
     @Deprecated
-    protected static boolean attemptLogin(String password, String verifyPass) { //TODO: delete this
+    protected static boolean attemptLogin(String password, String verifyPass) { // TODO: delete this
         if (Objects.equals(verifyPass, password))
             return true;
 
@@ -179,7 +177,7 @@ class SecuritySystem {
     }
 
     @Deprecated
-    protected static String getCurrentDate() { //TODO: delete this
+    protected static String getCurrentDate() { // TODO: delete this
         LocalDate currTime = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -187,7 +185,7 @@ class SecuritySystem {
     }
 
     protected static boolean securityStatus(final boolean status) {
-        //TODO: add functionalities on the code
+        // TODO: add functionalities on the code
         return status;
     }
 
