@@ -1,5 +1,9 @@
 package com.ctb.classes;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
@@ -137,74 +141,85 @@ public class Display {
     public static void handleDashboardOptions() {
         while (true) {
             User.displayDashboardMenu(getCurrentLoggedInUser());
-            String productType = BankSystem.getCurrentProductType(BankSystem.getCurrentLoggedInUser()); // TODO: delete
-                                                                                                        // this
+            String productType = BankSystem.getCurrentProductType(BankSystem.getCurrentLoggedInUser());
             int choice = input.nextInt();
             input.nextLine();
-            if (User.isAdmin()) { // TODO: modularize
-                switch (choice) {
-                    case 1:
-                        Admin.handleManageUsers(getCurrentLoggedInUser());
-                        input.nextLine();
-                        break;
-                    case 2:
-                        System.out.print("\033[H\033[2J"); // TODO: delete this
-                        CustomerService.displayAllHR();
-                        CustomerService.replyToHelp();
-                        break;
-                    case 3:
-                        logout(getCurrentLoggedInUser());
-                        System.out.print("\nPress Enter to continue..."); // TODO: implement inside logout()
-                        input.nextLine();
-                        System.out.print("\033[H\033[2J"); // TODO: delete this
-                        return;
-                    default:
-                        System.out.print("*Invalid choice. Please select a valid option.");
-                }
-            } else if (User.isCustomerService()) { // TODO: modularize
-                switch (choice) {
-                    case 1:
-                        System.out.print("\033[H\033[2J"); // TODO: delete this
-                        CustomerService.displayAllHR();
-                        CustomerService.replyToHelp();
-                        break;
-                    case 2:
-                        logout(getCurrentLoggedInUser());
-                        setCurrentLoggedInUser("");
-                        System.out.print("Press Enter to continue..."); // TODO: implement inside logout()
-                        input.nextLine();
-                        System.out.print("\033[H\033[2J"); // TODO: delete this
-                        return;
-                    default:
-                        System.out.print("*Invalid choice. Please select a valid option.");
-                }
-            } else { // TODO: modularize
-                switch (choice) {
-                    case 1:
-                        handleProductOptions(getCurrentProductType(getCurrentLoggedInUser()), getCurrentLoggedInUser());
-                        break;
-                    case 2:
-                        Profile.displayProfile(getCurrentLoggedInUser());
-                        break;
-                    case 3:
-                        viewAnalyticsDashBoard(getCurrentLoggedInUser());
-                        break;
-                    case 4:
-                        handleHelpAndResources(getCurrentLoggedInUser());
-                        break;
-                    case 5:
-                        logout(getCurrentLoggedInUser());
-                        System.out.print(
-                                """
+            try {
+                Connection conn = BankSystem.getConnection();
+                String sql = "SELECT * FROM users WHERE username = ?";
+                PreparedStatement pstmt = conn.prepareStatement(sql);
+                pstmt.setString(1, getCurrentLoggedInUser());
+                ResultSet rs = pstmt.executeQuery();
+                if (rs.next()) {
+                    if (rs.getBoolean("is_admin")) {
+                        switch (choice) {
+                            case 1:
+                                Admin.handleManageUsers(getCurrentLoggedInUser());
+                                input.nextLine();
+                                break;
+                            case 2:
+                                System.out.print("\033[H\033[2J");
+                                CustomerService.displayAllHR();
+                                CustomerService.replyToHelp();
+                                break;
+                            case 3:
+                                logout(getCurrentLoggedInUser());
+                                System.out.print("\nPress Enter to continue..."); // TODO: implement inside logout()
+                                input.nextLine();
+                                System.out.print("\033[H\033[2J");
+                                return;
+                            default:
+                                System.out.print("*Invalid choice. Please select a valid option.");
+                        }
+                    } else if (rs.getBoolean("is_customerservice")) {
+                        switch (choice) {
+                            case 1:
+                                System.out.print("\033[H\033[2J");
+                                CustomerService.displayAllHR();
+                                CustomerService.replyToHelp();
+                                break;
+                            case 2:
+                                logout(getCurrentLoggedInUser());
+                                setCurrentLoggedInUser("");
+                                System.out.print("Press Enter to continue..."); // TODO: implement inside logout()
+                                input.nextLine();
+                                System.out.print("\033[H\033[2J"); // TODO: delete this
+                                return;
+                            default:
+                                System.out.print("*Invalid choice. Please select a valid option.");
+                        }
+                    } else { // TODO: modularize
+                        switch (choice) {
+                            case 1:
+                                handleProductOptions(getCurrentProductType(getCurrentLoggedInUser()),
+                                        getCurrentLoggedInUser());
+                                break;
+                            case 2:
+                                Profile.displayProfile(getCurrentLoggedInUser());
+                                break;
+                            case 3:
+                                viewAnalyticsDashBoard(getCurrentLoggedInUser());
+                                break;
+                            case 4:
+                                handleHelpAndResources(getCurrentLoggedInUser());
+                                break;
+                            case 5:
+                                logout(getCurrentLoggedInUser());
+                                System.out.print(
+                                        """
 
-                                        ──────────────────────────────────
-                                        Press Enter to continue...""");
-                        input.nextLine();
-                        System.out.print("\033[H\033[2J"); // TODO: delete this
-                        return;
-                    default:
-                        System.out.print("*Invalid choice. Please select a valid option.");
+                                                ──────────────────────────────────
+                                                Press Enter to continue...""");
+                                input.nextLine();
+                                System.out.print("\033[H\033[2J"); // TODO: delete this
+                                return;
+                            default:
+                                System.out.print("*Invalid choice. Please select a valid option.");
+                        }
+                    }
                 }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         }
     }

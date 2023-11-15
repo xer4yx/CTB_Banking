@@ -1,5 +1,9 @@
 package com.ctb.classes;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Objects;
 
 //TODO: Obsolete file
@@ -27,9 +31,14 @@ public class Dashboard {
 
     /*----------------------Class Methods----------------------*/
     public void displayDashboard(String username) {
-        for (final User user : BankSystem.users) {
-            if (Objects.equals(User.getUsername(), username)) {
-                if (user.isAdmin()) {
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT * FROM users WHERE username = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                if (rs.getBoolean("is_admin")) {
                     System.out.print("\033[H\033[2J");
                     System.out.print(
                             """
@@ -45,7 +54,7 @@ public class Dashboard {
                                     ║  3. Logout                          ║
                                     ╚═════════════════════════════════════╝""");
                     System.out.print("Enter your choice: ");
-                } else if (user.isCustomerService()) {
+                } else if (rs.getBoolean("is_customerservice")) {
                     System.out.print("\033[H\033[2J");
                     System.out.print(
                             """
@@ -68,7 +77,7 @@ public class Dashboard {
                                     "\n│         CENTRAL TRUST BANK          │" +
                                     "\n╰─────────────────────────────────────╯" +
                                     "\n                                       " +
-                                    "\n Welcome " + user.getName() + "!" +
+                                    "\n Welcome " + username + "!" +
                                     "\n                                       " +
                                     "\n Current Balance: $" + BankSystem.getCurrentBalance(username) +
                                     "\n                                       " +
@@ -84,6 +93,9 @@ public class Dashboard {
                     System.out.print("Enter your choice: ");
                 }
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
+
 }

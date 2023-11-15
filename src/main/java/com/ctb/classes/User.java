@@ -1,5 +1,9 @@
 package com.ctb.classes;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -94,38 +98,47 @@ public class User {
 
     /*----------------------Class Methods----------------------*/
     protected static void displayDashboardMenu(final String username) {
-        if (Objects.equals(BankSystem.getCurrentLoggedInUser(), username)) {
-            if (User.isAdmin()) {
-                Admin.displayDashboardMenu(BankSystem.getCurrentLoggedInUser());
-            } else if (User.isCustomerService()) {
-                CustomerService.displayDashboardMenu(BankSystem.getCurrentLoggedInUser());
-            } else {
-                System.out.print("\033[H\033[2J"); // TODO: delete this
-                System.out.print(
-                        """
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT * FROM users WHERE username = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                if (rs.getBoolean("is_admin")) {
+                    Admin.displayDashboardMenu(BankSystem.getCurrentLoggedInUser());
+                } else if (rs.getBoolean("is_customerservice")) {
+                    CustomerService.displayDashboardMenu(BankSystem.getCurrentLoggedInUser());
+                } else {
+                    System.out.print("\033[H\033[2J");
+                    System.out.print(
+                            """
 
-                                ╭─────────────────────────────────────╮
-                                │         CENTRAL TRUST BANK          │
-                                ╰─────────────────────────────────────╯
-                                """);
-                System.out.print("Welcome " + BankSystem.getCurrentLoggedInUser() + "!");
-                System.out.print(
-                        "\nCurrent Balance: $" + BankSystem.getCurrentBalance(BankSystem.getCurrentLoggedInUser()));
-                System.out.print(
-                        """
+                                    ╭─────────────────────────────────────╮
+                                    │         CENTRAL TRUST BANK          │
+                                    ╰─────────────────────────────────────╯
+                                    """);
+                    System.out.print("Welcome " + BankSystem.getCurrentLoggedInUser() + "!");
+                    System.out.print(
+                            "\nCurrent Balance: $" + BankSystem.getCurrentBalance(BankSystem.getCurrentLoggedInUser()));
+                    System.out.print(
+                            """
 
-                                ╔═════════════════════════════════════╗
-                                ║         Dashboard Options:          ║
-                                ╠═════════════════════════════════════╣
-                                ║  1. Transaction Center              ║
-                                ║  2. User Profile                    ║
-                                ║  3. Data Analytics Dashboard        ║
-                                ║  4. Help  Resources                 ║
-                                ║  5. Logout                          ║
-                                ╚═════════════════════════════════════╝
-                                Enter your choice:\s""");
+                                    ╔═════════════════════════════════════╗
+                                    ║         Dashboard Options:          ║
+                                    ╠═════════════════════════════════════╣
+                                    ║  1. Transaction Center              ║
+                                    ║  2. User Profile                    ║
+                                    ║  3. Data Analytics Dashboard        ║
+                                    ║  4. Help  Resources                 ║
+                                    ║  5. Logout                          ║
+                                    ╚═════════════════════════════════════╝
+                                    Enter your choice:\s""");
 
+                }
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 

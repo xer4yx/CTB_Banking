@@ -2,6 +2,7 @@ package com.ctb.classes;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Objects;
 import java.util.Scanner;
@@ -185,93 +186,126 @@ class Admin extends User {
     }
 
     private static void handleUserData(User user) {
-        // TODO: Separate method for displaying user info
-        // CONVERT: List -> Database
-        System.out.print(
-                "\n──────────────────────────────────────────────────────────────────" +
-                        "\n                          Information:                            " +
+        try (Connection connection = BankSystem.getConnection()) {
+            PreparedStatement statement = connection
+                    .prepareStatement("SELECT * FROM ctb_banking.users WHERE user_id = ?");
+            statement.setNString(1, user.getUserID());
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                System.out.print(
                         "\n──────────────────────────────────────────────────────────────────" +
-                        "\n  User ID                : " + user.getUserID() +
-                        "\n  Name                   : " + user.getName() +
-                        "\n  Username               : " + getUsername() +
-                        "\n  Is Admin               : " + (BankSystem.isAdmin(getUsername()) ? "Yes" : "No") +
-                        "\n  Is Customer Service    : " + (BankSystem.isCustomerService(getUsername()) ? "Yes" : "No") +
-                        "\n  Product Type           : " + user.getProductType() +
-                        "\n  Balance                : " + user.getBalance());
+                                "\n                          Information:                            " +
+                                "\n──────────────────────────────────────────────────────────────────" +
+                                "\n  User ID                : " + resultSet.getLong("user_id") +
+                                "\n  Name                   : " + resultSet.getString("fname") + " "
+                                + resultSet.getString("mname") + " " + resultSet.getString("lname") +
+                                "\n  Username               : " + resultSet.getString("username") +
+                                "\n  Is Admin               : " + (resultSet.getBoolean("is_admin") ? "Yes" : "No") +
+                                "\n  Is Customer Service    : "
+                                + (resultSet.getBoolean("is_customerservice") ? "Yes" : "No") +
+                                "\n  Product Type           : " + resultSet.getString("product_type") +
+                                "\n  Balance                : " + resultSet.getDouble("balance"));
+                // Retrieving profiles
+                PreparedStatement profileStatement = connection
+                        .prepareStatement("SELECT * FROM ctb_banking.profiles WHERE user_id = ?");
+                profileStatement.setNString(1, user.getUserID());
+                ResultSet profileResult = profileStatement.executeQuery();
+                System.out.print(
+                        """
 
-        System.out.print(
-                """
+                                ──────────────────────────────────────────────────────────────────
+                                                           Profiles:
+                                ──────────────────────────────────────────────────────────────────""");
+                while (profileResult.next()) {
+                    System.out.print(
+                            "\n Email                  : " + profileResult.getString("email") +
+                                    "\n  Phone                  : " + profileResult.getString("phone_number") +
+                                    "\n  Two-Factor Enabled     : "
+                                    + (profileResult.getBoolean("is2fa") ? "Yes" : "No"));
+                }
 
-                        ──────────────────────────────────────────────────────────────────
-                                                   Profiles:                             \s
-                        ──────────────────────────────────────────────────────────────────""");
-        for (final Profile profile : user.userProfile) {
-            System.out.print(
-                    "\n Email                  : " + profile.getEmail() +
-                            "\n  Phone                  : " + profile.getPhoneNumber() +
-                            "\n  Two-Factor Enabled     : " + (profile.get2FAStatus() ? "Yes" : "No"));
-        }
+                // Retrieving transactions
+                PreparedStatement transactionStatement = connection
+                        .prepareStatement("SELECT * FROM ctb_banking.transactions WHERE user_id = ?");
+                transactionStatement.setNString(1, user.getUserID());
+                ResultSet transactionResult = transactionStatement.executeQuery();
+                System.out.print(
+                        """
 
-        System.out.print(
-                """
+                                ──────────────────────────────────────────────────────────────────
+                                                      Transaction History:
+                                ──────────────────────────────────────────────────────────────────""");
+                while (transactionResult.next()) {
+                    System.out.print(
+                            "\n  Transaction ID         : " + transactionResult.getLong("transaction_id") +
+                                    "\n  Transaction Type       : " + transactionResult.getString("transact_type") +
+                                    "\n  Amount                 : " + transactionResult.getDouble("amount") +
+                                    "\n  Timestamp              : " + transactionResult.getTimestamp("timestamp"));
+                }
+                // Retrieving sessions
+                PreparedStatement sessionStatement = connection
+                        .prepareStatement("SELECT * FROM ctb_banking.sessions WHERE user_id = ?");
+                sessionStatement.setNString(1, user.getUserID());
+                ResultSet sessionResult = sessionStatement.executeQuery();
+                System.out.print(
+                        """
 
-                        ──────────────────────────────────────────────────────────────────
-                                              Transaction History:
-                        ──────────────────────────────────────────────────────────────────""");
-        for (final Transaction transaction : user.userTransaction) {
-            System.out.print(
-                    "\n  Transaction ID         : " + transaction.getTransactionID() +
-                            "\n  Transaction Type       : " + transaction.getTransactionType() +
-                            "\n  Amount                 : " + transaction.getAmount() +
-                            "\n  Timestamp              : " + transaction.getTimeStamp());
-        }
+                                ──────────────────────────────────────────────────────────────────
+                                                      Sessions:
+                                ──────────────────────────────────────────────────────────────────""");
+                while (sessionResult.next()) {
+                    System.out.print(
+                            "\n  Session ID             : " + sessionResult.getLong("session_id") +
+                                    "\n  Timestamp              : " + sessionResult.getTimestamp("timestamp"));
+                }
+                // Retrieving product applications
+                PreparedStatement productAppStatement = connection
+                        .prepareStatement("SELECT * FROM ctb_banking.product_applications WHERE user_id = ?");
+                productAppStatement.setNString(1, user.getUserID());
+                ResultSet productAppResult = productAppStatement.executeQuery();
+                System.out.print(
+                        """
 
-        System.out.print(
-                """
+                                ──────────────────────────────────────────────────────────────────
+                                              Product Applications:
+                                ──────────────────────────────────────────────────────────────────""");
+                while (productAppResult.next()) {
+                    System.out.print(
+                            "\n  Product ID             : " + productAppResult.getLong("product_id") +
+                                    "\n  Product Type           : " + productAppResult.getString("product_type"));
+                }
 
-                        ──────────────────────────────────────────────────────────────────
-                                                  Sessions:
-                        ──────────────────────────────────────────────────────────────────""");
+                // Retrieving help and resources
+                PreparedStatement helpStatement = connection
+                        .prepareStatement("SELECT * FROM ctb_banking.help_resources WHERE user_id = ?");
+                helpStatement.setNString(1, user.getUserID());
+                ResultSet helpResult = helpStatement.executeQuery();
+                System.out.print(
+                        """
 
-        for (final Session session : user.userSessions) {
-            System.out.print(
-                    "\n  Session ID             : " + session.getSessionID() +
-                            "\n  Username               : " + getUsername() +
-                            "\n  Timestamp              : " + session.getTimeStamp());
-        }
-
-        System.out.print(
-                """
-
-                        ──────────────────────────────────────────────────────────────────
-                                             Product Applications:
-                        ──────────────────────────────────────────────────────────────────""");
-        for (final ProductApplication productApp : user.userProductApplications) {
-            System.out.print(
-                    "\n  Product ID             : " + productApp.getProductID() +
-                            "\n  Product Type           : " + productApp.getProductType());
-
-        }
-
-        System.out.print(
-                """
-
-                        ──────────────────────────────────────────────────────────────────
+                                ──────────────────────────────────────────────────────────────────
                                               Help and Resources:
-                        ──────────────────────────────────────────────────────────────────""");
-        for (final HelpAndResources resources : user.userHelpAndResources) {
-            System.out.print(
-                    "\n  Help ID                : " + resources.getHelpID() +
-                            "\n  Type                   : " + resources.getH_rType() +
-                            "\n  Description            : " + resources.getH_rDescription() +
-                            "\n  Feedback               : " + resources.getFeedback() +
-                            "\n──────────────────────────────────────────────────────────────────");
+                                ──────────────────────────────────────────────────────────────────""");
+                while (helpResult.next()) {
+                    System.out.print(
+                            "\n  Help ID                : " + helpResult.getLong("hr_id") +
+                                    "\n  Type                   : " + helpResult.getString("hr_type") +
+                                    "\n  Description            : " + helpResult.getString("hr_description") +
+                                    "\n  Feedback               : " + helpResult.getString("feedback"));
+                }
+            } else {
+                System.out.println("User not found!");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+
         System.out.print(
                 """
 
                         ╔═══════════════════════════════════════════════════════════════════════════╗
-                        ║╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳║
+                        ║╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳║
                         ╚═══════════════════════════════════════════════════════════════════════════╝""");
     }
 
