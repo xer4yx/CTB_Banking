@@ -1,13 +1,9 @@
 package com.ctb.classes;
 
-import com.ctb.exceptions.*;
-import org.fusesource.jansi.Ansi;
-import org.fusesource.jansi.AnsiConsole;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.ctb.exceptions.DataInsertionException;
+import com.ctb.exceptions.DataRetrievalException;
+import com.ctb.exceptions.InvalidProductTypeException;
 
-import java.io.*;
 import java.sql.*;
 import java.util.Date;
 import java.util.*;
@@ -18,7 +14,7 @@ public class BankSystem {
     static String userDB = "root";
     static String passwordDB = "Vertig@6925";
     private static String driver = "com.mysql.cj.jdbc.Driver";
-    private final SecuritySystem system = new SecuritySystem();
+    private static final Scanner input = new Scanner(System.in);
     private static long currentUserID;
     private static String currentLoggedInUser;
     private static String currentProductType;
@@ -61,7 +57,7 @@ public class BankSystem {
     }
 
     protected static String getCurrentProductType(String username) {
-        return currentProductType;
+        return currentProductType; //TODO: Set up database
     }
 
     protected static double getCurrentBalance(String username) {
@@ -93,41 +89,57 @@ public class BankSystem {
 
         return -1.0;
     }
-
-    @Deprecated
-    protected static List<User> getUsers() {return users;} //TODO: delete obsolete
-
-    @Deprecated
-    protected List<Profile> getProfiles() {return profiles;} //TODO: delete obsolete
-
-    @Deprecated
-    protected static List<Transaction> getTransactionHistory() {return transactionHistory;} //TODO: delete obsolete
-
-    @Deprecated
-    protected List<ProductApplication> getProductApplications() {return productApplications;} //TODO: delete obsolete
-
-    @Deprecated
-    protected List<Session> getSessions() {return sessions;} //TODO: delete obsolete
-
-    @Deprecated
-    protected List<Dashboard> getDashboards() {return dashboards;} //TODO: delete obsolete
-
     /*----------------------Class Methods----------------------*/
-    @Deprecated
-    public BankSystem(String dataFile) {
-        dataFilePath = dataFile;
-        loadDataFromFile();
-    } //TODO: delete obsolete
+    public static void forgotPassword() {
+        System.out.print(
+                """
+                        ╭────────────────────────────────────────────────────────────╮
+                        │                     Forgot Password                        │
+                        ╰────────────────────────────────────────────────────────────╯"""
+        );
+        char choice;
+        System.out.print("\nEnter your email: ");
+        String email = input.nextLine();
+        boolean emailFound = false;
 
-    @Deprecated
-    protected static void clearConsole() {
-        AnsiConsole.systemInstall();
-        Ansi ansi = Ansi.ansi();
-        ansi.eraseScreen();
-        ansi.cursor(0, 0);
-        System.out.print(ansi.toString());
-        AnsiConsole.systemUninstall();
-    } //TODO: delete obsolete
+        //TODO: Separate method for handling forgot pass (should be inside User)
+        //CONVERT: List -> Database
+
+        for (User user : BankSystem.users) {
+            for (Profile profile : user.userProfile) {
+                if (Objects.equals(profile.getEmail(), email)) {
+                    System.out.print("---Email found!---");
+                    System.out.print("\nSending an OTP for " + profile.getEmail() + " 2 Factor Authentication.");
+                    SecuritySystem.sendOTP();
+                    System.out.print("\nEnter your OTP: ");
+                    String inputOTP = input.nextLine();
+                    if (!SecuritySystem.verifyOTP(inputOTP)) {
+                        System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
+                        try {
+                            Thread.sleep(30000);
+                        } catch (InterruptedException e) {
+                            System.err.print(e.getMessage());
+                        }
+                        return;
+                    }
+                    System.out.print(
+                            """
+                                    ──────────────────────────────────────────────────────────────
+                                    Enter new password:\s
+                                    """
+                    );
+                    String newpass = input.nextLine();
+                    User.changePassword(User.getUsername());
+                    System.out.print("---Password changed successfully!---");
+                    emailFound = true;
+                }
+            }
+        }
+
+        if (!emailFound) {
+            System.out.print("\n*Email not found. Please try again.");
+        }
+    }
 
     protected static void closeResources(Connection connection, PreparedStatement statement, ResultSet dataSet) {
         try {
@@ -321,67 +333,6 @@ public class BankSystem {
         return interestEarned;
     }
 
-    @Deprecated
-    protected static double calculateTotalPaid(String username) { //TODO: delete obsolete
-        double totalPaid = 0;
-
-        for (final User user : users)
-        {
-            if (Objects.equals(User.getUsername(), username))
-            {
-                for (final Transaction transaction : getTransactionHistory())
-                {
-                    if (Objects.equals(transaction.getTransactionType(), "Bill Payment"))
-                    {
-                        totalPaid += transaction.getAmount();
-                    }
-                }
-            }
-        }
-
-        return totalPaid;
-    }
-
-    @Deprecated
-    protected static double calculateTotalSpent(String username) { //TODO: delete obsolete
-        double totalSpent = 0;
-
-        for (final User user : users)
-        {
-            if (Objects.equals(User.getUsername(), username))
-            {
-                for (final Transaction transaction : getTransactionHistory())
-                {
-                    if (Objects.equals(transaction.getTransactionType(), "Purchase") ||
-                            Objects.equals(transaction.getTransactionType(), "Deposit"))
-                    {
-                        totalSpent += transaction.getAmount();
-                    }
-                }
-            }
-        }
-        return totalSpent;
-    }
-
-    @Deprecated
-    protected static double calculateTotalNet(String username) { //TODO: delete obsolete
-        double totalNet = 0;
-        for (final User user : users)
-        {
-            if (Objects.equals(User.getUsername(), username))
-            {
-                for (final Transaction transaction : getTransactionHistory())
-                {
-                    if (Objects.equals(transaction.getTransactionType(), "Deposit"))
-                    {
-                        totalNet += transaction.getAmount();
-                    }
-                }
-            }
-        }
-        return totalNet;
-    }
-
     protected static boolean isValidProductType(String productType) {
         List<String> validProductTypes = new LinkedList<>(Arrays.asList("Savings Account", "Credit Account"));
         return validProductTypes.contains(productType);
@@ -489,201 +440,4 @@ public class BankSystem {
         System.out.print("\nUser account created successfully.");
         return true;
     }
-
-    @Deprecated
-    protected void loadDataFromFile() { //TODO: delete obsolete
-        try {
-            BufferedReader file = new BufferedReader(new FileReader(dataFilePath));
-            StringBuilder data = new StringBuilder();
-            String line;
-            while ((line = file.readLine()) != null) {
-                data.append(line);
-            }
-            file.close();
-
-            JSONArray jsonArray = new JSONArray(data.toString());
-
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject item = jsonArray.getJSONObject(i);
-
-                User user = new User();
-                user.setUserID(item.optString("id", ""));
-                user.setName(item.optString("name", ""));
-                user.setUsername(item.optString("username", ""));
-                user.setAdmin(item.optBoolean("isadmin", false));
-                user.setCustomerService(item.optBoolean("iscustomerservice", false));
-                user.setPassword(item.optString("password", ""));
-                user.setProductType(item.optString("producttype", ""));
-                user.setBalance(item.optDouble("balance", 0.0));
-
-                if(item.has("profiles")) {
-                    JSONArray profileArray = item.getJSONArray(("profiles"));
-                    for(int n = 0; n < profileArray.length(); n++) {
-                        JSONObject profileItem = profileArray.getJSONObject(n);
-
-                        Profile profile = new Profile();
-                        profile.setEmail(profileItem.optString("email", ""));
-                        profile.setPhoneNumber(profileItem.optString("phone"));
-                        profile.set2FAStatus(profileItem.optBoolean("isTwoFactorEnabled", false));
-
-                        user.userProfile.add(profile);
-                    }
-                }
-
-                if (item.has("transactionhistory")) {
-                    JSONArray transactionArray = item.getJSONArray("transactionhistory");
-                    for (int n = 0; n < transactionArray.length(); n++) {
-                        JSONObject transactionItem = transactionArray.getJSONObject(n);
-
-                        Transaction transaction = new Transaction();
-                        transaction.setTransactionID(transactionItem.optString("transactionID", ""));
-                        transaction.setTransactionType(transactionItem.optString("transactionType", ""));
-                        transaction.setAmount(transactionItem.optDouble("amount", 0.0));
-                        transaction.setTimeStamp(transactionItem.optLong("timestamp", 0));
-                        transaction.setDescription(transactionItem.optString("description", ""));
-
-                        user.userTransaction.add(transaction);
-                    }
-                }
-
-                if (item.has("sessions")) {
-                    JSONArray sessionArray = item.getJSONArray("sessions");
-                    for (int k = 0; k < sessionArray.length(); k++) {
-                        JSONObject sessionItem = sessionArray.getJSONObject(k);
-
-                        Session session = new Session();
-                        session.setSessionID(sessionItem.optString("sessionID", ""));
-                        session.setUsername(sessionItem.optString("username", ""));
-                        session.setTimeStamp(sessionItem.optLong("timestamp", 0));
-
-                        user.userSessions.add(session);
-                    }
-                }
-
-                if (item.has("productapplications")) {
-                    JSONArray productApplicationArray = item.getJSONArray("productapplications");
-                    for (int l = 0; l < productApplicationArray.length(); l++) {
-                        JSONObject productApplicationItem = productApplicationArray.getJSONObject(l);
-
-                        ProductApplication productApplication = new ProductApplication();
-                        productApplication.setProductType(productApplicationItem.optString("producttype", ""));
-                        productApplication.setProductID(productApplicationItem.optString("productID", ""));
-
-                        user.userProductApplications.add(productApplication);
-                    }
-                }
-
-                if (item.has("helpandresources")) {
-                    JSONArray helpandResourcesArray = item.getJSONArray("helpandresources");
-                    for (int m = 0; m < helpandResourcesArray.length(); m++) {
-                        JSONObject helpAndResourcesItem = helpandResourcesArray.getJSONObject(m);
-
-                        HelpAndResources helpAndResource = new HelpAndResources();
-                        helpAndResource.setHelpID(helpAndResourcesItem.optString("Help ID", ""));
-                        helpAndResource.setH_rType(helpAndResourcesItem.optString("Type", ""));
-                        helpAndResource.setH_rDescription(helpAndResourcesItem.optString("Description", ""));
-
-                        user.userHelpAndResources.add(helpAndResource);
-                    }
-                }
-                users.add(user);
-            }
-        } catch (IOException e) {
-            System.err.print("Failed to read from file: " + e.getMessage());
-        } catch (Exception e) {
-            System.err.print("Failed to parse JSON data: " + e.getMessage());
-        }
-    }
-
-    @Deprecated
-    protected static void saveDataToFile() { //TODO: delete obsolete
-        BufferedWriter dataWriter = null;
-
-        try {
-            dataWriter = new BufferedWriter(new FileWriter(dataFilePath));
-            JSONArray dataArray = new JSONArray();
-
-            for (User user : users) {
-                JSONObject dataClient = new JSONObject();
-                dataClient.put("id", user.getUserID());
-                dataClient.put("name", user.getName());
-                dataClient.put("username", user.getUsername());  // Use the user's username
-                dataClient.put("password", user.getPassword());
-                dataClient.put("isadmin", user.isAdmin());
-                dataClient.put("iscustomerservice", user.isCustomerService());
-                dataClient.put("producttype", user.getProductType());
-                dataClient.put("balance", user.getBalance());
-
-                JSONArray profilesJsonArray = new JSONArray();
-                for (Profile profile : user.userProfile) {
-                    JSONObject dataProfile = new JSONObject();
-                    dataProfile.put("email", profile.getEmail());
-                    dataProfile.put("phone", profile.getPhoneNumber());
-                    dataProfile.put("isTwoFactorEnabled", profile.get2FAStatus());
-                    profilesJsonArray.put(dataProfile);
-                }
-                dataClient.put("profiles", profilesJsonArray);
-
-                JSONArray transactionHistoryJsonArray = new JSONArray();
-                for (Transaction transaction : user.userTransaction) {
-                    JSONObject dataTransact = new JSONObject();
-                    dataTransact.put("transactionID", transaction.getTransactionID());
-                    dataTransact.put("transactionType", transaction.getTransactionType());
-                    dataTransact.put("amount", transaction.getAmount());
-                    dataTransact.put("timestamp", transaction.getTimeStamp());
-                    dataTransact.put("description", transaction.getDescription());
-                    transactionHistoryJsonArray.put(dataTransact);
-                }
-                dataClient.put("transactionhistory", transactionHistoryJsonArray);
-
-                JSONArray sessionsJsonArray = new JSONArray();
-                for (Session session : user.userSessions) {
-                    JSONObject dataSession = new JSONObject();
-                    dataSession.put("sessionID", session.getSessionID());
-                    dataSession.put("username", user.getUsername());  // Use the user's username
-                    dataSession.put("timestamp", session.getTimeStamp());
-                    sessionsJsonArray.put(dataSession);
-                }
-                dataClient.put("sessions", sessionsJsonArray);
-
-                JSONArray productApplicationsJsonArray = new JSONArray();
-                for (ProductApplication productApplication : user.userProductApplications) {
-                    JSONObject dataProduct = new JSONObject();
-                    dataProduct.put("producttype", productApplication.getProductType());
-                    dataProduct.put("productID", productApplication.getProductID());
-                    productApplicationsJsonArray.put(dataProduct);
-                }
-                dataClient.put("productapplications", productApplicationsJsonArray);
-
-                JSONArray helpAndResourcesJsonArray = new JSONArray();
-                for (HelpAndResources resources : user.userHelpAndResources) {
-                    JSONObject dataHR = new JSONObject();
-                    dataHR.put("helpandresourcesID", resources.getHelpID());
-                    dataHR.put("helpandresourcesType", resources.getH_rType());
-                    dataHR.put("helpandresourcesDescription", resources.getH_rDescription());
-                    helpAndResourcesJsonArray.put(dataHR);
-                }
-                dataClient.put("helpandresources", helpAndResourcesJsonArray);
-
-                dataArray.put(dataClient);
-            }
-
-            dataWriter.write(dataArray.toString(4));
-            dataWriter.close();
-        } catch (JSONException e) {
-            System.err.print("JSON error: " + e.getMessage());
-        } catch (IOException e) {
-            System.err.print(("I/O error: " + e.getMessage()));
-        } finally {
-            if (dataWriter != null) {
-                try {
-                    dataWriter.close();
-                } catch (IOException e) {
-                    System.err.print("Error closing file: " + e.getMessage());
-                }
-            }
-        }
-    }
-
-
 }

@@ -1,7 +1,14 @@
 package com.ctb.classes;
 
+import com.ctb.exceptions.DataRetrievalException;
+
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Date;
+
+import static com.ctb.classes.BankSystem.*;
+import static com.ctb.classes.BankSystem.calculateTotalPaid;
 
 public class User {
     private static final Scanner input = new Scanner(System.in);
@@ -61,9 +68,8 @@ public class User {
             if (User.isAdmin()) {
                 Admin.displayDashboardMenu();
             } else if (User.isCustomerService()) {
-                CustomerService.displayDashboardMenu(BankSystem.getCurrentLoggedInUser());
+                CustomerService.displayDashboardMenu();
             } else {
-                BankSystem.clearConsole(); //TODO: delete this
                 System.out.print(
                         """
                                 
@@ -93,7 +99,48 @@ public class User {
         }
     }
 
-    public void displayUserSettings(String username) {
+    public static void displayProfile() {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet dataSet = null;
+
+        try {
+            connection = DriverManager.getConnection(BankSystem.url, BankSystem.userDB, BankSystem.passwordDB);
+            String query = "SELECT fname, mname, lname, username, email, phone_number, product_type, is2fa FROM users WHERE username = ?";
+
+            statement = connection.prepareStatement(query);
+            statement.setString(1, BankSystem.getCurrentLoggedInUser());
+
+            dataSet = statement.executeQuery();
+            if(dataSet.next()){
+                String user = dataSet.getString("username");
+                if (Objects.equals(user, BankSystem.getCurrentLoggedInUser())) {
+                    String show2FAStatus = dataSet.getBoolean("is2fa") ? "Enabled" : "Disabled";
+                    System.out.print(
+                            "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" +
+                                    "\n                      User Profile                            " +
+                                    "\n══════════════════════════════════════════════════════════════" +
+                                    "\n  Name: " + dataSet.getString("fname") +
+                                    "\n  Username: " + user +
+                                    "\n  Email: " + dataSet.getString("email") +
+                                    "\n  Phone: " + dataSet.getString("phone") +
+                                    "\n  Account: " + dataSet.getString("product_type") +
+                                    "\n  Balance: " + dataSet.getDouble("balance") +
+                                    "\n  Two Factor Authentication: " + show2FAStatus +
+                                    "\n══════════════════════════════════════════════════════════════");
+                    displayUserSettings(User.getUsername());
+                }
+            } else {
+                throw new DataRetrievalException("");
+            }
+        } catch (SQLException e) {
+            System.err.print("\nError on Data Update: " + e.getMessage());
+        } finally {
+            BankSystem.closeResources(connection, statement, dataSet);
+        }
+    }
+
+    public static void displayUserSettings(String username) {
         while (true) {
             System.out.print(
                     """
@@ -138,15 +185,13 @@ public class User {
 
         switch (choice) {
             case 1:
-                BankSystem.clearConsole(); //TODO: delete this
-                Display.displayTransactionHistory(username);
+                displayTransaction(username);
                 break;
             case 2:
-                displaySessions(username);
+                displaySessions();
                 break;
             case 3:
-                BankSystem.clearConsole(); //TODO: delete this
-                CustomerService.displayHelpHistory(username);
+                CustomerService.displayHelpHistory(BankSystem.getCurrentUserID());
                 break;
             default:
                 System.out.print("*Invalid choice. Please select a valid option.");
@@ -154,28 +199,43 @@ public class User {
         }
     }
 
-    public static void displaySessions(String username) {
-        //TODO: Separate method of interface and data retrieval
-        //CONVERT: List -> Database
-        for (final User user : BankSystem.users) {
-            if (Objects.equals(User.username, username)) {
-            BankSystem.clearConsole(); //TODO: delete this
+    public static void displaySessions() {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet dataSet = null;
+
+        try {
+            connection = DriverManager.getConnection(BankSystem.url, BankSystem.userDB, BankSystem.passwordDB);
+            String query = "SELECT * FROM sessions WHERE user_id = ?";
+
+            statement = connection.prepareStatement(query);
+            statement.setLong(1, BankSystem.getCurrentUserID());
+
+            dataSet = statement.executeQuery();
+            if (dataSet.next()) {
+                long user_id = dataSet.getLong("user_id");
                 System.out.print(
                         "\n╔════════════════════════════════════════════╗" +
                         "\n║               Session History              ║" +
                         "\n╚════════════════════════════════════════════╝" +
-                        "\n User: " + User.username +
+                        "\n User: " + getCurrentLoggedInUser() +
                         "\n──────────────────────────────────────────────"
                 );
-                for (final Session session : user.userSessions) {
+                if(Objects.equals(user_id, getCurrentUserID())) {
                     System.out.print(
-                            "\nSession ID: " + session.getSessionID() +
-                            "\nUsername: " + getUsername() +
-                            "\nTimestamp: " + session.getTimeStamp() +
+                            "\n Session ID: " + dataSet.getLong("session_id") +
+                            "\n Timestamp: " + dataSet.getDate("timestamp") +
                             "\n──────────────────────────────────────────────"
                     );
                 }
+            } else {
+                throw new DataRetrievalException("There are no sessions for this user.");
             }
+
+        } catch (SQLException e) {
+            System.err.print("Error in Data Retrieving: " + e.getMessage());
+        } finally {
+            closeResources(connection, statement, dataSet);
         }
     }
 
@@ -241,6 +301,81 @@ public class User {
                 break;
         }
 
+    }
+
+    protected static void displayTransaction(final String username) {
+        //TODO: Make method for printing and displaying data from database
+        //CONVERT: List -> Database
+
+        for (final User user : BankSystem.users)
+        {
+            if (Objects.equals(User.getUsername(), username))
+            {
+                System.out.print(
+                        """
+                                ╔═════════════════════════════════════╗
+                                ║        Transaction History          ║
+                                ╚═════════════════════════════════════╝"""
+                );
+                System.out.print(
+                        "User: " + User.getUsername() +
+                                "\n───────────────────────────────────────");
+                for (final Transaction transaction : user.userTransaction)
+                {
+                    SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+                    Date date = new Date(transaction.getTimeStamp());
+                    String formattedDate = sdf.format(date);
+                    System.out.print(
+                            "\nTransaction ID: " + transaction.getTransactionID() +
+                                    "\nTransaction Type: " + transaction.getTransactionType() +
+                                    "\nAmount: $" + transaction.getAmount() +
+                                    "\nTimestamp: " + formattedDate +
+                                    "\nDescription: " + transaction.getDescription() +
+                                    "\n───────────────────────────────────────"
+                    );
+                }
+            }
+        }
+    }
+
+    public static void displayAnalytics(final String username) {
+        //TODO: modularize
+        //CONVERT: List -> Database
+
+        for (final User user : BankSystem.users)
+        {
+            if (Objects.equals(BankSystem.getCurrentLoggedInUser(), username))
+            {
+                BankSystem.clearConsole(); //TODO: delete this
+                System.out.print(
+                        """
+                                ╔═════════════════════════════════════╗
+                                ║           Data Analytics            ║
+                                ╚═════════════════════════════════════╝"""
+                );
+                System.out.print(
+                        "\nName: " + user.getName() +
+                                "\n───────────────────────────────────────"
+                );
+                if (Objects.equals(user.getProductType(), "Savings Account"))
+                {
+                    System.out.print(
+                            "\nTotal Net worth: " + BankSystem.calculateTotalNet() +
+                                    "\nTotal Interest Earned: " + BankSystem.showInterestEarned()
+                    );
+                }
+                else if (Objects.equals(getCurrentProductType(getCurrentLoggedInUser()), "Credit Account"))
+                {
+                    System.out.print(
+                            "\nTotal Spent: " + calculateTotalSpent() +
+                                    "\nTotal Paid: " + calculateTotalPaid() +
+                                    "───────────────────────────────────────"
+                    );
+                }
+            }
+        }
+        System.out.print("Press Enter to continue...");
+        input.nextLine();
     }
 
     public static void processDeposit(String username) {
@@ -602,67 +737,6 @@ public class User {
 
         HelpAndResources.saveHelpAndResources(username, "Help", message, "");
     }
-
-    @Deprecated
-    protected void setUserProfile(List<Profile> userProfile) {
-        this.userProfile = userProfile;
-    }
-
-    @Deprecated
-    protected void setUserTransaction(List<Transaction> userTransaction) {
-        this.userTransaction = userTransaction;
-    }
-
-    @Deprecated
-    protected void setUserProductApplications(List<ProductApplication> userProductApplications) {
-        this.userProductApplications = userProductApplications;
-    }
-
-    @Deprecated
-    protected void setUserSessions(List<Session> userSessions) {
-        this.userSessions = userSessions;
-    }
-
-    @Deprecated
-    protected void setUserHelpAndResources(List<HelpAndResources> userHelpAndResources) {
-        this.userHelpAndResources = userHelpAndResources;
-    }
-
-    @Deprecated
-    protected void setUserDashboard(List<Dashboard> userDashboard) {
-        this.userDashboard = userDashboard;
-    }
-
-    @Deprecated
-    protected List<Profile> getUserProfile() {
-        return userProfile;
-    }
-
-    @Deprecated
-    protected List<Transaction> getUserTransaction() {
-        return userTransaction;
-    }
-
-    @Deprecated
-    protected List<ProductApplication> getUserProductApplications() {
-        return userProductApplications;
-    }
-
-    @Deprecated
-    protected List<Session> getUserSessions() {
-        return userSessions;
-    }
-
-    @Deprecated
-    protected List<HelpAndResources> getUserHelpAndResources() {
-        return userHelpAndResources;
-    }
-
-    @Deprecated
-    protected List<Dashboard> getUserDashboard() {
-        return userDashboard;
-    }
-
 
     public static boolean isAdmin() { //CONVERT Database
         return isAdmin;

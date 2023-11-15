@@ -315,7 +315,7 @@ class Admin extends User{
         System.out.print("\nPress enter to continue...");
     }
 
-    private static void makeUserAdmin(String username) { //CONVERT: List -> Database
+    private static void makeUserAdmin(String username) {
         Connection connection = null;
         PreparedStatement statement = null;
 
@@ -340,7 +340,7 @@ class Admin extends User{
         }
     }
 
-    private static void makeUserCustomerService(String username) { //CONVERT: List -> Database
+    private static void makeUserCustomerService(String username) {
         Connection connection = null;
         PreparedStatement statement = null;
 
