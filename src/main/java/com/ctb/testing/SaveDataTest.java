@@ -25,7 +25,7 @@ public class SaveDataTest {
                 userJson.put("name", user.getName());
                 userJson.put("username", User.getUsername());
                 userJson.put("password", user.getPassword());
-                userJson.put("isadmin", user.isAdmin());
+                userJson.put("isadmin", User.isAdmin());
                 userJson.put("iscustomerservice", user.isCustomerService());
                 userJson.put("producttype", user.getProductType());
                 userJson.put("balance", user.getBalance());
