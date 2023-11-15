@@ -16,19 +16,46 @@ public class Transaction {
     private long timeStamp;
 
     /*----------------------Setter Methods----------------------*/
-    public void setTransactionID(String transactionID) {this.transactionID = transactionID;}
-    public void setTransactionType(String transactionType) {this.transactionType = transactionType;}
-    public void setDescription(String description) {this.description = description;}
-    public void setAmount(double amount) {this.amount = amount;}
-    public void setTimeStamp(long timeStamp) {this.timeStamp = timeStamp;}
+    public void setTransactionID(String transactionID) {
+        this.transactionID = transactionID;
+    }
+
+    public void setTransactionType(String transactionType) {
+        this.transactionType = transactionType;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setAmount(double amount) {
+        this.amount = amount;
+    }
+
+    public void setTimeStamp(long timeStamp) {
+        this.timeStamp = timeStamp;
+    }
 
     /*----------------------Getter Methods----------------------*/
-    public String getTransactionID() {return transactionID;}
-    public String getTransactionType() {return transactionType;}
-    public String getDescription() {return description;}
-    public double getAmount() {return amount;}
-    public long getTimeStamp() {return timeStamp;}
+    public String getTransactionID() {
+        return transactionID;
+    }
 
+    public String getTransactionType() {
+        return transactionType;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+
+    public long getTimeStamp() {
+        return timeStamp;
+    }
 
     /*----------------------Class Methods----------------------*/
 
@@ -38,18 +65,17 @@ public class Transaction {
             int randomNumber = rand.nextInt();
             String timeString = Long.toString(time);
             String randomNumberString = Integer.toString(randomNumber);
-            
+
             return "TXN" + timeString + randomNumberString;
         }
     }
 
     protected static boolean depositFunds(String username, double amount) {
-        for (User user : BankSystem.users)
-        {
-            if (Objects.equals(User.getUsername(), username))
-            {
+        for (User user : BankSystem.users) {
+            if (Objects.equals(User.getUsername(), username)) {
                 // Check for 2FA within profiles of the user
-                if (handleVerification(user)) return false;
+                if (handleVerification(user))
+                    return false;
 
                 Transaction depositTransaction = new Transaction();
                 depositTransaction.transactionID = generateTransactionID();
@@ -68,18 +94,15 @@ public class Transaction {
     }
 
     private static boolean handleVerification(User user) {
-        for (final Profile profile : user.userProfile)
-        {
-            if (profile.get2FAStatus())
-            {
+        for (final Profile profile : user.userProfile) {
+            if (profile.get2FAStatus()) {
                 System.out.print("\nSending an OTP for 2 Factor Authentication.");
                 SecuritySystem.sendOTP();
 
                 System.out.print("\nEnter your OTP: ");
                 String inputOTP = input.nextLine();
 
-                if (!SecuritySystem.verifyOTP(inputOTP))
-                {
+                if (!SecuritySystem.verifyOTP(inputOTP)) {
                     System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
                     try {
                         Thread.sleep(30000);
@@ -94,35 +117,31 @@ public class Transaction {
     }
 
     protected static boolean withdrawFunds(String username, double amount) {
-        for (User  user :  BankSystem.users)
-        {
-            if (Objects.equals(User.getUsername(), username))
-            {
+        for (User user : BankSystem.users) {
+            if (Objects.equals(User.getUsername(), username)) {
                 // Check for 2FA within profiles of the user
-                if (handleVerification(user)) return false;
+                if (handleVerification(user))
+                    return false;
 
-                if (amount <= 0.0)
-                {
+                if (amount <= 0.0) {
                     System.out.print("*Invalid withdrawal amount. Please enter a positive amount.");
                     return false;
                 }
 
-                if (user.getBalance() >= amount)
-                {
+                if (user.getBalance() >= amount) {
                     Transaction withdrawTransaction = new Transaction();
-                    withdrawTransaction.transactionID = generateTransactionID(); // Call a function to generate a unique transaction ID
+                    withdrawTransaction.transactionID = generateTransactionID(); // Call a function to generate a unique
+                                                                                 // transaction ID
                     withdrawTransaction.transactionType = "Withdrawal";
                     withdrawTransaction.amount = amount;
                     withdrawTransaction.timeStamp = Calendar.getInstance().getTimeInMillis();
 
                     user.userTransaction.add(withdrawTransaction);
                     user.setBalance(user.getBalance() - amount);
-                    
+
                     BankSystem.saveDataToFile();
                     return true;
-                }
-                else
-                {
+                } else {
                     System.out.print("\n*Insufficient balance. Withdrawal failed.");
                     return false;
                 }
@@ -133,22 +152,19 @@ public class Transaction {
     }
 
     protected static boolean makePurchase(String username, double amount, String purchaseDescription) {
-        for (User user :  BankSystem.users)
-        {
-            if (Objects.equals(User.getUsername(), username))
-            {
+        for (User user : BankSystem.users) {
+            if (Objects.equals(User.getUsername(), username)) {
                 // Check for 2FA within profiles of the user
-                if (handleVerification(user)) return false;
+                if (handleVerification(user))
+                    return false;
 
-                if (amount <= 0.0)
-                {
+                if (amount <= 0.0) {
                     System.out.print("*Invalid purchase amount. Please enter a positive amount.");
                     return false;
                 }
 
                 // Check if the user's balance will go below -5000 after the purchase
-                if (user.getBalance() - amount < -5000.0)
-                {
+                if (user.getBalance() - amount < -5000.0) {
                     System.out.print("*Insufficient credit limit. Purchase failed.");
                     return false;
                 }
@@ -170,7 +186,7 @@ public class Transaction {
                 BankSystem.saveDataToFile();
                 System.out.print(
                         "Purchase of $" + amount + " successful. " +
-                        "Description: " + purchaseDescription);
+                                "Description: " + purchaseDescription);
 
                 return true;
             }
@@ -180,19 +196,16 @@ public class Transaction {
     }
 
     protected static boolean payBills(String username, double amount, String billDescription) {
-        for (User  user :  BankSystem.users)
-        {
-            if (Objects.equals(User.getUsername(), username))
-            {
-                if (handleVerification(user)) return false;
+        for (User user : BankSystem.users) {
+            if (Objects.equals(User.getUsername(), username)) {
+                if (handleVerification(user))
+                    return false;
 
-                if (amount <= 0.0)
-                {
+                if (amount <= 0.0) {
                     System.out.print("*Invalid bill amount. Please enter a positive amount.");
                     return false;
                 }
-                if (user.getBalance() <= amount)
-                {
+                if (user.getBalance() <= amount) {
 
                     Transaction billTransaction = new Transaction();
                     billTransaction.transactionID = generateTransactionID();
@@ -207,12 +220,10 @@ public class Transaction {
 
                     System.out.print(
                             "Bill payment of $" + amount + " successful. " +
-                            " Description: " + billDescription);
+                                    " Description: " + billDescription);
 
                     return true;
-                }
-                else
-                {
+                } else {
                     System.out.print("*Insufficient balance. Bill payment failed.");
                     return false;
                 }

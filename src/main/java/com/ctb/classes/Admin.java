@@ -1,5 +1,10 @@
 package com.ctb.classes;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Objects;
+import java.util.Scanner;
+
 import com.ctb.exceptions.DataDeletionException;
 import com.ctb.exceptions.DataRetrievalException;
 import com.ctb.exceptions.DataUpdateException;
@@ -7,9 +12,10 @@ import com.ctb.exceptions.DataUpdateException;
 import java.sql.*;
 import java.util.Scanner;
 
-class Admin extends User{
+class Admin extends User {
     private String adminID;
     private static final Scanner input = new Scanner(System.in);
+    private Connection conn;
 
     /*----------------------Setter Methods----------------------*/
     private void setAdminID(String adminID) {
@@ -17,16 +23,19 @@ class Admin extends User{
     }
 
     /*----------------------Getter Methods----------------------*/
-    private String getAdminID() {return adminID;}
+    private String getAdminID() {
+        return adminID;
+    }
 
     /*----------------------Class Methods----------------------*/
-    protected static void displayDashboardMenu() {
+    protected static void displayDashboardMenu(final String username) {
+        BankSystem.clearConsole();
         System.out.print(
                 """
                         ╔═════════════════════════════════════╗
                         ║            Administrator            ║
                         ╚═════════════════════════════════════╝
-                                                               
+
                         ╔═════════════════════════════════════╗
                         ║         Dashboard Options:          ║
                         ╠═════════════════════════════════════╣
@@ -34,8 +43,16 @@ class Admin extends User{
                         ║  2. Help  Resources                 ║
                         ║  3. Logout                          ║
                         ╚═════════════════════════════════════╝
-                        Enter your choice:\s"""
-        );
+                        Enter your choice:\s""");
+    }
+
+    /*----------------------Database Connection----------------------*/
+    public void connectToDatabase() {
+        try {
+            this.conn = BankSystem.getConnection();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     protected static void handleManageUsers() {
@@ -50,8 +67,7 @@ class Admin extends User{
                         ║  3. Delete Users              ║
                         ║  4. Update Users              ║
                         ║  5. Exit                      ║
-                        ╚═══════════════════════════════╝"""
-        );
+                        ╚═══════════════════════════════╝""");
 
         System.out.print("Enter your choice: ");
         int choice = input.nextInt();
@@ -90,7 +106,7 @@ class Admin extends User{
 
             int rowsAffected = statement.executeUpdate();
 
-            if(rowsAffected > 0) {
+            if (rowsAffected > 0) {
                 System.out.print("\nUser data safely deleted");
             } else {
                 throw new DataDeletionException("\nUsername " + userToDelete + "is not found.");
@@ -109,8 +125,7 @@ class Admin extends User{
 
                         ╭────────────────────────────────────────────────────────────────╮
                         │                         Delete User                            │
-                        ╰────────────────────────────────────────────────────────────────╯"""
-        );
+                        ╰────────────────────────────────────────────────────────────────╯""");
         System.out.print("\nEnter the username of the user to delete: ");
         String user = input.nextLine();
         input.nextLine();
@@ -119,7 +134,7 @@ class Admin extends User{
 
     public static void handleSettings(String username) {
         while (true) {
-            //FIXME: Remove unused vars
+            // FIXME: Remove unused vars
             String newPassword, newEmail, newPhoneNumber, newUsername;
             char new2FA;
             displayUserData(username);
@@ -142,13 +157,11 @@ class Admin extends User{
                             ║  11. Make a Purchase(Credit Only)   ║
                             ║  12. Bills Payment(Credit Only)     ║
                             ║  13. Back to Profile                ║
-                            ╚═════════════════════════════════════╝"""
-            );
+                            ╚═════════════════════════════════════╝""");
             System.out.print("Enter: ");
             int choice = input.nextInt();
             input.nextLine();
-            switch (choice)
-            {
+            switch (choice) {
                 case 1:
                     System.out.print("Enter new password: ");
                     newPassword = input.nextLine();
@@ -211,14 +224,14 @@ class Admin extends User{
             }
         }
     }
+
     private static void updateUser() {
         System.out.print(
                 """
 
                         ╭────────────────────────────────────────────────────────────────╮
                         │                         Update User                            │
-                        ╰────────────────────────────────────────────────────────────────╯"""
-        );
+                        ╰────────────────────────────────────────────────────────────────╯""");
         System.out.print("\nEnter the username of the user you want to update: ");
         String pickedUsername = input.nextLine();
         input.nextLine();
@@ -243,26 +256,26 @@ class Admin extends User{
                 if (name.equals(username)) {
                     System.out.print(
                             "\n──────────────────────────────────────────────────────────────────" +
-                            "\n                          Information:                            " +
-                            "\n──────────────────────────────────────────────────────────────────" +
-                            "\n  User ID                : " + dataSet.getLong("user_id") +
-                            "\n  Name                   : " + dataSet.getString("fname") +
-                            "\n  Username               : " + name +
-                            "\n  Email                  : " + dataSet.getString("email") +
-                            "\n  Phone                  : " + dataSet.getString("phone_number") +
-                            "\n  Two-Factor Enabled     : " + (dataSet.getBoolean("is2fa") ? "Yes" : "No") +
-                            "\n  Is Admin               : " + (dataSet.getBoolean("is_admin") ? "Yes" : "No") +
-                            "\n  Is Customer Service    : " + (dataSet.getBoolean("is_customerservice") ? "Yes" : "No") +
-                            "\n  Product Type           : " + dataSet.getString("product_type") +
-                            "\n  Balance                : " + dataSet.getDouble("balance") +
-                            "\n──────────────────────────────────────────────────────────────────"
-                    );
+                                    "\n                          Information:                            " +
+                                    "\n──────────────────────────────────────────────────────────────────" +
+                                    "\n  User ID                : " + dataSet.getLong("user_id") +
+                                    "\n  Name                   : " + dataSet.getString("fname") +
+                                    "\n  Username               : " + name +
+                                    "\n  Email                  : " + dataSet.getString("email") +
+                                    "\n  Phone                  : " + dataSet.getString("phone_number") +
+                                    "\n  Two-Factor Enabled     : " + (dataSet.getBoolean("is2fa") ? "Yes" : "No") +
+                                    "\n  Is Admin               : " + (dataSet.getBoolean("is_admin") ? "Yes" : "No") +
+                                    "\n  Is Customer Service    : "
+                                    + (dataSet.getBoolean("is_customerservice") ? "Yes" : "No") +
+                                    "\n  Product Type           : " + dataSet.getString("product_type") +
+                                    "\n  Balance                : " + dataSet.getDouble("balance") +
+                                    "\n──────────────────────────────────────────────────────────────────");
                 }
             } else {
                 throw new DataRetrievalException("User with username " + username + " not found.");
             }
 
-        } catch (SQLException e){
+        } catch (SQLException e) {
             System.err.print("Error in Data Retrieving: " + e.getMessage());
         } finally {
             BankSystem.closeResources(connection, statement, dataSet);
@@ -283,31 +296,30 @@ class Admin extends User{
 
             System.out.print(
                     """
-    
+
                             ╔════════════════════════════════════════════════════════╗
                             ║                   View Users Data                      ║
-                            ╚════════════════════════════════════════════════════════╝"""
-            );
+                            ╚════════════════════════════════════════════════════════╝""");
 
             while (dataSet.next()) {
                 System.out.print(
                         "\n──────────────────────────────────────────────────────────────────" +
-                        "\n                          Information:                            " +
-                        "\n──────────────────────────────────────────────────────────────────" +
-                        "\n  User ID                : " + dataSet.getLong("user_id") +
-                        "\n  Name                   : " + dataSet.getString("fname") +
-                        "\n  Username               : " + dataSet.getString("username") +
-                        "\n  Email                  : " + dataSet.getString("email") +
-                        "\n  Phone                  : " + dataSet.getString("phone_number") +
-                        "\n  Two-Factor Enabled     : " + (dataSet.getBoolean("is2fa") ? "Yes" : "No") +
-                        "\n  Is Admin               : " + (dataSet.getBoolean("is_admin") ? "Yes" : "No") +
-                        "\n  Is Customer Service    : " + (dataSet.getBoolean("is_customerservice") ? "Yes" : "No") +
-                        "\n  Product Type           : " + dataSet.getString("product_type") +
-                        "\n  Balance                : " + dataSet.getDouble("balance") +
-                        "\n──────────────────────────────────────────────────────────────────"
-                );
+                                "\n                          Information:                            " +
+                                "\n──────────────────────────────────────────────────────────────────" +
+                                "\n  User ID                : " + dataSet.getLong("user_id") +
+                                "\n  Name                   : " + dataSet.getString("fname") +
+                                "\n  Username               : " + dataSet.getString("username") +
+                                "\n  Email                  : " + dataSet.getString("email") +
+                                "\n  Phone                  : " + dataSet.getString("phone_number") +
+                                "\n  Two-Factor Enabled     : " + (dataSet.getBoolean("is2fa") ? "Yes" : "No") +
+                                "\n  Is Admin               : " + (dataSet.getBoolean("is_admin") ? "Yes" : "No") +
+                                "\n  Is Customer Service    : "
+                                + (dataSet.getBoolean("is_customerservice") ? "Yes" : "No") +
+                                "\n  Product Type           : " + dataSet.getString("product_type") +
+                                "\n  Balance                : " + dataSet.getDouble("balance") +
+                                "\n──────────────────────────────────────────────────────────────────");
             }
-        } catch (SQLException e){
+        } catch (SQLException e) {
             System.err.print("Error in Data Retrieving: " + e.getMessage());
         } finally {
             BankSystem.closeResources(connection, statement, dataSet);
@@ -328,7 +340,7 @@ class Admin extends User{
             statement.setString(2, username);
 
             int updatedRows = statement.executeUpdate();
-            if(updatedRows > 0) {
+            if (updatedRows > 0) {
                 System.out.print("\nUser status updated");
             } else {
                 throw new DataUpdateException("Username " + username + "not found.");
@@ -353,7 +365,7 @@ class Admin extends User{
             statement.setString(2, username);
 
             int updatedRows = statement.executeUpdate();
-            if(updatedRows > 0) {
+            if (updatedRows > 0) {
                 System.out.print("\nUser status updated");
             } else {
                 throw new DataUpdateException("Username " + username + "not found.");
@@ -407,7 +419,7 @@ class Admin extends User{
         amount = input.nextInt();
         input.nextLine();
         System.out.print("Enter the description of the purchase: ");
-        purchaseDescription =  input.nextLine();
+        purchaseDescription = input.nextLine();
         input.nextLine();
         if (Transaction.makePurchase(username, amount, purchaseDescription)) {
             System.out.print("Purchase made successfully.");
