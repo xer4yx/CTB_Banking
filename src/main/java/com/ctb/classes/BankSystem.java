@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 public class BankSystem {
     static String url = "jdbc:mysql://localhost:3306/ctb_banking";
     static String userDB = "root";
-    static String passwordDB = "Vertig@6925";
+    static String passwordDB = "password";
     private static String driver = "com.mysql.cj.jdbc.Driver";
     private static final Scanner input = new Scanner(System.in);
     private static long currentUserID;
@@ -33,7 +33,9 @@ public class BankSystem {
         BankSystem.currentUserID = currentUserID;
     }
 
-    protected static void setCurrentLoggedInUser(String username) {currentLoggedInUser = username;}
+    protected static void setCurrentLoggedInUser(String username) {
+        currentLoggedInUser = username;
+    }
 
     protected static void setCurrentProductType(String productType) {
         try {
@@ -57,7 +59,7 @@ public class BankSystem {
     }
 
     protected static String getCurrentProductType(String username) {
-        return currentProductType; //TODO: Set up database
+        return currentProductType; // TODO: Set up database
     }
 
     protected static double getCurrentBalance(String username) {
@@ -75,7 +77,7 @@ public class BankSystem {
 
             dataSet = statement.executeQuery();
 
-            if(dataSet.next()) {
+            if (dataSet.next()) {
                 return dataSet.getDouble("balance");
             } else {
                 throw new DataRetrievalException("Balance Irretrievable");
@@ -89,21 +91,30 @@ public class BankSystem {
 
         return -1.0;
     }
+
+    public static Connection getConnection() throws SQLException {
+        try {
+            Class.forName(driver);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return DriverManager.getConnection(url, userDB, passwordDB);
+    }
+
     /*----------------------Class Methods----------------------*/
     public static void forgotPassword() {
         System.out.print(
                 """
                         ╭────────────────────────────────────────────────────────────╮
                         │                     Forgot Password                        │
-                        ╰────────────────────────────────────────────────────────────╯"""
-        );
+                        ╰────────────────────────────────────────────────────────────╯""");
         char choice;
         System.out.print("\nEnter your email: ");
         String email = input.nextLine();
         boolean emailFound = false;
 
-        //TODO: Separate method for handling forgot pass (should be inside User)
-        //CONVERT: List -> Database
+        // TODO: Separate method for handling forgot pass (should be inside User)
+        // CONVERT: List -> Database
 
         for (User user : BankSystem.users) {
             for (Profile profile : user.userProfile) {
@@ -126,8 +137,7 @@ public class BankSystem {
                             """
                                     ──────────────────────────────────────────────────────────────
                                     Enter new password:\s
-                                    """
-                    );
+                                    """);
                     String newpass = input.nextLine();
                     User.changePassword(User.getUsername());
                     System.out.print("---Password changed successfully!---");
@@ -170,7 +180,7 @@ public class BankSystem {
         }
     }
 
-    protected static double showInterestEarned(){
+    protected static double showInterestEarned() {
         double interestRate = 0.05;
         double interestEarned = 0;
         double principal = 0;
@@ -192,7 +202,7 @@ public class BankSystem {
             statement.setString(2, "Deposit");
 
             dataSet = statement.executeQuery();
-            while(dataSet.next()) {
+            while (dataSet.next()) {
                 principal += dataSet.getDouble("amount");
                 Date transactionDate = dataSet.getDate("timestamp");
                 long diffInMillis = Math.abs(now.getTime() - transactionDate.getTime());
@@ -227,7 +237,7 @@ public class BankSystem {
             statement.setString(2, "Bill Payment");
 
             dataSet = statement.executeQuery();
-            while(dataSet.next()) {
+            while (dataSet.next()) {
                 totalPaid += dataSet.getDouble("amount");
             }
 
@@ -258,7 +268,7 @@ public class BankSystem {
             statement.setString(2, "Purchase");
 
             dataSet = statement.executeQuery();
-            while(dataSet.next()) {
+            while (dataSet.next()) {
                 totalSpent += dataSet.getDouble("amount");
             }
 
@@ -289,7 +299,7 @@ public class BankSystem {
             statement.setString(2, "Deposit");
 
             dataSet = statement.executeQuery();
-            while(dataSet.next()) {
+            while (dataSet.next()) {
                 totalNet += dataSet.getDouble("amount");
             }
 
@@ -305,7 +315,7 @@ public class BankSystem {
     }
 
     @Deprecated
-    protected static double showInterestEarned(String username) { //TODO: delete obsolete
+    protected static double showInterestEarned(String username) { // TODO: delete obsolete
         double interestRate = 0.05; // Annual interest rate
         double interestEarned = 0;
 
@@ -384,9 +394,9 @@ public class BankSystem {
         return false;
     }
 
-    protected static boolean createUser(String fname, String mname, String lname,String username, String password, String email, String phoneNum, char twoFA, String productType) {
-        if (User.isUsernameTaken(username))
-        {
+    protected static boolean createUser(String fname, String mname, String lname, String username, String password,
+            String email, String phoneNum, char twoFA, String productType) {
+        if (User.isUsernameTaken(username)) {
             System.out.print("Username is already taken. Please choose another one.");
             return false;
         }
@@ -405,7 +415,8 @@ public class BankSystem {
         try {
             connection = DriverManager.getConnection(url, userDB, passwordDB);
 
-            String query = "INSERT INTO users (user_id, fname, mname, lname, username, password, email, phone_number, " +
+            String query = "INSERT INTO users (user_id, fname, mname, lname, username, password, email, phone_number, "
+                    +
                     "is2fa, is_admin, is_customerservice, product_type, balance) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
             try {
@@ -421,7 +432,7 @@ public class BankSystem {
                 statement.setString(8, phoneNum);
                 statement.setBoolean(9, SecuritySystem.enable2FA(twoFA));
                 statement.setBoolean(10, false);
-                statement.setBoolean(11,false);
+                statement.setBoolean(11, false);
                 statement.setString(12, productType);
                 statement.setDouble(13, 0.00);
 
@@ -439,5 +450,13 @@ public class BankSystem {
 
         System.out.print("\nUser account created successfully.");
         return true;
+    }
+
+    public static void clearConsole() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+    }
+
+    public static void saveDataToFile() {
     }
 }
