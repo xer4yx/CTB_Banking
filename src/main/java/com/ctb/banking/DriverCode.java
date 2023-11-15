@@ -15,8 +15,8 @@ public class DriverCode {
             int choice = input.nextInt();
             switch (choice) {
                 case 1:
-                    if (Display.loginUser()){
-                       Display.handleDashboardOptions();
+                    if (Display.loginUser()) {
+                        Display.handleDashboardOptions();
                     }
                     break;
 

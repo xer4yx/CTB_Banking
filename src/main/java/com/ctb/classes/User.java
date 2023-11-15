@@ -31,33 +31,70 @@ public class User {
     private List<Dashboard> userDashboard = new LinkedList<>();
 
     /*----------------------Constructor Methods----------------------*/
-    public User() {}
+    public User() {
+    }
 
     @Deprecated
-    User(String name, String username, String productType) { //TODO: delete this
+    User(String name, String username, String productType) { // TODO: delete this
         this.name = name;
         User.username = username;
         this.productType = productType;
     }
 
     /*----------------------Setter Methods----------------------*/
-    public void setUserID(String userID) {this.userID =  userID;}
-    public void setName(String name) {this.name = name;}
+    public void setUserID(String userID) {
+        this.userID = userID;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public void setUsername(String username) {
-        User.username = username;}
-    public void setPassword(String password) {this.password = password;}
-    public void setProductType(String productType) {this.productType = productType;}
+        User.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setProductType(String productType) {
+        this.productType = productType;
+    }
+
     public void setCSStatus(boolean isCustomerService) {
-        User.isCustomerService = isCustomerService;}
-    public void setAdminStatus(boolean isAdmin) {this.isAdmin = isAdmin;}
-    public void setBalance(double balance) {this.balance += balance;}
+        User.isCustomerService = isCustomerService;
+    }
+
+    public void setAdminStatus(boolean isAdmin) {
+        this.isAdmin = isAdmin;
+    }
+
+    public void setBalance(double balance) {
+        this.balance += balance;
+    }
 
     /*----------------------Getter Methods----------------------*/
-    public String getUserID() {return this.userID;}
-    public String getName() {return this.name;}
-    public static String getUsername() {return username;}
-    public String getPassword() {return this.password;}
-    public String getProductType() {return this.productType;}
+    public String getUserID() {
+        return this.userID;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public static String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return this.password;
+    }
+
+    public String getProductType() {
+        return this.productType;
+    }
+
     public double getBalance() {
         return balance;
     }
@@ -65,36 +102,45 @@ public class User {
     /*----------------------Class Methods----------------------*/
     protected static void displayDashboardMenu(final String username) {
         if (Objects.equals(BankSystem.getCurrentLoggedInUser(), username)) {
-            if (User.isAdmin()) {
-                Admin.displayDashboardMenu();
-            } else if (User.isCustomerService()) {
-                CustomerService.displayDashboardMenu();
-            } else {
-                System.out.print(
-                        """
-                                
-                                ╭─────────────────────────────────────╮
-                                │         CENTRAL TRUST BANK          │
-                                ╰─────────────────────────────────────╯
+            try {
+                Connection conn = BankSystem.getConnection();
+                String sql = "SELECT * FROM users WHERE username = ?";
+                PreparedStatement pstmt = conn.prepareStatement(sql);
+                pstmt.setString(1, username);
+                ResultSet rs = pstmt.executeQuery();
+                if (rs.next()) {
+                    if (rs.getBoolean("is_admin")) {
+                        Admin.displayDashboardMenu(username);
+                    } else if (rs.getBoolean("is_customerservice")) {
+                        CustomerService.displayDashboardMenu();
+                    } else {
+                        System.out.print(
                                 """
-                );
-                System.out.print("Welcome " + BankSystem.getCurrentLoggedInUser() + "!");
-                System.out.print("\nCurrent Balance: $" + BankSystem.getCurrentBalance(BankSystem.getCurrentLoggedInUser()));
-                System.out.print(
-                        """
-                                
-                                ╔═════════════════════════════════════╗
-                                ║         Dashboard Options:          ║
-                                ╠═════════════════════════════════════╣
-                                ║  1. Transaction Center              ║
-                                ║  2. User Profile                    ║
-                                ║  3. Data Analytics Dashboard        ║
-                                ║  4. Help  Resources                 ║
-                                ║  5. Logout                          ║
-                                ╚═════════════════════════════════════╝
-                                Enter your choice:\s"""
-                );
 
+                                        ╭─────────────────────────────────────╮
+                                        │         CENTRAL TRUST BANK          │
+                                        ╰─────────────────────────────────────╯
+                                        """);
+                        System.out.print("Welcome " + BankSystem.getCurrentLoggedInUser() + "!");
+                        System.out.print("\nCurrent Balance: $"
+                                + BankSystem.getCurrentBalance(BankSystem.getCurrentLoggedInUser()));
+                        System.out.print(
+                                """
+
+                                        ╔═════════════════════════════════════╗
+                                        ║         Dashboard Options:          ║
+                                        ╠═════════════════════════════════════╣
+                                        ║  1. Transaction Center              ║
+                                        ║  2. User Profile                    ║
+                                        ║  3. Data Analytics Dashboard        ║
+                                        ║  4. Help  Resources                 ║
+                                        ║  5. Logout                          ║
+                                        ╚═════════════════════════════════════╝
+                                        Enter your choice:\s""");
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -112,7 +158,7 @@ public class User {
             statement.setString(1, BankSystem.getCurrentLoggedInUser());
 
             dataSet = statement.executeQuery();
-            if(dataSet.next()){
+            if (dataSet.next()) {
                 String user = dataSet.getString("username");
                 if (Objects.equals(user, BankSystem.getCurrentLoggedInUser())) {
                     String show2FAStatus = dataSet.getBoolean("is2fa") ? "Enabled" : "Disabled";
@@ -177,8 +223,7 @@ public class User {
                         │ 1. Transaction History    │
                         │ 2. Session History        │
                         │ 3. Help History           │
-                        ╰───────────────────────────╯"""
-        );
+                        ╰───────────────────────────╯""");
 
         System.out.print("\nEnter: ");
         int choice = input.nextInt();
@@ -216,17 +261,15 @@ public class User {
                 long user_id = dataSet.getLong("user_id");
                 System.out.print(
                         "\n╔════════════════════════════════════════════╗" +
-                        "\n║               Session History              ║" +
-                        "\n╚════════════════════════════════════════════╝" +
-                        "\n User: " + getCurrentLoggedInUser() +
-                        "\n──────────────────────────────────────────────"
-                );
-                if(Objects.equals(user_id, getCurrentUserID())) {
+                                "\n║               Session History              ║" +
+                                "\n╚════════════════════════════════════════════╝" +
+                                "\n User: " + getCurrentLoggedInUser() +
+                                "\n──────────────────────────────────────────────");
+                if (Objects.equals(user_id, getCurrentUserID())) {
                     System.out.print(
                             "\n Session ID: " + dataSet.getLong("session_id") +
-                            "\n Timestamp: " + dataSet.getDate("timestamp") +
-                            "\n──────────────────────────────────────────────"
-                    );
+                                    "\n Timestamp: " + dataSet.getDate("timestamp") +
+                                    "\n──────────────────────────────────────────────");
                 }
             } else {
                 throw new DataRetrievalException("There are no sessions for this user.");
@@ -304,24 +347,20 @@ public class User {
     }
 
     protected static void displayTransaction(final String username) {
-        //TODO: Make method for printing and displaying data from database
-        //CONVERT: List -> Database
+        // TODO: Make method for printing and displaying data from database
+        // CONVERT: List -> Database
 
-        for (final User user : BankSystem.users)
-        {
-            if (Objects.equals(User.getUsername(), username))
-            {
+        for (final User user : BankSystem.users) {
+            if (Objects.equals(User.getUsername(), username)) {
                 System.out.print(
                         """
                                 ╔═════════════════════════════════════╗
                                 ║        Transaction History          ║
-                                ╚═════════════════════════════════════╝"""
-                );
+                                ╚═════════════════════════════════════╝""");
                 System.out.print(
                         "User: " + User.getUsername() +
                                 "\n───────────────────────────────────────");
-                for (final Transaction transaction : user.userTransaction)
-                {
+                for (final Transaction transaction : user.userTransaction) {
                     SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
                     Date date = new Date(transaction.getTimeStamp());
                     String formattedDate = sdf.format(date);
@@ -331,46 +370,36 @@ public class User {
                                     "\nAmount: $" + transaction.getAmount() +
                                     "\nTimestamp: " + formattedDate +
                                     "\nDescription: " + transaction.getDescription() +
-                                    "\n───────────────────────────────────────"
-                    );
+                                    "\n───────────────────────────────────────");
                 }
             }
         }
     }
 
     public static void displayAnalytics(final String username) {
-        //TODO: modularize
-        //CONVERT: List -> Database
+        // TODO: modularize
+        // CONVERT: List -> Database
 
-        for (final User user : BankSystem.users)
-        {
-            if (Objects.equals(BankSystem.getCurrentLoggedInUser(), username))
-            {
-                BankSystem.clearConsole(); //TODO: delete this
+        for (final User user : BankSystem.users) {
+            if (Objects.equals(BankSystem.getCurrentLoggedInUser(), username)) {
+                BankSystem.clearConsole(); // TODO: delete this
                 System.out.print(
                         """
                                 ╔═════════════════════════════════════╗
                                 ║           Data Analytics            ║
-                                ╚═════════════════════════════════════╝"""
-                );
+                                ╚═════════════════════════════════════╝""");
                 System.out.print(
                         "\nName: " + user.getName() +
-                                "\n───────────────────────────────────────"
-                );
-                if (Objects.equals(user.getProductType(), "Savings Account"))
-                {
+                                "\n───────────────────────────────────────");
+                if (Objects.equals(user.getProductType(), "Savings Account")) {
                     System.out.print(
                             "\nTotal Net worth: " + BankSystem.calculateTotalNet() +
-                                    "\nTotal Interest Earned: " + BankSystem.showInterestEarned()
-                    );
-                }
-                else if (Objects.equals(getCurrentProductType(getCurrentLoggedInUser()), "Credit Account"))
-                {
+                                    "\nTotal Interest Earned: " + BankSystem.showInterestEarned());
+                } else if (Objects.equals(getCurrentProductType(getCurrentLoggedInUser()), "Credit Account")) {
                     System.out.print(
                             "\nTotal Spent: " + calculateTotalSpent() +
                                     "\nTotal Paid: " + calculateTotalPaid() +
-                                    "───────────────────────────────────────"
-                    );
+                                    "───────────────────────────────────────");
                 }
             }
         }
@@ -462,8 +491,7 @@ public class User {
 
                             ╔═════════════════════════════════════╗
                             ║       Product Application           ║
-                            ╚═════════════════════════════════════╝"""
-            );
+                            ╚═════════════════════════════════════╝""");
 
             System.out.print("\nEnter your given name: ");
             fname = input.nextLine();
@@ -478,7 +506,7 @@ public class User {
                 System.out.print("\n*Username is already taken. Please choose another one.");
                 System.out.print("Press Enter to continue...");
                 input.nextLine();
-                BankSystem.clearConsole(); //TODO: delete this
+                BankSystem.clearConsole(); // TODO: delete this
                 continue;
             }
 
@@ -495,8 +523,7 @@ public class User {
 
                             Pick account type:
                             1. Savings Account
-                            2. Credit Account"""
-            );
+                            2. Credit Account""");
             System.out.print("\nChoose your account type: ");
             acctype = input.nextInt();
 
@@ -512,13 +539,13 @@ public class User {
                     continue;
             }
 
-            boolean registrationSuccess = BankSystem.createUser(fname, mname, lname,username, password, email, phone, enable2FA, accounttype);
+            boolean registrationSuccess = BankSystem.createUser(fname, mname, lname, username, password, email, phone,
+                    enable2FA, accounttype);
             if (registrationSuccess) {
                 System.out.print(
                         """
                                 Registration successful!
-                                Press Enter to continue..."""
-                );
+                                Press Enter to continue...""");
                 input.nextLine();
                 break;
             } else {
@@ -536,26 +563,24 @@ public class User {
     }
 
     public static boolean isUsernameTaken(String username) {
-        //CONVERT: List -> Database
+        // CONVERT: List -> Database
         return BankSystem.users.stream()
                 .anyMatch(user -> Objects.equals(getUsername(), username));
     }
 
     public static void changePassword(String username) {
-        //CONVERT: List -> Database
+        // CONVERT: List -> Database
         for (User user : BankSystem.users) {
             if (Objects.equals(getUsername(), username)) {
                 for (Profile profile : user.userProfile) {
-                    if (profile.get2FAStatus())
-                    {
+                    if (profile.get2FAStatus()) {
                         System.out.print("\nSending an OTP for 2 Factor Authentication.");
                         SecuritySystem.sendOTP();
 
                         System.out.print("\nEnter your OTP: ");
                         String inputOTP = input.nextLine();
 
-                        if (!SecuritySystem.verifyOTP(inputOTP))
-                        {
+                        if (!SecuritySystem.verifyOTP(inputOTP)) {
                             System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
                             try {
                                 Thread.sleep(30000);
@@ -578,22 +603,17 @@ public class User {
     }
 
     public static void changeEmail(String username) {
-        //CONVERT: List -> Database
-        for (User user : BankSystem.users)
-        {
-            if (Objects.equals(getUsername(), username))
-            {
-                for (Profile profile : user.userProfile)
-                {
-                    if (profile.get2FAStatus())
-                    {
+        // CONVERT: List -> Database
+        for (User user : BankSystem.users) {
+            if (Objects.equals(getUsername(), username)) {
+                for (Profile profile : user.userProfile) {
+                    if (profile.get2FAStatus()) {
                         System.out.print("\nSending an OTP for 2 Factor Authentication.");
                         SecuritySystem.sendOTP();
                         System.out.print("\nEnter your OTP: ");
                         String inputOTP = input.nextLine();
 
-                        if (!SecuritySystem.verifyOTP(inputOTP))
-                        {
+                        if (!SecuritySystem.verifyOTP(inputOTP)) {
                             System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
                             try {
                                 Thread.sleep(30000);
@@ -615,23 +635,18 @@ public class User {
     }
 
     public static void changePhoneNum(String username) {
-        //CONVERT: List -> Database
-        for (User user : BankSystem.users)
-        {
-            if (Objects.equals(getUsername(), username))
-            {
-                for (Profile profile : user.userProfile)
-                {
-                    if (profile.get2FAStatus())
-                    {
+        // CONVERT: List -> Database
+        for (User user : BankSystem.users) {
+            if (Objects.equals(getUsername(), username)) {
+                for (Profile profile : user.userProfile) {
+                    if (profile.get2FAStatus()) {
                         System.out.print("\nSending an OTP for 2 Factor Authentication.");
                         SecuritySystem.sendOTP();
 
                         System.out.print("\nEnter your OTP: ");
                         String inputOTP = input.nextLine();
 
-                        if (!SecuritySystem.verifyOTP(inputOTP))
-                        {
+                        if (!SecuritySystem.verifyOTP(inputOTP)) {
                             System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
                             try {
                                 Thread.sleep(30000);
@@ -653,15 +668,11 @@ public class User {
     }
 
     public static void changeUsername(String username) {
-        //CONVERT: List -> Database
-        for (User user : BankSystem.users)
-        {
-            if (Objects.equals(getUsername(), username))
-            {
-                for (Profile profile : user.userProfile)
-                {
-                    if (profile.get2FAStatus())
-                    {
+        // CONVERT: List -> Database
+        for (User user : BankSystem.users) {
+            if (Objects.equals(getUsername(), username)) {
+                for (Profile profile : user.userProfile) {
+                    if (profile.get2FAStatus()) {
                         System.out.print("\nSending an OTP for 2 Factor Authentication.");
                         SecuritySystem.sendOTP();
 
@@ -669,8 +680,7 @@ public class User {
                         String inputOTP = input.nextLine();
                         input.nextLine();
 
-                        if (!SecuritySystem.verifyOTP(inputOTP))
-                        {
+                        if (!SecuritySystem.verifyOTP(inputOTP)) {
                             System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
                             try {
                                 Thread.sleep(30000);
@@ -692,15 +702,11 @@ public class User {
     }
 
     public static void change2FAStatus(String username) {
-        //CONVERT: List -> Database
-        for (User user : BankSystem.users)
-        {
-            if (Objects.equals(getUsername(), username))
-            {
-                for (Profile profile : user.userProfile)
-                {
-                    if (profile.get2FAStatus())
-                    {
+        // CONVERT: List -> Database
+        for (User user : BankSystem.users) {
+            if (Objects.equals(getUsername(), username)) {
+                for (Profile profile : user.userProfile) {
+                    if (profile.get2FAStatus()) {
                         System.out.print("\nSending an OTP for 2 Factor Authentication.");
                         SecuritySystem.sendOTP();
 
@@ -708,8 +714,7 @@ public class User {
                         String inputOTP = input.nextLine();
                         input.nextLine();
 
-                        if (!SecuritySystem.verifyOTP(inputOTP))
-                        {
+                        if (!SecuritySystem.verifyOTP(inputOTP)) {
                             System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
                             try {
                                 Thread.sleep(30000);
@@ -738,7 +743,7 @@ public class User {
         HelpAndResources.saveHelpAndResources(username, "Help", message, "");
     }
 
-    public static boolean isAdmin() { //CONVERT Database
+    public static boolean isAdmin() { // CONVERT Database
         return isAdmin;
     }
 
@@ -746,7 +751,7 @@ public class User {
         isAdmin = admin;
     }
 
-    public static boolean isCustomerService() { //CONVERT Database
+    public static boolean isCustomerService() { // CONVERT Database
         return isCustomerService;
     }
 
