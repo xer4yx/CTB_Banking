@@ -8,6 +8,7 @@ import java.sql.*;
 import java.util.Date;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.Scanner;
 
 public class BankSystem {
     static String url = "jdbc:mysql://localhost:3306/ctb_banking";
@@ -453,8 +454,7 @@ public class BankSystem {
     }
 
     public static void clearConsole() {
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
+
     }
 
     public static void saveDataToFile() {
