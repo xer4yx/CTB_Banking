@@ -1,11 +1,15 @@
 package com.ctb.classes;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Objects;
 import java.util.Scanner;
 
-class Admin extends User{
+class Admin extends User {
     private String adminID;
     private static final Scanner input = new Scanner(System.in);
+    private static Connection conn;
 
     /*----------------------Setter Methods----------------------*/
     private void setAdminID(String adminID) {
@@ -13,17 +17,19 @@ class Admin extends User{
     }
 
     /*----------------------Getter Methods----------------------*/
-    private String getAdminID() {return adminID;}
+    private String getAdminID() {
+        return adminID;
+    }
 
     /*----------------------Class Methods----------------------*/
     protected static void displayDashboardMenu(final String username) {
-        BankSystem.clearConsole();
+        System.out.print("\033[H\033[2J");
         System.out.print(
                 """
                         ╔═════════════════════════════════════╗
                         ║            Administrator            ║
                         ╚═════════════════════════════════════╝
-                                                               
+
                         ╔═════════════════════════════════════╗
                         ║         Dashboard Options:          ║
                         ╠═════════════════════════════════════╣
@@ -31,25 +37,74 @@ class Admin extends User{
                         ║  2. Help  Resources                 ║
                         ║  3. Logout                          ║
                         ╚═════════════════════════════════════╝
-                        Enter your choice:\s"""
-        );
+                        Enter your choice:\s""");
     }
 
-    private static boolean deleteUserByUsername(String userToDelete) { //CONVERT: List -> Database
-        var userIterator = BankSystem.getUsers().iterator();
-        while(userIterator.hasNext()) {
-            User user = userIterator.next();
-            if (getUsername().equals(userToDelete)) {
-                userIterator.remove();
-                BankSystem.saveDataToFile();
-                return true;
+    /*----------------------Database Connection----------------------*/
+    public void connectToDatabase() {
+        try {
+            Admin.conn = BankSystem.getConnection();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static boolean deleteUserByUsername(String userToDelete) {
+        try {
+            Connection conn = BankSystem.getConnection();
+            conn.setAutoCommit(false); // start transaction
+
+            // delete from transactions
+            String sql = "DELETE FROM transactions WHERE user_id IN (SELECT user_id FROM users WHERE username = ?)";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, userToDelete);
+            pstmt.executeUpdate();
+
+            // delete from sessions
+            sql = "DELETE FROM sessions WHERE user_id IN (SELECT user_id FROM users WHERE username = ?)";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, userToDelete);
+            pstmt.executeUpdate();
+
+            // delete from help_resources
+            sql = "DELETE FROM help_resources WHERE user_id IN (SELECT user_id FROM users WHERE username = ?)";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, userToDelete);
+            pstmt.executeUpdate();
+
+            // delete from users
+            sql = "DELETE FROM users WHERE username = ?";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, userToDelete);
+            int affectedRows = pstmt.executeUpdate();
+
+            conn.commit(); // end transaction
+
+            return affectedRows > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            if (conn != null) {
+                try {
+                    System.err.print("Transaction is being rolled back");
+                    conn.rollback();
+                } catch (SQLException excep) {
+                    excep.printStackTrace();
+                }
+            }
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
         }
         return false;
     }
 
-    protected static void handleManageUsers(String username) { //FIXME: Remove unused/obsolete parameter
-        BankSystem.clearConsole();
+    protected static void handleManageUsers(String username) { // FIXME: Remove unused/obsolete parameter
+        System.out.print("\033[H\033[2J");
         System.out.print(
                 """
 
@@ -61,8 +116,7 @@ class Admin extends User{
                         ║  3. Delete Users              ║
                         ║  4. Update Users              ║
                         ║  5. Exit                      ║
-                        ╚═══════════════════════════════╝"""
-        );
+                        ╚═══════════════════════════════╝""");
 
         System.out.print("Enter your choice: ");
         int choice = input.nextInt();
@@ -89,14 +143,13 @@ class Admin extends User{
     }
 
     private static void updateUser() {
-        BankSystem.clearConsole();
+        System.out.print("\033[H\033[2J");
         System.out.print(
                 """
 
                         ╭────────────────────────────────────────────────────────────────╮
                         │                         Update User                            │
-                        ╰────────────────────────────────────────────────────────────────╯"""
-        );
+                        ╰────────────────────────────────────────────────────────────────╯""");
         System.out.print("\nEnter the username of the user you want to update: ");
         String pickedUsername = input.nextLine();
         input.nextLine();
@@ -104,14 +157,13 @@ class Admin extends User{
     }
 
     private static void deleteUser() {
-        BankSystem.clearConsole();
+        System.out.print("\033[H\033[2J");
         System.out.print(
                 """
 
                         ╭────────────────────────────────────────────────────────────────╮
                         │                         Delete User                            │
-                        ╰────────────────────────────────────────────────────────────────╯"""
-        );
+                        ╰────────────────────────────────────────────────────────────────╯""");
         System.out.print("\nEnter the username of the user to delete: ");
         String user = input.nextLine();
         input.nextLine();
@@ -121,11 +173,10 @@ class Admin extends User{
             System.out.printf("User with username '%s' not found.", user);
         }
     }
+
     private static void displayUserData(String username) {
-        for (final User user : BankSystem.users)
-        {
-            if (Objects.equals(getUsername(), username))
-            {
+        for (final User user : BankSystem.users) {
+            if (Objects.equals(getUsername(), username)) {
                 handleUserData(user);
                 return; // Exit the loop once the user is found and displayed
             }
@@ -134,35 +185,31 @@ class Admin extends User{
     }
 
     private static void handleUserData(User user) {
-        //TODO: Separate method for displaying user info
-        //CONVERT: List -> Database
+        // TODO: Separate method for displaying user info
+        // CONVERT: List -> Database
         System.out.print(
                 "\n──────────────────────────────────────────────────────────────────" +
-                "\n                          Information:                            " +
-                "\n──────────────────────────────────────────────────────────────────" +
-                "\n  User ID                : " + user.getUserID() +
-                "\n  Name                   : " + user.getName() +
-                "\n  Username               : " + getUsername() +
-                "\n  Is Admin               : " + (BankSystem.isAdmin(getUsername()) ? "Yes" : "No") +
-                "\n  Is Customer Service    : " + (BankSystem.isCustomerService(getUsername()) ? "Yes" : "No") +
-                "\n  Product Type           : " + user.getProductType() +
-                "\n  Balance                : " + user.getBalance()
-        );
+                        "\n                          Information:                            " +
+                        "\n──────────────────────────────────────────────────────────────────" +
+                        "\n  User ID                : " + user.getUserID() +
+                        "\n  Name                   : " + user.getName() +
+                        "\n  Username               : " + getUsername() +
+                        "\n  Is Admin               : " + (BankSystem.isAdmin(getUsername()) ? "Yes" : "No") +
+                        "\n  Is Customer Service    : " + (BankSystem.isCustomerService(getUsername()) ? "Yes" : "No") +
+                        "\n  Product Type           : " + user.getProductType() +
+                        "\n  Balance                : " + user.getBalance());
 
         System.out.print(
                 """
 
                         ──────────────────────────────────────────────────────────────────
                                                    Profiles:                             \s
-                        ──────────────────────────────────────────────────────────────────"""
-        );
-        for (final Profile profile : user.userProfile)
-        {
+                        ──────────────────────────────────────────────────────────────────""");
+        for (final Profile profile : user.userProfile) {
             System.out.print(
                     "\n Email                  : " + profile.getEmail() +
-                    "\n  Phone                  : " + profile.getPhoneNumber() +
-                    "\n  Two-Factor Enabled     : " + (profile.get2FAStatus() ? "Yes" : "No")
-            );
+                            "\n  Phone                  : " + profile.getPhoneNumber() +
+                            "\n  Two-Factor Enabled     : " + (profile.get2FAStatus() ? "Yes" : "No"));
         }
 
         System.out.print(
@@ -170,16 +217,13 @@ class Admin extends User{
 
                         ──────────────────────────────────────────────────────────────────
                                               Transaction History:
-                        ──────────────────────────────────────────────────────────────────"""
-        );
-        for (final Transaction transaction : user.userTransaction)
-        {
+                        ──────────────────────────────────────────────────────────────────""");
+        for (final Transaction transaction : user.userTransaction) {
             System.out.print(
                     "\n  Transaction ID         : " + transaction.getTransactionID() +
-                    "\n  Transaction Type       : " + transaction.getTransactionType() +
-                    "\n  Amount                 : " + transaction.getAmount() +
-                    "\n  Timestamp              : " + transaction.getTimeStamp()
-            );
+                            "\n  Transaction Type       : " + transaction.getTransactionType() +
+                            "\n  Amount                 : " + transaction.getAmount() +
+                            "\n  Timestamp              : " + transaction.getTimeStamp());
         }
 
         System.out.print(
@@ -187,16 +231,13 @@ class Admin extends User{
 
                         ──────────────────────────────────────────────────────────────────
                                                   Sessions:
-                        ──────────────────────────────────────────────────────────────────"""
-        );
+                        ──────────────────────────────────────────────────────────────────""");
 
-        for (final Session session : user.userSessions)
-        {
+        for (final Session session : user.userSessions) {
             System.out.print(
                     "\n  Session ID             : " + session.getSessionID() +
-                    "\n  Username               : " + getUsername() +
-                    "\n  Timestamp              : " + session.getTimeStamp()
-            );
+                            "\n  Username               : " + getUsername() +
+                            "\n  Timestamp              : " + session.getTimeStamp());
         }
 
         System.out.print(
@@ -204,14 +245,11 @@ class Admin extends User{
 
                         ──────────────────────────────────────────────────────────────────
                                              Product Applications:
-                        ──────────────────────────────────────────────────────────────────"""
-        );
-        for (final ProductApplication productApp : user.userProductApplications)
-        {
+                        ──────────────────────────────────────────────────────────────────""");
+        for (final ProductApplication productApp : user.userProductApplications) {
             System.out.print(
-                "\n  Product ID             : " + productApp.getProductID() +
-                "\n  Product Type           : " + productApp.getProductType()
-            );
+                    "\n  Product ID             : " + productApp.getProductID() +
+                            "\n  Product Type           : " + productApp.getProductType());
 
         }
 
@@ -220,46 +258,40 @@ class Admin extends User{
 
                         ──────────────────────────────────────────────────────────────────
                                               Help and Resources:
-                        ──────────────────────────────────────────────────────────────────"""
-        );
-        for (final HelpAndResources resources : user.userHelpAndResources)
-        {
+                        ──────────────────────────────────────────────────────────────────""");
+        for (final HelpAndResources resources : user.userHelpAndResources) {
             System.out.print(
-                "\n  Help ID                : " + resources.getHelpID() +
-                "\n  Type                   : " + resources.getH_rType() +
-                "\n  Description            : " + resources.getH_rDescription() +
-                "\n  Feedback               : " + resources.getFeedback() +
-                "\n──────────────────────────────────────────────────────────────────"
-            );
+                    "\n  Help ID                : " + resources.getHelpID() +
+                            "\n  Type                   : " + resources.getH_rType() +
+                            "\n  Description            : " + resources.getH_rDescription() +
+                            "\n  Feedback               : " + resources.getFeedback() +
+                            "\n──────────────────────────────────────────────────────────────────");
         }
         System.out.print(
                 """
 
                         ╔═══════════════════════════════════════════════════════════════════════════╗
                         ║╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳╳║
-                        ╚═══════════════════════════════════════════════════════════════════════════╝"""
-        );
+                        ╚═══════════════════════════════════════════════════════════════════════════╝""");
     }
 
     private static void displayAllUserData() {
-        //TODO: Separate method for displaying user info
-        //CONVERT: List -> Database
-        BankSystem.clearConsole();
+        // TODO: Separate method for displaying user info
+        // CONVERT: List -> Database
+        System.out.print("\033[H\033[2J");
         System.out.print(
                 """
 
                         ╔════════════════════════════════════════════════════════╗
                         ║                   View Users Data                      ║
-                        ╚════════════════════════════════════════════════════════╝"""
-        );
-        for (final User user : BankSystem.users)
-        {
+                        ╚════════════════════════════════════════════════════════╝""");
+        for (final User user : BankSystem.users) {
             handleUserData(user);
         }
         System.out.print("\nPress enter to continue...");
     }
 
-    private static void makeUserAdmin(String username) { //CONVERT: List -> Database
+    private static void makeUserAdmin(String username) { // CONVERT: List -> Database
         for (final User user : BankSystem.users) {
             if (getUsername().equals(username)) {
                 user.setAdminStatus(true);
@@ -269,7 +301,7 @@ class Admin extends User{
         }
     }
 
-    private static void makeUserCustomerService(String username) { //CONVERT: List -> Database
+    private static void makeUserCustomerService(String username) { // CONVERT: List -> Database
         for (final User user : BankSystem.users) {
             if (getUsername().equals(username)) {
                 user.setCSStatus(true);
@@ -281,7 +313,7 @@ class Admin extends User{
 
     public static void handleSettings(String username) {
         while (true) {
-            //FIXME: Remove unused vars
+            // FIXME: Remove unused vars
             String newPassword, newEmail, newPhoneNumber, newUsername;
             char new2FA;
             displayUserData(username);
@@ -304,13 +336,11 @@ class Admin extends User{
                             ║  11. Make a Purchase(Credit Only)   ║
                             ║  12. Bills Payment(Credit Only)     ║
                             ║  13. Back to Profile                ║
-                            ╚═════════════════════════════════════╝"""
-            );
+                            ╚═════════════════════════════════════╝""");
             System.out.print("Enter: ");
             int choice = input.nextInt();
             input.nextLine();
-            switch (choice)
-            {
+            switch (choice) {
                 case 1:
                     System.out.print("Enter new password: ");
                     newPassword = input.nextLine();
@@ -371,7 +401,7 @@ class Admin extends User{
                     System.out.print("*Invalid choice. Please select a valid option.");
                     break;
             }
-            BankSystem.clearConsole();
+            System.out.print("\033[H\033[2J");
         }
     }
 
@@ -417,7 +447,7 @@ class Admin extends User{
         amount = input.nextInt();
         input.nextLine();
         System.out.print("Enter the description of the purchase: ");
-        purchaseDescription =  input.nextLine();
+        purchaseDescription = input.nextLine();
         input.nextLine();
         if (Transaction.makePurchase(username, amount, purchaseDescription)) {
             System.out.print("Purchase made successfully.");

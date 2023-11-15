@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 public class BankSystem {
     static String url = "jdbc:mysql://localhost:3306/ctb_banking";
     static String userDB = "root";
-    static String passwordDB = "Vertig@6925";
+    static String passwordDB = "password";
     private static String driver = "com.mysql.cj.jdbc.Driver";
     private final SecuritySystem system = new SecuritySystem();
     private static long currentUserID;
@@ -37,7 +37,9 @@ public class BankSystem {
         BankSystem.currentUserID = currentUserID;
     }
 
-    protected static void setCurrentLoggedInUser(String username) {currentLoggedInUser = username;}
+    protected static void setCurrentLoggedInUser(String username) {
+        currentLoggedInUser = username;
+    }
 
     protected static void setCurrentProductType(String productType) {
         try {
@@ -79,7 +81,7 @@ public class BankSystem {
 
             dataSet = statement.executeQuery();
 
-            if(dataSet.next()) {
+            if (dataSet.next()) {
                 return dataSet.getDouble("balance");
             } else {
                 throw new DataRetrievalException("Balance Irretrievable");
@@ -94,30 +96,51 @@ public class BankSystem {
         return -1.0;
     }
 
-    @Deprecated
-    protected static List<User> getUsers() {return users;} //TODO: delete obsolete
+    public static Connection getConnection() throws SQLException {
+        try {
+            Class.forName(driver);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return DriverManager.getConnection(url, userDB, passwordDB);
+    }
 
     @Deprecated
-    protected List<Profile> getProfiles() {return profiles;} //TODO: delete obsolete
+    protected static List<User> getUsers() {
+        return users;
+    } // TODO: delete obsolete
 
     @Deprecated
-    protected static List<Transaction> getTransactionHistory() {return transactionHistory;} //TODO: delete obsolete
+    protected List<Profile> getProfiles() {
+        return profiles;
+    } // TODO: delete obsolete
 
     @Deprecated
-    protected List<ProductApplication> getProductApplications() {return productApplications;} //TODO: delete obsolete
+    protected static List<Transaction> getTransactionHistory() {
+        return transactionHistory;
+    } // TODO: delete obsolete
 
     @Deprecated
-    protected List<Session> getSessions() {return sessions;} //TODO: delete obsolete
+    protected List<ProductApplication> getProductApplications() {
+        return productApplications;
+    } // TODO: delete obsolete
 
     @Deprecated
-    protected List<Dashboard> getDashboards() {return dashboards;} //TODO: delete obsolete
+    protected List<Session> getSessions() {
+        return sessions;
+    } // TODO: delete obsolete
+
+    @Deprecated
+    protected List<Dashboard> getDashboards() {
+        return dashboards;
+    } // TODO: delete obsolete
 
     /*----------------------Class Methods----------------------*/
     @Deprecated
     public BankSystem(String dataFile) {
         dataFilePath = dataFile;
         loadDataFromFile();
-    } //TODO: delete obsolete
+    } // TODO: delete obsolete
 
     @Deprecated
     protected static void clearConsole() {
@@ -127,7 +150,7 @@ public class BankSystem {
         ansi.cursor(0, 0);
         System.out.print(ansi.toString());
         AnsiConsole.systemUninstall();
-    } //TODO: delete obsolete
+    } // TODO: delete obsolete
 
     protected static void closeResources(Connection connection, PreparedStatement statement, ResultSet dataSet) {
         try {
@@ -158,7 +181,7 @@ public class BankSystem {
         }
     }
 
-    protected static double showInterestEarned(){
+    protected static double showInterestEarned() {
         double interestRate = 0.05;
         double interestEarned = 0;
         double principal = 0;
@@ -180,7 +203,7 @@ public class BankSystem {
             statement.setString(2, "Deposit");
 
             dataSet = statement.executeQuery();
-            while(dataSet.next()) {
+            while (dataSet.next()) {
                 principal += dataSet.getDouble("amount");
                 Date transactionDate = dataSet.getDate("timestamp");
                 long diffInMillis = Math.abs(now.getTime() - transactionDate.getTime());
@@ -215,7 +238,7 @@ public class BankSystem {
             statement.setString(2, "Bill Payment");
 
             dataSet = statement.executeQuery();
-            while(dataSet.next()) {
+            while (dataSet.next()) {
                 totalPaid += dataSet.getDouble("amount");
             }
 
@@ -246,7 +269,7 @@ public class BankSystem {
             statement.setString(2, "Purchase");
 
             dataSet = statement.executeQuery();
-            while(dataSet.next()) {
+            while (dataSet.next()) {
                 totalSpent += dataSet.getDouble("amount");
             }
 
@@ -277,7 +300,7 @@ public class BankSystem {
             statement.setString(2, "Deposit");
 
             dataSet = statement.executeQuery();
-            while(dataSet.next()) {
+            while (dataSet.next()) {
                 totalNet += dataSet.getDouble("amount");
             }
 
@@ -293,7 +316,7 @@ public class BankSystem {
     }
 
     @Deprecated
-    protected static double showInterestEarned(String username) { //TODO: delete obsolete
+    protected static double showInterestEarned(String username) { // TODO: delete obsolete
         double interestRate = 0.05; // Annual interest rate
         double interestEarned = 0;
 
@@ -322,17 +345,13 @@ public class BankSystem {
     }
 
     @Deprecated
-    protected static double calculateTotalPaid(String username) { //TODO: delete obsolete
+    protected static double calculateTotalPaid(String username) { // TODO: delete obsolete
         double totalPaid = 0;
 
-        for (final User user : users)
-        {
-            if (Objects.equals(User.getUsername(), username))
-            {
-                for (final Transaction transaction : getTransactionHistory())
-                {
-                    if (Objects.equals(transaction.getTransactionType(), "Bill Payment"))
-                    {
+        for (final User user : users) {
+            if (Objects.equals(User.getUsername(), username)) {
+                for (final Transaction transaction : getTransactionHistory()) {
+                    if (Objects.equals(transaction.getTransactionType(), "Bill Payment")) {
                         totalPaid += transaction.getAmount();
                     }
                 }
@@ -343,18 +362,14 @@ public class BankSystem {
     }
 
     @Deprecated
-    protected static double calculateTotalSpent(String username) { //TODO: delete obsolete
+    protected static double calculateTotalSpent(String username) { // TODO: delete obsolete
         double totalSpent = 0;
 
-        for (final User user : users)
-        {
-            if (Objects.equals(User.getUsername(), username))
-            {
-                for (final Transaction transaction : getTransactionHistory())
-                {
+        for (final User user : users) {
+            if (Objects.equals(User.getUsername(), username)) {
+                for (final Transaction transaction : getTransactionHistory()) {
                     if (Objects.equals(transaction.getTransactionType(), "Purchase") ||
-                            Objects.equals(transaction.getTransactionType(), "Deposit"))
-                    {
+                            Objects.equals(transaction.getTransactionType(), "Deposit")) {
                         totalSpent += transaction.getAmount();
                     }
                 }
@@ -364,16 +379,12 @@ public class BankSystem {
     }
 
     @Deprecated
-    protected static double calculateTotalNet(String username) { //TODO: delete obsolete
+    protected static double calculateTotalNet(String username) { // TODO: delete obsolete
         double totalNet = 0;
-        for (final User user : users)
-        {
-            if (Objects.equals(User.getUsername(), username))
-            {
-                for (final Transaction transaction : getTransactionHistory())
-                {
-                    if (Objects.equals(transaction.getTransactionType(), "Deposit"))
-                    {
+        for (final User user : users) {
+            if (Objects.equals(User.getUsername(), username)) {
+                for (final Transaction transaction : getTransactionHistory()) {
+                    if (Objects.equals(transaction.getTransactionType(), "Deposit")) {
                         totalNet += transaction.getAmount();
                     }
                 }
@@ -433,9 +444,9 @@ public class BankSystem {
         return false;
     }
 
-    protected static boolean createUser(String fname, String mname, String lname,String username, String password, String email, String phoneNum, char twoFA, String productType) {
-        if (User.isUsernameTaken(username))
-        {
+    protected static boolean createUser(String fname, String mname, String lname, String username, String password,
+            String email, String phoneNum, char twoFA, String productType) {
+        if (User.isUsernameTaken(username)) {
             System.out.print("Username is already taken. Please choose another one.");
             return false;
         }
@@ -454,7 +465,8 @@ public class BankSystem {
         try {
             connection = DriverManager.getConnection(url, userDB, passwordDB);
 
-            String query = "INSERT INTO users (user_id, fname, mname, lname, username, password, email, phone_number, " +
+            String query = "INSERT INTO users (user_id, fname, mname, lname, username, password, email, phone_number, "
+                    +
                     "is2fa, is_admin, is_customerservice, product_type, balance) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
             try {
@@ -470,7 +482,7 @@ public class BankSystem {
                 statement.setString(8, phoneNum);
                 statement.setBoolean(9, SecuritySystem.enable2FA(twoFA));
                 statement.setBoolean(10, false);
-                statement.setBoolean(11,false);
+                statement.setBoolean(11, false);
                 statement.setString(12, productType);
                 statement.setDouble(13, 0.00);
 
@@ -491,7 +503,7 @@ public class BankSystem {
     }
 
     @Deprecated
-    protected void loadDataFromFile() { //TODO: delete obsolete
+    protected void loadDataFromFile() { // TODO: delete obsolete
         try {
             BufferedReader file = new BufferedReader(new FileReader(dataFilePath));
             StringBuilder data = new StringBuilder();
@@ -516,9 +528,9 @@ public class BankSystem {
                 user.setProductType(item.optString("producttype", ""));
                 user.setBalance(item.optDouble("balance", 0.0));
 
-                if(item.has("profiles")) {
+                if (item.has("profiles")) {
                     JSONArray profileArray = item.getJSONArray(("profiles"));
-                    for(int n = 0; n < profileArray.length(); n++) {
+                    for (int n = 0; n < profileArray.length(); n++) {
                         JSONObject profileItem = profileArray.getJSONObject(n);
 
                         Profile profile = new Profile();
@@ -596,7 +608,7 @@ public class BankSystem {
     }
 
     @Deprecated
-    protected static void saveDataToFile() { //TODO: delete obsolete
+    protected static void saveDataToFile() { // TODO: delete obsolete
         BufferedWriter dataWriter = null;
 
         try {
@@ -607,7 +619,7 @@ public class BankSystem {
                 JSONObject dataClient = new JSONObject();
                 dataClient.put("id", user.getUserID());
                 dataClient.put("name", user.getName());
-                dataClient.put("username", user.getUsername());  // Use the user's username
+                dataClient.put("username", user.getUsername()); // Use the user's username
                 dataClient.put("password", user.getPassword());
                 dataClient.put("isadmin", user.isAdmin());
                 dataClient.put("iscustomerservice", user.isCustomerService());
@@ -640,7 +652,7 @@ public class BankSystem {
                 for (Session session : user.userSessions) {
                     JSONObject dataSession = new JSONObject();
                     dataSession.put("sessionID", session.getSessionID());
-                    dataSession.put("username", user.getUsername());  // Use the user's username
+                    dataSession.put("username", user.getUsername()); // Use the user's username
                     dataSession.put("timestamp", session.getTimeStamp());
                     sessionsJsonArray.put(dataSession);
                 }
@@ -684,6 +696,5 @@ public class BankSystem {
             }
         }
     }
-
 
 }

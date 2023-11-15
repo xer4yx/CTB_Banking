@@ -9,10 +9,11 @@ import static com.ctb.classes.BankSystem.*;
 
 public class Display {
     private static final Scanner input = new Scanner(System.in);
+
     public static void displayMainMenu() {
         System.out.print(
                 """
-                        
+
                         ╔══════════════════════════════════════╗
                         ║      ╔═══════════════════════╗       ║
                         ║      ║   CENTRAL TRUST BANK  ║       ║
@@ -26,25 +27,23 @@ public class Display {
                         │ │  4. Exit                         │ │
                         │ └──────────────────────────────────┘ │
                         └──────────────────────────────────────┘
-                        Enter your choice:\s"""
-        );
+                        Enter your choice:\s""");
     }
 
-     public static boolean loginUser() {
-        BankSystem.clearConsole(); //TODO: delete this
-         System.out.print(
-                 """
-      
+    public static boolean loginUser() {
+        System.out.print("\033[H\033[2J"); // TODO: delete this
+        System.out.print(
+                """
+
                         ╔══════════════════════════════════════╗
                         ║      ╔═══════════════════════╗       ║
                         ║      ║   CENTRAL TRUST BANK  ║       ║
                         ║      ╚═══════════════════════╝       ║
                         ╚══════════════════════════════════════╝
-                                                              
+
                         ╔══════════════════════════════════════╗
                         ║                Login                 ║
-                        ╚══════════════════════════════════════╝"""
-         );
+                        ╚══════════════════════════════════════╝""");
         String username, password;
         System.out.print("\nEnter username: ");
         username = input.nextLine();
@@ -54,23 +53,21 @@ public class Display {
         if (SecuritySystem.authenticateUser(username, password)) {
             System.out.print(
                     """
-                            
+
                             ╔══════════════════════════════════════╗
                             ║          Login successful!           ║
-                            ╚══════════════════════════════════════╝"""
-            );
+                            ╚══════════════════════════════════════╝""");
             System.out.print("\nPress Enter to continue...");
             return true;
         } else {
             System.out.print(
                     """
                             Please try again.
-                            
-                            """
-            );
+
+                            """);
             System.out.print("Press Enter to continue...");
             input.nextLine();
-            BankSystem.clearConsole(); //TODO: delete this
+            System.out.print("\033[H\033[2J"); // TODO: delete this
             return false;
         }
     }
@@ -87,23 +84,22 @@ public class Display {
         System.out.print("\nLogged out successfully.");
     }
 
-     public static void forgotPassword() {
-         BankSystem.clearConsole(); //TODO: delete this
-         System.out.print(
-                 """
-                         ╭────────────────────────────────────────────────────────────╮
-                         │                     Forgot Password                        │
-                         ╰────────────────────────────────────────────────────────────╯"""
-         );
-         char choice;
-         System.out.print("\nEnter your email: ");
-         String email = input.nextLine();
-         boolean emailFound = false;
+    public static void forgotPassword() {
+        System.out.print("\033[H\033[2J"); // TODO: delete this
+        System.out.print(
+                """
+                        ╭────────────────────────────────────────────────────────────╮
+                        │                     Forgot Password                        │
+                        ╰────────────────────────────────────────────────────────────╯""");
+        char choice;
+        System.out.print("\nEnter your email: ");
+        String email = input.nextLine();
+        boolean emailFound = false;
 
-         //TODO: Separate method for handling forgot pass (should be inside User)
-         //CONVERT: List -> Database
+        // TODO: Separate method for handling forgot pass (should be inside User)
+        // CONVERT: List -> Database
 
-         for (User user : BankSystem.users) {
+        for (User user : BankSystem.users) {
             for (Profile profile : user.userProfile) {
                 if (Objects.equals(profile.getEmail(), email)) {
                     System.out.print("---Email found!---");
@@ -124,15 +120,14 @@ public class Display {
                             """
                                     ──────────────────────────────────────────────────────────────
                                     Enter new password:\s
-                                    """
-                    );
+                                    """);
                     String newpass = input.nextLine();
                     User.changePassword(User.getUsername());
                     System.out.print("---Password changed successfully!---");
                     emailFound = true;
                 }
             }
-         }
+        }
 
         if (!emailFound) {
             System.out.print("\n*Email not found. Please try again.");
@@ -142,47 +137,48 @@ public class Display {
     public static void handleDashboardOptions() {
         while (true) {
             User.displayDashboardMenu(getCurrentLoggedInUser());
-            String productType = BankSystem.getCurrentProductType(BankSystem.getCurrentLoggedInUser()); //TODO: delete this
+            String productType = BankSystem.getCurrentProductType(BankSystem.getCurrentLoggedInUser()); // TODO: delete
+                                                                                                        // this
             int choice = input.nextInt();
             input.nextLine();
-            if (User.isAdmin()) { //TODO: modularize
+            if (User.isAdmin()) { // TODO: modularize
                 switch (choice) {
                     case 1:
                         Admin.handleManageUsers(getCurrentLoggedInUser());
                         input.nextLine();
                         break;
                     case 2:
-                        BankSystem.clearConsole(); //TODO: delete this
+                        System.out.print("\033[H\033[2J"); // TODO: delete this
                         CustomerService.displayAllHR();
                         CustomerService.replyToHelp();
                         break;
                     case 3:
                         logout(getCurrentLoggedInUser());
-                        System.out.print("\nPress Enter to continue..."); //TODO: implement inside logout()
+                        System.out.print("\nPress Enter to continue..."); // TODO: implement inside logout()
                         input.nextLine();
-                        BankSystem.clearConsole(); //TODO: delete this
+                        System.out.print("\033[H\033[2J"); // TODO: delete this
                         return;
                     default:
                         System.out.print("*Invalid choice. Please select a valid option.");
                 }
-            } else if (User.isCustomerService()) { //TODO: modularize
+            } else if (User.isCustomerService()) { // TODO: modularize
                 switch (choice) {
                     case 1:
-                        BankSystem.clearConsole(); //TODO: delete this
+                        System.out.print("\033[H\033[2J"); // TODO: delete this
                         CustomerService.displayAllHR();
                         CustomerService.replyToHelp();
                         break;
                     case 2:
                         logout(getCurrentLoggedInUser());
                         setCurrentLoggedInUser("");
-                        System.out.print("Press Enter to continue..."); //TODO: implement inside logout()
+                        System.out.print("Press Enter to continue..."); // TODO: implement inside logout()
                         input.nextLine();
-                        BankSystem.clearConsole(); //TODO: delete this
+                        System.out.print("\033[H\033[2J"); // TODO: delete this
                         return;
                     default:
                         System.out.print("*Invalid choice. Please select a valid option.");
                 }
-            } else { //TODO: modularize
+            } else { // TODO: modularize
                 switch (choice) {
                     case 1:
                         handleProductOptions(getCurrentProductType(getCurrentLoggedInUser()), getCurrentLoggedInUser());
@@ -200,12 +196,11 @@ public class Display {
                         logout(getCurrentLoggedInUser());
                         System.out.print(
                                 """
-                                        
+
                                         ──────────────────────────────────
-                                        Press Enter to continue..."""
-                        );
+                                        Press Enter to continue...""");
                         input.nextLine();
-                        BankSystem.clearConsole(); //TODO: delete this
+                        System.out.print("\033[H\033[2J"); // TODO: delete this
                         return;
                     default:
                         System.out.print("*Invalid choice. Please select a valid option.");
@@ -230,10 +225,10 @@ public class Display {
         handleCreditCenter(username);
     }
 
-    protected static void displayTransactionMenu(final String username) { //TODO: delete parameter
+    protected static void displayTransactionMenu(final String username) { // TODO: delete parameter
         System.out.print(
                 """
-                        
+
                         ╔═════════════════════════════════════╗
                         ║         Transaction Center:         ║
                         ╠═════════════════════════════════════╣
@@ -242,11 +237,10 @@ public class Display {
                         ║  3. View Transaction History        ║
                         ║  4. Back to Dashboard               ║
                         ╚═════════════════════════════════════╝
-                        Enter your choice:\s"""
-        );
+                        Enter your choice:\s""");
     }
 
-    protected static void displayTransactionCredit(final String username) { //TODO: delete parameter
+    protected static void displayTransactionCredit(final String username) { // TODO: delete parameter
         System.out.print(
                 """
                         ╔═════════════════════════════════════╗
@@ -257,40 +251,34 @@ public class Display {
                         ║  3. View Transaction History        ║
                         ║  4. Back to Dashboard               ║
                         ╚═════════════════════════════════════╝
-                        Enter your choice:\s"""
-        );
+                        Enter your choice:\s""");
     }
 
     protected static void displayTransactionHistory(final String username) {
-        //TODO: Make method for printing and displaying data from database
-        //CONVERT: List -> Database
+        // TODO: Make method for printing and displaying data from database
+        // CONVERT: List -> Database
 
-        for (final User user : BankSystem.users)
-        {
-            if (Objects.equals(User.getUsername(), username))
-            {
+        for (final User user : BankSystem.users) {
+            if (Objects.equals(User.getUsername(), username)) {
                 System.out.print(
                         """
                                 ╔═════════════════════════════════════╗
                                 ║        Transaction History          ║
-                                ╚═════════════════════════════════════╝"""
-                );
+                                ╚═════════════════════════════════════╝""");
                 System.out.print(
                         "User: " + User.getUsername() +
-                        "\n───────────────────────────────────────");
-                for (final Transaction transaction : user.userTransaction)
-                {
+                                "\n───────────────────────────────────────");
+                for (final Transaction transaction : user.userTransaction) {
                     SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
                     Date date = new Date(transaction.getTimeStamp());
                     String formattedDate = sdf.format(date);
                     System.out.print(
                             "\nTransaction ID: " + transaction.getTransactionID() +
-                            "\nTransaction Type: " + transaction.getTransactionType() +
-                            "\nAmount: $" + transaction.getAmount() +
-                            "\nTimestamp: " + formattedDate +
-                            "\nDescription: " + transaction.getDescription() +
-                            "\n───────────────────────────────────────"
-                    );
+                                    "\nTransaction Type: " + transaction.getTransactionType() +
+                                    "\nAmount: $" + transaction.getAmount() +
+                                    "\nTimestamp: " + formattedDate +
+                                    "\nDescription: " + transaction.getDescription() +
+                                    "\n───────────────────────────────────────");
                 }
             }
         }
@@ -309,8 +297,9 @@ public class Display {
                 case 2:
                     User.processWithdrawal(username);
                     break;
-                case 3:;
-            BankSystem.clearConsole(); //TODO: delete this
+                case 3:
+                    ;
+                    System.out.print("\033[H\033[2J"); // TODO: delete this
                     displayTransactionHistory(username);
                     System.out.print("Press Enter to continue...");
                     input.nextLine();
@@ -333,14 +322,14 @@ public class Display {
             switch (transactionChoice) {
                 case 1:
                     User.processPurchase(username);
-            BankSystem.clearConsole(); //TODO: delete this
+                    System.out.print("\033[H\033[2J"); // TODO: delete this
                     break;
                 case 2:
                     User.processBills(username);
-                    BankSystem.clearConsole(); //TODO: delete this
+                    System.out.print("\033[H\033[2J"); // TODO: delete this
                     break;
                 case 3:
-                    BankSystem.clearConsole(); //TODO: delete this
+                    System.out.print("\033[H\033[2J"); // TODO: delete this
                     displayTransactionHistory(username);
                     System.out.print("Press Enter to continue...");
                     input.nextLine();
@@ -353,8 +342,8 @@ public class Display {
         }
     }
 
-     public static void handleHelpAndResources(final String username) { //TODO: delete parameter
-        BankSystem.clearConsole(); //TODO: delete this
+    public static void handleHelpAndResources(final String username) { // TODO: delete parameter
+        System.out.print("\033[H\033[2J"); // TODO: delete this
         System.out.print(
                 """
                         ╔═════════════════════════════════════╗
@@ -364,25 +353,23 @@ public class Display {
                         ║  2. Contact US                      ║
                         ║  3. Back to Dashboard               ║
                         ╚═════════════════════════════════════╝
-                        Enter your choice:\s"""
-        );
+                        Enter your choice:\s""");
 
         int jhchoice = input.nextInt();
         input.nextLine();
-        switch (jhchoice) { //TODO: modularize
+        switch (jhchoice) { // TODO: modularize
             case 1:
                 System.out.print(
                         """
                                 Hi! I'm your AI Assistant. How may I help you?
-                                Enter inquiry:\\s"""
-                );
+                                Enter inquiry:\\s""");
                 String message = input.nextLine();
                 HelpAndResources.chatBot(message, BankSystem.getCurrentLoggedInUser());
                 System.out.print("Press Enter to continue...");
                 input.nextLine();
                 break;
             case 2:
-                BankSystem.clearConsole(); //TODO: delete this
+                System.out.print("\033[H\033[2J"); // TODO: delete this
                 System.out.print(
                         """
                                 ╭────────────────────────────────────────────────╮
@@ -396,8 +383,7 @@ public class Display {
                                 │  1. Send a message                             │
                                 │  2. Back to Dashboard                          │
                                 ╰────────────────────────────────────────────────╯
-                                Enter your choice:\s"""
-                );
+                                Enter your choice:\s""");
 
                 int schoice = input.nextInt();
                 if (schoice == 1) {
@@ -406,8 +392,7 @@ public class Display {
                             """
                                     Message sent successfully!
                                     Press Enter to continue...
-                                    """
-                    );
+                                    """);
                     input.nextLine();
                 } else if (schoice == 2) {
                     break;
@@ -422,41 +407,32 @@ public class Display {
                 System.out.print("Press Enter to continue...");
                 input.nextLine();
         }
-     }
+    }
 
     public static void viewAnalyticsDashBoard(final String username) {
-        //TODO: modularize
-        //CONVERT: List -> Database
+        // TODO: modularize
+        // CONVERT: List -> Database
 
-        for (final User user : BankSystem.users)
-        {
-            if (Objects.equals(BankSystem.getCurrentLoggedInUser(), username))
-            {
-                BankSystem.clearConsole(); //TODO: delete this
+        for (final User user : BankSystem.users) {
+            if (Objects.equals(BankSystem.getCurrentLoggedInUser(), username)) {
+                System.out.print("\033[H\033[2J"); // TODO: delete this
                 System.out.print(
                         """
                                 ╔═════════════════════════════════════╗
                                 ║           Data Analytics            ║
-                                ╚═════════════════════════════════════╝"""
-                );
+                                ╚═════════════════════════════════════╝""");
                 System.out.print(
                         "\nName: " + user.getName() +
-                        "\n───────────────────────────────────────"
-                );
-                if (Objects.equals(user.getProductType(), "Savings Account"))
-                {
+                                "\n───────────────────────────────────────");
+                if (Objects.equals(user.getProductType(), "Savings Account")) {
                     System.out.print(
                             "\nTotal Net worth: " + BankSystem.calculateTotalNet() +
-                            "\nTotal Interest Earned: " + BankSystem.showInterestEarned()
-                    );
-                }
-                else if (Objects.equals(getCurrentProductType(getCurrentLoggedInUser()), "Credit Account"))
-                {
+                                    "\nTotal Interest Earned: " + BankSystem.showInterestEarned());
+                } else if (Objects.equals(getCurrentProductType(getCurrentLoggedInUser()), "Credit Account")) {
                     System.out.print(
                             "\nTotal Spent: " + calculateTotalSpent() +
-                            "\nTotal Paid: " + calculateTotalPaid() +
-                            "───────────────────────────────────────"
-                    );
+                                    "\nTotal Paid: " + calculateTotalPaid() +
+                                    "───────────────────────────────────────");
                 }
             }
         }

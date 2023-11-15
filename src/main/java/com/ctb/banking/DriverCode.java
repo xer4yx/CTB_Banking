@@ -10,7 +10,7 @@ public class DriverCode {
     public static Scanner input = new Scanner(System.in);
 
     public static void main(String[] args) {
-        new BankSystem("bank_data.json"); // TODO: delete this
+
         boolean isRunning = true;
         while (isRunning) {
             Display.displayMainMenu();
