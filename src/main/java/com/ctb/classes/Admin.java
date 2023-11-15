@@ -2,7 +2,6 @@ package com.ctb.classes;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Objects;
 import java.util.Scanner;
 
 import com.ctb.exceptions.DataDeletionException;
@@ -10,7 +9,6 @@ import com.ctb.exceptions.DataRetrievalException;
 import com.ctb.exceptions.DataUpdateException;
 
 import java.sql.*;
-import java.util.Scanner;
 
 class Admin extends User {
     private String adminID;
@@ -134,9 +132,6 @@ class Admin extends User {
 
     public static void handleSettings(String username) {
         while (true) {
-            // FIXME: Remove unused vars
-            String newPassword, newEmail, newPhoneNumber, newUsername;
-            char new2FA;
             displayUserData(username);
             System.out.print(
                     """
@@ -160,38 +155,38 @@ class Admin extends User {
                             ╚═════════════════════════════════════╝""");
             System.out.print("Enter: ");
             int choice = input.nextInt();
-            input.nextLine();
+            input.nextLine(); // Move cursor to next line
             switch (choice) {
                 case 1:
                     System.out.print("Enter new password: ");
-                    newPassword = input.nextLine();
-                    Admin.changePassword(username);
+                    String newPassword = input.nextLine();
+                    Admin.changePassword(username, newPassword);
                     break;
 
                 case 2:
                     System.out.print("Enter new email: ");
-                    newEmail = input.nextLine();
-                    Admin.changeEmail(username);
+                    String newEmail = input.nextLine();
+                    Admin.changeEmail(username, newEmail);
                     break;
 
                 case 3:
                     System.out.print("Enter new phone: ");
-                    newPhoneNumber = input.nextLine();
-                    Admin.changePhoneNum(username);
+                    String newPhoneNumber = input.nextLine();
+                    Admin.changePhoneNum(username, newPhoneNumber);
                     break;
 
                 case 4:
                     System.out.print("Enter new username: ");
-                    newUsername = input.nextLine();
-                    Admin.changeUsername(username);
+                    String newUsername = input.nextLine();
+                    Admin.changeUsername(username, newUsername);
                     break;
 
                 case 5:
                     System.out.print("Do you want to enable 2FA?(Y/N): ");
-                    new2FA = input.next().charAt(0);
-                    Admin.change2FAStatus(username);
+                    char new2FA = input.next().charAt(0);
+                    input.nextLine(); // Move cursor to next line
+                    Admin.change2FAStatus(username, new2FA);
                     break;
-
                 case 6:
                     displayActivityLog(username);
                     break;
@@ -223,6 +218,7 @@ class Admin extends User {
                     break;
             }
         }
+
     }
 
     private static void updateUser() {

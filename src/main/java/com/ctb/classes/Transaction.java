@@ -1,5 +1,9 @@
 package com.ctb.classes;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Objects;
 import java.util.Random;
@@ -71,31 +75,53 @@ public class Transaction {
     }
 
     protected static boolean depositFunds(String username, double amount) {
-        for (User user : BankSystem.users) {
-            if (Objects.equals(User.getUsername(), username)) {
-                // Check for 2FA within profiles of the user
-                if (handleVerification(user))
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT * FROM users WHERE username = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                if (handleVerification(username))
                     return false;
 
-                Transaction depositTransaction = new Transaction();
-                depositTransaction.transactionID = generateTransactionID();
-                depositTransaction.transactionType = "Deposit";
-                depositTransaction.amount = amount;
-                depositTransaction.timeStamp = Calendar.getInstance().getTimeInMillis();
+                String transactionID = generateTransactionID();
+                long timeStampMillis = Calendar.getInstance().getTimeInMillis();
+                java.sql.Timestamp timeStamp = new java.sql.Timestamp(timeStampMillis);
 
-                user.userTransaction.add(depositTransaction);
-                user.setBalance(amount);
+                sql = "INSERT INTO transactions (transaction_id, transact_type, amount, timestamp, user_id) VALUES (?, ?, ?, ?, ?)";
+                pstmt = conn.prepareStatement(sql);
+                pstmt.setString(1, transactionID);
+                pstmt.setString(2, "Deposit");
+                pstmt.setDouble(3, amount);
+                pstmt.setTimestamp(4, timeStamp);
+                pstmt.setLong(5, rs.getLong("user_id"));
+                pstmt.executeUpdate();
 
-                BankSystem.saveDataToFile();
+                sql = "UPDATE users SET balance = balance + ? WHERE username = ?";
+                pstmt = conn.prepareStatement(sql);
+                pstmt.setDouble(1, amount);
+                pstmt.setString(2, username);
+                pstmt.executeUpdate();
+
                 return true;
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return false;
     }
 
-    private static boolean handleVerification(User user) {
-        for (final Profile profile : user.userProfile) {
-            if (profile.get2FAStatus()) {
+    private static boolean handleVerification(String username) {
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT * FROM users WHERE username = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next() && rs.getBoolean("is2fa")) {
                 System.out.print("\nSending an OTP for 2 Factor Authentication.");
                 SecuritySystem.sendOTP();
 
@@ -112,15 +138,22 @@ public class Transaction {
                     return true;
                 }
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return false;
     }
 
     protected static boolean withdrawFunds(String username, double amount) {
-        for (User user : BankSystem.users) {
-            if (Objects.equals(User.getUsername(), username)) {
-                // Check for 2FA within profiles of the user
-                if (handleVerification(user))
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT * FROM users WHERE username = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                if (handleVerification(username))
                     return false;
 
                 if (amount <= 0.0) {
@@ -128,34 +161,49 @@ public class Transaction {
                     return false;
                 }
 
-                if (user.getBalance() >= amount) {
-                    Transaction withdrawTransaction = new Transaction();
-                    withdrawTransaction.transactionID = generateTransactionID(); // Call a function to generate a unique
-                                                                                 // transaction ID
-                    withdrawTransaction.transactionType = "Withdrawal";
-                    withdrawTransaction.amount = amount;
-                    withdrawTransaction.timeStamp = Calendar.getInstance().getTimeInMillis();
+                if (rs.getDouble("balance") >= amount) {
+                    String transactionID = generateTransactionID();
+                    long timeStampMillis = Calendar.getInstance().getTimeInMillis();
+                    java.sql.Timestamp timeStamp = new java.sql.Timestamp(timeStampMillis);
 
-                    user.userTransaction.add(withdrawTransaction);
-                    user.setBalance(user.getBalance() - amount);
+                    sql = "INSERT INTO transactions (transaction_id, transact_type, amount, timestamp, user_id) VALUES (?, ?, ?, ?, ?)";
+                    pstmt = conn.prepareStatement(sql);
+                    pstmt.setString(1, transactionID);
+                    pstmt.setString(2, "Withdrawal");
+                    pstmt.setDouble(3, amount);
+                    pstmt.setTimestamp(4, timeStamp);
+                    pstmt.setLong(5, rs.getLong("user_id"));
+                    pstmt.executeUpdate();
 
-                    BankSystem.saveDataToFile();
+                    sql = "UPDATE users SET balance = balance - ? WHERE username = ?";
+                    pstmt = conn.prepareStatement(sql);
+                    pstmt.setDouble(1, amount);
+                    pstmt.setString(2, username);
+                    pstmt.executeUpdate();
+
                     return true;
                 } else {
                     System.out.print("\n*Insufficient balance. Withdrawal failed.");
                     return false;
                 }
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         System.out.print("*User not found. Withdrawal failed.");
         return false;
     }
 
     protected static boolean makePurchase(String username, double amount, String purchaseDescription) {
-        for (User user : BankSystem.users) {
-            if (Objects.equals(User.getUsername(), username)) {
-                // Check for 2FA within profiles of the user
-                if (handleVerification(user))
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT * FROM users WHERE username = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                if (handleVerification(username))
                     return false;
 
                 if (amount <= 0.0) {
@@ -163,71 +211,90 @@ public class Transaction {
                     return false;
                 }
 
-                // Check if the user's balance will go below -5000 after the purchase
-                if (user.getBalance() - amount < -5000.0) {
+                if (rs.getDouble("balance") - amount < -5000.0) {
                     System.out.print("*Insufficient credit limit. Purchase failed.");
                     return false;
                 }
 
-                // Update user's transaction history
-                Transaction purchaseTransaction = new Transaction();
-                purchaseTransaction.transactionID = generateTransactionID();
-                purchaseTransaction.transactionType = "Purchase";
-                purchaseTransaction.amount = amount;
-                purchaseTransaction.timeStamp = Calendar.getInstance().getTimeInMillis();
-                purchaseTransaction.description = purchaseDescription;
+                String transactionID = generateTransactionID();
+                long timeStampMillis = Calendar.getInstance().getTimeInMillis();
+                java.sql.Timestamp timeStamp = new java.sql.Timestamp(timeStampMillis);
 
-                user.userTransaction.add(purchaseTransaction);
+                sql = "INSERT INTO transactions (transaction_id, transact_type, amount, timestamp, user_id, description) VALUES (?, ?, ?, ?, ?, ?)";
+                pstmt = conn.prepareStatement(sql);
+                pstmt.setString(1, transactionID);
+                pstmt.setString(2, "Purchase");
+                pstmt.setDouble(3, amount);
+                pstmt.setTimestamp(4, timeStamp);
+                pstmt.setLong(5, rs.getLong("user_id"));
+                pstmt.setString(6, purchaseDescription);
+                pstmt.executeUpdate();
 
-                // Update user's balance (subtract the purchase amount for a credit card)
-                user.setBalance(user.getBalance() - amount);
+                sql = "UPDATE users SET balance = balance - ? WHERE username = ?";
+                pstmt = conn.prepareStatement(sql);
+                pstmt.setDouble(1, amount);
+                pstmt.setString(2, username);
+                pstmt.executeUpdate();
 
-                // Save the updated user data to the file
-                BankSystem.saveDataToFile();
                 System.out.print(
                         "Purchase of $" + amount + " successful. " +
-                                "Description: " + purchaseDescription);
+                                "\nDescription: " + purchaseDescription);
 
                 return true;
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         System.out.print("*User not found. Purchase failed.");
         return false;
     }
 
     protected static boolean payBills(String username, double amount, String billDescription) {
-        for (User user : BankSystem.users) {
-            if (Objects.equals(User.getUsername(), username)) {
-                if (handleVerification(user))
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT * FROM users WHERE username = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                if (handleVerification(username))
                     return false;
 
                 if (amount <= 0.0) {
                     System.out.print("*Invalid bill amount. Please enter a positive amount.");
                     return false;
                 }
-                if (user.getBalance() <= amount) {
 
-                    Transaction billTransaction = new Transaction();
-                    billTransaction.transactionID = generateTransactionID();
-                    billTransaction.transactionType = "Bill Payment";
-                    billTransaction.amount = amount;
-                    billTransaction.timeStamp = Calendar.getInstance().getTimeInMillis();
-                    billTransaction.description = billDescription;
-                    user.userTransaction.add(billTransaction);
+                String transactionID = generateTransactionID();
+                long timeStampMillis = Calendar.getInstance().getTimeInMillis();
+                java.sql.Timestamp timeStamp = new java.sql.Timestamp(timeStampMillis);
 
-                    user.setBalance(amount);
-                    BankSystem.saveDataToFile();
+                sql = "INSERT INTO transactions (transaction_id, transact_type, amount, timestamp, user_id, description) VALUES (?, ?, ?, ?, ?, ?)";
+                pstmt = conn.prepareStatement(sql);
+                pstmt.setString(1, transactionID);
+                pstmt.setString(2, "BP");
+                pstmt.setString(2, "Bill Payment");
+                pstmt.setDouble(3, amount);
+                pstmt.setTimestamp(4, timeStamp);
+                pstmt.setLong(5, rs.getLong("user_id"));
+                pstmt.setString(6, billDescription);
+                pstmt.executeUpdate();
 
-                    System.out.print(
-                            "Bill payment of $" + amount + " successful. " +
-                                    " Description: " + billDescription);
+                sql = "UPDATE users SET balance = balance + ? WHERE username = ?";
+                pstmt = conn.prepareStatement(sql);
+                pstmt.setDouble(1, amount);
+                pstmt.setString(2, username);
+                pstmt.executeUpdate();
 
-                    return true;
-                } else {
-                    System.out.print("*Insufficient balance. Bill payment failed.");
-                    return false;
-                }
+                System.out.print(
+                        "Bill payment of $" + amount + " successful. " +
+                                "\nDescription: " + billDescription);
+
+                return true;
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         System.out.print("*User not found. Bill payment failed.");
         return false;
