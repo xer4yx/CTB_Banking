@@ -73,8 +73,20 @@ public class User {
     }
 
     /*----------------------Getter Methods----------------------*/
-    public String getUserID() {
-        return this.userID;
+    public static long getUserId(String username) {
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT user_id FROM users WHERE username = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getLong("user_id");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
     }
 
     public String getName() {
@@ -256,21 +268,26 @@ public class User {
             statement.setLong(1, BankSystem.getCurrentUserID());
 
             dataSet = statement.executeQuery();
-            if (dataSet.next()) {
+            boolean hasSessions = false;
+            while (dataSet.next()) {
                 long user_id = dataSet.getLong("user_id");
-                System.out.print(
-                        "\n╔════════════════════════════════════════════╗" +
-                                "\n║               Session History              ║" +
-                                "\n╚════════════════════════════════════════════╝" +
-                                "\n User: " + getCurrentLoggedInUser() +
-                                "\n──────────────────────────────────────────────");
                 if (Objects.equals(user_id, getCurrentUserID())) {
+                    if (!hasSessions) {
+                        System.out.print(
+                                "\n╔════════════════════════════════════════════╗" +
+                                        "\n║               Session History              ║" +
+                                        "\n╚════════════════════════════════════════════╝" +
+                                        "\n User: " + getCurrentLoggedInUser() +
+                                        "\n──────────────────────────────────────────────");
+                        hasSessions = true;
+                    }
                     System.out.print(
-                            "\n Session ID: " + dataSet.getLong("session_id") +
+                            "\n Session ID: " + dataSet.getString("session_id") +
                                     "\n Timestamp: " + dataSet.getDate("timestamp") +
                                     "\n──────────────────────────────────────────────");
                 }
-            } else {
+            }
+            if (!hasSessions) {
                 throw new DataRetrievalException("There are no sessions for this user.");
             }
 
@@ -804,9 +821,17 @@ public class User {
 
         try {
             Connection conn = BankSystem.getConnection();
-            String sql = "INSERT INTO help_and_resources (username, type, message) VALUES (?, 'Help', ?)";
+            String sql = "INSERT INTO help_resources (user_id, hr_type, hr_description) VALUES (?, 'Help', ?)";
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, username);
+
+            // Get the user_id of the user
+            long userId = User.getUserId(username);
+            if (userId == -1) {
+                System.out.println("User with username " + username + " not found.");
+                return;
+            }
+
+            pstmt.setLong(1, userId);
             pstmt.setString(2, message);
             pstmt.executeUpdate();
         } catch (SQLException e) {
