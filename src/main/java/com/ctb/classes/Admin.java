@@ -1,7 +1,5 @@
 package com.ctb.classes;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Scanner;
 
 import com.ctb.exceptions.DataDeletionException;
@@ -118,7 +116,26 @@ class Admin extends User {
         deleteUserByUsername(user);
     }
 
+    public static boolean isUserExists(String username) {
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT * FROM users WHERE username = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public static void handleSettings(String username) {
+        // Check if the user exists in the database
+        if (!Admin.isUserExists(username)) {
+            System.out.println("User with username " + username + " not found.");
+            handleManageUsers();
+        }
         while (true) {
             displayUserData(username);
             System.out.print(
@@ -146,6 +163,7 @@ class Admin extends User {
             input.nextLine(); // Move cursor to next line
             switch (choice) {
                 case 1:
+
                     System.out.print("Enter new password: ");
                     String newPassword = input.nextLine();
                     Admin.changePassword(username, newPassword);
