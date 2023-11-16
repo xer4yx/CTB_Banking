@@ -92,8 +92,8 @@ public class HelpAndResources {
         }
     }
 
-    public static long generateUniqueHrId() {
-        return new Random().nextLong();
+    public static int generateUniqueHrId() {
+        return new Random().nextInt(100) + 1;
     }
 
     protected static void saveHelpAndResources(final String username, final String h_rType, final String h_rDescription,

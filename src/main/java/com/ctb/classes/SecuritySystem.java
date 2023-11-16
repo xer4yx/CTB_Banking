@@ -164,7 +164,7 @@ class SecuritySystem {
         Scanner scanner = new Scanner(System.in);
         System.out.print("\nEnter your OTP: ");
         inputOTP = scanner.nextLine();
-        scanner.close();
+        // scanner.close(); // Removed this line to prevent NoSuchElementException
 
         if (!verifyOTP(inputOTP)) {
             System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
