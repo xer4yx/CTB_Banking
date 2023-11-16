@@ -11,19 +11,7 @@ import com.ctb.exceptions.DataUpdateException;
 import java.sql.*;
 
 class Admin extends User {
-    private String adminID;
     private static final Scanner input = new Scanner(System.in);
-    private Connection conn;
-
-    /*----------------------Setter Methods----------------------*/
-    private void setAdminID(String adminID) {
-        this.adminID = adminID;
-    }
-
-    /*----------------------Getter Methods----------------------*/
-    private String getAdminID() {
-        return adminID;
-    }
 
     /*----------------------Class Methods----------------------*/
     protected static void displayDashboardMenu(final String username) {
@@ -47,7 +35,7 @@ class Admin extends User {
     /*----------------------Database Connection----------------------*/
     public void connectToDatabase() {
         try {
-            this.conn = BankSystem.getConnection();
+            BankSystem.getConnection();
         } catch (SQLException e) {
             e.printStackTrace();
         }
