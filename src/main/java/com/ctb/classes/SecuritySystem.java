@@ -161,8 +161,10 @@ class SecuritySystem {
         sendOTP();
 
         String inputOTP;
+        Scanner scanner = new Scanner(System.in);
         System.out.print("\nEnter your OTP: ");
-        inputOTP = new Scanner(System.in).nextLine();
+        inputOTP = scanner.nextLine();
+        // scanner.close(); // Removed this line to prevent NoSuchElementException
 
         if (!verifyOTP(inputOTP)) {
             System.out.print("\n*Incorrect OTP. Timeout for 30 seconds...");
@@ -174,14 +176,6 @@ class SecuritySystem {
             return true;
         }
         return false;
-    }
-
-    @Deprecated
-    protected static String getCurrentDate() { // TODO: delete this
-        LocalDate currTime = LocalDate.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-        return currTime.format(formatter);
     }
 
     protected static boolean securityStatus(final boolean status) {

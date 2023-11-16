@@ -61,6 +61,9 @@ public class Display {
                             ║          Login successful!           ║
                             ╚══════════════════════════════════════╝""");
             System.out.print("\nPress Enter to continue...");
+            if (input.hasNextLine()) {
+                input.nextLine(); // Consume the newline character
+            }
             return true;
         } else {
             System.out.print(
@@ -69,8 +72,10 @@ public class Display {
 
                             """);
             System.out.print("Press Enter to continue...");
-            input.nextLine();
-            BankSystem.clearConsole(); // TODO: delete this
+            if (input.hasNextLine()) {
+                input.nextLine(); // Consume the newline character
+            }
+            BankSystem.clearConsole();
             return false;
         }
     }
@@ -89,8 +94,16 @@ public class Display {
 
     public static void handleDashboardOptions() {
         while (true) {
+            input.nextLine();
             User.displayDashboardMenu(getCurrentLoggedInUser());
-            int choice = input.nextInt();
+            int choice = 0;
+            if (input.hasNextInt()) {
+                choice = input.nextInt();
+            } else {
+                System.out.println("Invalid input. Please enter an integer.");
+                input.next(); // Consume the invalid input
+                continue; // Skip the rest of the loop and start over
+            }
             input.nextLine();
 
             try {
