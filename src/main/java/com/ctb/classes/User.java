@@ -13,9 +13,7 @@ public class User {
     private static final Scanner input = new Scanner(System.in);
     private static final Calendar calendar = Calendar.getInstance();
     private static final Date date = calendar.getTime();
-    private static final Random rand = new Random();
     private static boolean isAdmin;
-    private String userID;
     private String name;
     private static String username;
     private String password;
@@ -40,7 +38,6 @@ public class User {
 
     /*----------------------Setter Methods----------------------*/
     public void setUserID(String userID) {
-        this.userID = userID;
     }
 
     public void setName(String name) {

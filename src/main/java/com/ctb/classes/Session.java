@@ -5,14 +5,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Objects;
 import java.util.Random;
 
 public class Session extends User { // TODO: transfer session methods to this class
     private static final Calendar calendar = Calendar.getInstance();
     private static final Random rand = new Random();
-    private static final Date currentTime = new Date();
     private static Session instance;
     private User userData;
     private String sessionID;
