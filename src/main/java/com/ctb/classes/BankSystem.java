@@ -415,7 +415,6 @@ public class BankSystem {
             return false;
         }
 
-        User newUser = new User();
         try {
             Class.forName(driver);
         } catch (ClassNotFoundException e) {
