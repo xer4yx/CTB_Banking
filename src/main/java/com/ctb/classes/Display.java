@@ -64,6 +64,7 @@ public class Display {
             if (input.hasNextLine()) {
                 input.nextLine(); // Consume the newline character
             }
+            Session.saveSession(BankSystem.getCurrentLoggedInUser(), "Login");
             return true;
         } else {
             System.out.print(
