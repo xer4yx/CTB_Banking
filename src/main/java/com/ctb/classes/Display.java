@@ -315,14 +315,14 @@ public class Display {
             switch (transactionChoice) {
                 case 1:
                     User.processPurchase(username);
-                    BankSystem.clearConsole(); // TODO: delete this
+                    BankSystem.clearConsole();
                     break;
                 case 2:
                     User.processBills(username);
-                    BankSystem.clearConsole(); // TODO: delete this
+                    BankSystem.clearConsole();
                     break;
                 case 3:
-                    BankSystem.clearConsole(); // TODO: delete this
+                    BankSystem.clearConsole();
                     displayTransaction(username);
                     System.out.print("Press Enter to continue...");
                     input.nextLine();
