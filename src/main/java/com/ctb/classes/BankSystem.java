@@ -320,7 +320,7 @@ public class BankSystem {
     }
 
     @Deprecated
-    protected static double showInterestEarned(String username) { // TODO: delete obsolete
+    protected static double showInterestEarned(String username) {
         double interestRate = 0.05; // Annual interest rate
         double interestEarned = 0;
 
@@ -458,6 +458,8 @@ public class BankSystem {
     }
 
     public static void clearConsole() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
 
     }
 

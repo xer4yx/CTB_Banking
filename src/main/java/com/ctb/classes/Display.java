@@ -167,7 +167,7 @@ public class Display {
                                 displayAnalytics(getCurrentLoggedInUser());
                                 break;
                             case 4:
-                                handleHelpAndResources(getCurrentLoggedInUser());
+                                handleHelpAndResources();
                                 break;
                             case 5:
                                 logout(getCurrentLoggedInUser());
@@ -374,7 +374,7 @@ public class Display {
         }
     }
 
-    public static void handleHelpAndResources(final String username) { // TODO: delete parameter
+    public static void handleHelpAndResources() {
         BankSystem.clearConsole(); // TODO: delete this
         System.out.print(
                 """

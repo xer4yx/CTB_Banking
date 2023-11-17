@@ -189,8 +189,7 @@ class CustomerService extends User {
 
     public static void displayAnalytics(String username) {
         try {
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/ctb_banking", "yourusername",
-                    "yourpassword");
+            Connection conn = BankSystem.getConnection();
 
             // Display total number of help resources
             Statement stmt = conn.createStatement();
