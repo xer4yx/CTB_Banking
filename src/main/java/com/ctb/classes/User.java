@@ -22,7 +22,6 @@ public class User {
     private String productType;
     private static boolean isCustomerService;
     private double balance;
-    public List<Profile> userProfile = new LinkedList<>();
     public List<Transaction> userTransaction = new LinkedList<>();
     public List<ProductApplication> userProductApplications = new LinkedList<>();
     public List<Session> userSessions = new LinkedList<>();
@@ -65,7 +64,7 @@ public class User {
     }
 
     public void setAdminStatus(boolean isAdmin) {
-        this.isAdmin = isAdmin;
+        User.isAdmin = isAdmin;
     }
 
     public void setBalance(double balance) {
@@ -599,7 +598,7 @@ public class User {
         }
     }
 
-    public static long generateUserID() {
+    public long generateUserID() {
         String timeString = new SimpleDateFormat("YYYYMMDDHHmm").format(date);
         String lastTwoDigitsOfTime = timeString.substring(timeString.length() - 2);
 
