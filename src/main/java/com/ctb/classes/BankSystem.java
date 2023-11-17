@@ -435,7 +435,7 @@ public class BankSystem {
             try {
                 statement = connection.prepareStatement(query);
 
-                statement.setLong(1, ProductApplication.generateProductID(productType));
+                statement.setLong(1, User.generateUserID());
                 statement.setString(2, fname);
                 statement.setString(3, mname);
                 statement.setString(4, lname);

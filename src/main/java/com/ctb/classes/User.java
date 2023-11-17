@@ -21,7 +21,6 @@ public class User {
     private static boolean isCustomerService;
     private double balance;
     public List<Transaction> userTransaction = new LinkedList<>();
-    public List<ProductApplication> userProductApplications = new LinkedList<>();
     public List<Session> userSessions = new LinkedList<>();
     public List<HelpAndResources> userHelpAndResources = new LinkedList<>();
 
@@ -670,7 +669,7 @@ public class User {
         }
     }
 
-    public long generateUserID() {
+    public static long generateUserID() {
         String timeString = new SimpleDateFormat("YYYYMMDDHHmm").format(date);
         String lastTwoDigitsOfTime = timeString.substring(timeString.length() - 2);
 
