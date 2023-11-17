@@ -13,16 +13,13 @@ public class User {
     private static final Scanner input = new Scanner(System.in);
     private static final Calendar calendar = Calendar.getInstance();
     private static final Date date = calendar.getTime();
-    private static final Random rand = new Random();
     private static boolean isAdmin;
-    private String userID;
     private String name;
     private static String username;
     private String password;
     private String productType;
     private static boolean isCustomerService;
     private double balance;
-    public List<Profile> userProfile = new LinkedList<>();
     public List<Transaction> userTransaction = new LinkedList<>();
     public List<ProductApplication> userProductApplications = new LinkedList<>();
     public List<Session> userSessions = new LinkedList<>();
@@ -41,7 +38,6 @@ public class User {
 
     /*----------------------Setter Methods----------------------*/
     public void setUserID(String userID) {
-        this.userID = userID;
     }
 
     public void setName(String name) {
@@ -65,7 +61,7 @@ public class User {
     }
 
     public void setAdminStatus(boolean isAdmin) {
-        this.isAdmin = isAdmin;
+        User.isAdmin = isAdmin;
     }
 
     public void setBalance(double balance) {
@@ -599,7 +595,7 @@ public class User {
         }
     }
 
-    public static long generateUserID() {
+    public long generateUserID() {
         String timeString = new SimpleDateFormat("YYYYMMDDHHmm").format(date);
         String lastTwoDigitsOfTime = timeString.substring(timeString.length() - 2);
 
