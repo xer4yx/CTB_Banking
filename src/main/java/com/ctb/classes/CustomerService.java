@@ -22,6 +22,7 @@ class CustomerService extends User {
                         ║         Dashboard Options:          ║
                         ╠═════════════════════════════════════╣
                         ║  1. Messages                        ║
+                        ║  2. Analytics                       ║
                         ║  2. Logout                          ║
                         ╚═════════════════════════════════════╝
                         Enter your choice:\s""");
@@ -183,6 +184,39 @@ class CustomerService extends User {
             System.err.print("\nError on Data Update: " + e.getMessage());
         } finally {
             BankSystem.closeResources(connection, statement);
+        }
+    }
+
+    public static void displayAnalytics(String username) {
+        try {
+            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/ctb_banking", "yourusername",
+                    "yourpassword");
+
+            // Display total number of help resources
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM help_resources");
+            if (rs.next()) {
+                System.out.println("Total number of help resources: " + rs.getInt(1));
+            }
+
+            // Display number of users with 2FA enabled
+            rs = stmt.executeQuery("SELECT COUNT(*) FROM users WHERE is2fa = 1");
+            if (rs.next()) {
+                System.out.println("Number of users with 2FA enabled: " + rs.getInt(1));
+            }
+
+            // Display number of active sessions
+            rs = stmt.executeQuery("SELECT COUNT(*) FROM sessions");
+            if (rs.next()) {
+                System.out.println("Number of active sessions: " + rs.getInt(1));
+            }
+
+            // Close resources
+            rs.close();
+            stmt.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }

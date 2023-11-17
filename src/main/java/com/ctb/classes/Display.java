@@ -125,6 +125,9 @@ public class Display {
                                 CustomerService.replyToHelp();
                                 break;
                             case 3:
+                                displayAnalytics(getCurrentLoggedInUser());
+                                break;
+                            case 4:
                                 logout(getCurrentLoggedInUser());
                                 System.out.print("\nPress Enter to continue...");
                                 input.nextLine();
@@ -140,6 +143,9 @@ public class Display {
                                 CustomerService.replyToHelp();
                                 break;
                             case 2:
+                                displayAnalytics(getCurrentLoggedInUser());
+                                break;
+                            case 3:
                                 logout(getCurrentLoggedInUser());
                                 setCurrentLoggedInUser("");
                                 System.out.print("Press Enter to continue...");
@@ -184,6 +190,29 @@ public class Display {
     }
 
     private static void displayAnalytics(String currentLoggedInUser) {
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT * FROM users WHERE username = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, currentLoggedInUser);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                if (rs.getBoolean("is_admin")) {
+                    Admin.displayAnalytics(currentLoggedInUser);
+                } else if (rs.getBoolean("is_customerservice")) {
+                    CustomerService.displayAnalytics(currentLoggedInUser);
+                } else {
+                    User.displayAnalytics(currentLoggedInUser);
+                }
+            }
+
+            rs.close();
+            pstmt.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void handleProductOptions(final String username) {

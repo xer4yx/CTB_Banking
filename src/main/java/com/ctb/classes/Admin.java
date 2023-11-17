@@ -25,7 +25,8 @@ class Admin extends User {
                         ╠═════════════════════════════════════╣
                         ║  1. Manage Users                    ║
                         ║  2. Help  Resources                 ║
-                        ║  3. Logout                          ║
+                        ║  3. Analytics                       ║
+                        ║  4. Logout                          ║
                         ╚═════════════════════════════════════╝
                         Enter your choice:\s""");
     }
@@ -448,4 +449,37 @@ class Admin extends User {
             System.out.print("Error: Unable to pay bill.");
         }
     }
+
+    public static void displayAnalytics(String username) {
+        try {
+            Connection conn = BankSystem.getConnection();
+
+            // Display total number of users
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM users");
+            if (rs.next()) {
+                System.out.println("Total number of users: " + rs.getInt(1));
+            }
+
+            // Display total number of transactions
+            rs = stmt.executeQuery("SELECT COUNT(*) FROM transactions");
+            if (rs.next()) {
+                System.out.println("Total number of transactions: " + rs.getInt(1));
+            }
+
+            // Display average transaction amount
+            rs = stmt.executeQuery("SELECT AVG(amount) FROM transactions");
+            if (rs.next()) {
+                System.out.println("Average transaction amount: " + rs.getDouble(1));
+            }
+
+            // Close resources
+            rs.close();
+            stmt.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

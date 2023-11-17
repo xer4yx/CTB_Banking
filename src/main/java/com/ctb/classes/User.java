@@ -415,37 +415,121 @@ public class User {
 
     public static void displayAnalytics(final String username) {
         try {
-            Connection conn = BankSystem.getConnection();
+            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/ctb_banking", "yourusername",
+                    "yourpassword");
             String sql = "SELECT * FROM users WHERE username = ?";
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, username);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                BankSystem.clearConsole();
                 System.out.print(
                         """
                                 ╔═════════════════════════════════════╗
-                                ║           Data Analytics            ║
+                                ║           User Analytics            ║
                                 ╚═════════════════════════════════════╝""");
                 System.out.print(
-                        "\nName: " + rs.getString("name") +
+                        "\nName: " + rs.getString("fname") + " " + rs.getString("lname") +
                                 "\n───────────────────────────────────────");
-                if (Objects.equals(rs.getString("productType"), "Savings Account")) {
+                if (Objects.equals(rs.getString("product_type"), "Savings Account")) {
+                    // Display total net worth and total interest earned
+                    // These methods need to be implemented
                     System.out.print(
-                            "\nTotal Net worth: " + BankSystem.calculateTotalNet() +
-                                    "\nTotal Interest Earned: " + BankSystem.showInterestEarned());
-                } else if (Objects.equals(rs.getString("productType"), "Credit Account")) {
+                            "\nTotal Net worth: " + calculateTotalNetWorth(username) +
+                                    "\nTotal Interest Earned: " + calculateTotalInterestEarned(username));
+                } else if (Objects.equals(rs.getString("product_type"), "Credit Account")) {
+                    // Display total spent and total paid
+                    // These methods need to be implemented
                     System.out.print(
-                            "\nTotal Spent: " + calculateTotalSpent() +
-                                    "\nTotal Paid: " + calculateTotalPaid() +
-                                    "───────────────────────────────────────");
+                            "\nTotal Spent: " + calculateTotalSpent(username) +
+                                    "\nTotal Paid: " + calculateTotalPaid(username));
                 }
             }
+            rs.close();
+            pstmt.close();
+            conn.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        System.out.print("Press Enter to continue...");
-        input.nextLine();
+    }
+
+    public static double calculateTotalNetWorth(final String username) {
+        double totalNetWorth = 0;
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT SUM(amount) FROM transactions WHERE user_id = (SELECT user_id FROM users WHERE username = ?) AND transact_type = 'deposit'";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                totalNetWorth = rs.getDouble(1);
+            }
+            rs.close();
+            pstmt.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return totalNetWorth;
+    }
+
+    public static double calculateTotalSpent(final String username) {
+        double totalSpent = 0;
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT SUM(amount) FROM transactions WHERE user_id = (SELECT user_id FROM users WHERE username = ?) AND transact_type = 'withdraw'";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                totalSpent = rs.getDouble(1);
+            }
+            rs.close();
+            pstmt.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return totalSpent;
+    }
+
+    public static double calculateTotalPaid(final String username) {
+        double totalPaid = 0;
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT SUM(amount) FROM transactions WHERE user_id = (SELECT user_id FROM users WHERE username = ?) AND transact_type = 'payment'";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                totalPaid = rs.getDouble(1);
+            }
+            rs.close();
+            pstmt.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return totalPaid;
+    }
+
+    public static double calculateTotalInterestEarned(final String username) {
+        double totalInterestEarned = 0;
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT SUM(amount) FROM transactions WHERE user_id = (SELECT user_id FROM users WHERE username = ?) AND transact_type = 'interest'";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                totalInterestEarned = rs.getDouble(1);
+            }
+            rs.close();
+            pstmt.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return totalInterestEarned;
     }
 
     public static void processDeposit(String username) {
