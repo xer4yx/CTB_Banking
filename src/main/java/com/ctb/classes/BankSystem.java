@@ -8,7 +8,6 @@ import java.sql.*;
 import java.util.Date;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.Scanner;
 
 public class BankSystem {
     static String url = "jdbc:mysql://localhost:3306/ctb_banking";
@@ -107,6 +106,16 @@ public class BankSystem {
             e.printStackTrace();
         }
         return DriverManager.getConnection(url, userDB, passwordDB);
+    }
+
+    public static void closeConnection(Connection conn) {
+        if (conn != null) {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /*----------------------Class Methods----------------------*/
@@ -427,7 +436,7 @@ public class BankSystem {
             try {
                 statement = connection.prepareStatement(query);
 
-                statement.setLong(1, newUser.generateUserID());
+                statement.setLong(1, ProductApplication.generateProductID(productType));
                 statement.setString(2, fname);
                 statement.setString(3, mname);
                 statement.setString(4, lname);

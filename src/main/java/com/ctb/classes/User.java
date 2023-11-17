@@ -26,15 +26,6 @@ public class User {
     public List<HelpAndResources> userHelpAndResources = new LinkedList<>();
 
     /*----------------------Constructor Methods----------------------*/
-    public User() {
-    }
-
-    @Deprecated
-    User(String name, String username, String productType) { // TODO: delete this
-        this.name = name;
-        User.username = username;
-        this.productType = productType;
-    }
 
     /*----------------------Setter Methods----------------------*/
     public void setUserID(String userID) {
