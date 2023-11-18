@@ -430,6 +430,9 @@ public class User {
                                     "\nTotal Paid: " + calculateTotalPaid(username));
                 }
             }
+
+            System.out.println("\n\nPress Enter to continue...");
+
             dataSet.close();
             statement.close();
             conn.close();
@@ -867,7 +870,7 @@ public class User {
 
                 boolean new2FAStatus = SecuritySystem.enable2FA(new2FA);
 
-                sql = "UPDATE users SET is2fa = ? WHERE username = ?"; // Changed '2FAStatus' to 'is2fa'
+                sql = "UPDATE users SET is2fa = ? WHERE username = ?";
                 statement = conn.prepareStatement(sql);
                 statement.setBoolean(1, new2FAStatus);
                 statement.setString(2, username);
@@ -959,7 +962,56 @@ public class User {
         return false;
     }
 
-    public void setCustomerService(boolean customerService) {
-        isCustomerService = customerService;
+    protected static void displayHelpHistory(long userID) {
+        PreparedStatement statement = null;
+        ResultSet dataSet = null;
+        boolean helpFound = false;
+        Connection connection = null;
+
+        try {
+            connection = DriverManager.getConnection(BankSystem.url, BankSystem.userDB, BankSystem.passwordDB);
+            String query = "SELECT * FROM help_resources WHERE user_id = ?";
+
+            statement = connection.prepareStatement(query);
+            statement.setLong(1, userID);
+
+            dataSet = statement.executeQuery();
+
+            if (dataSet.next()) {
+                long user_id = dataSet.getLong("user_id");
+                if (Objects.equals(user_id, userID)) {
+                    System.out.print(
+                            """
+
+                                    ╔═════════════════════════════════════════════════════════════╗
+                                    ║                        Help History                         ║
+                                    ╚═════════════════════════════════════════════════════════════╝
+                                    ───────────────────────────────────────────────────────────────""");
+                    System.out.print(
+                            "\nHelp ID: " + dataSet.getLong("hr_id") +
+                                    "\nType: " + dataSet.getString("hr_type") +
+                                    "\nDescription: " + dataSet.getString("hr_description"));
+                    String feedback = dataSet.getString("feedback");
+                    if (feedback == null || feedback.isEmpty()) {
+                        feedback = "No feedback yet.";
+                    }
+                    System.out.print(
+                            "\nFeedback: " + feedback +
+                                    "\n───────────────────────────────────────────────────────────────");
+
+                    helpFound = true;
+                }
+            } else {
+                throw new DataRetrievalException("User ID does not exist");
+            }
+        } catch (SQLException e) {
+            System.out.print("\nError on Data Retrieval: " + e.getMessage());
+        } finally {
+            if (!helpFound) {
+                System.out.print("No help history available for the user.");
+            }
+
+            BankSystem.closeResources(connection, statement, dataSet);
+        }
     }
 }

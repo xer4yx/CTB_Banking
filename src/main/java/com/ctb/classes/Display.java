@@ -146,6 +146,9 @@ public class Display {
                                 displayAnalytics(getCurrentLoggedInUser());
                                 break;
                             case 3:
+                                CustomerService.handleManageUsers();
+                                break;
+                            case 4:
                                 logout(getCurrentLoggedInUser());
                                 setCurrentLoggedInUser("");
                                 System.out.print("Press Enter to continue...");
