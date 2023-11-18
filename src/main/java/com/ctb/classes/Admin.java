@@ -285,7 +285,7 @@ class Admin extends User {
         }
     }
 
-    private static void displayAllUserData() {
+    static void displayAllUserData() {
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet dataSet = null;
