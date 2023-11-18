@@ -107,11 +107,16 @@ class CustomerService extends User {
                             ────────────────────────────────────────────""");
 
             while (dataSet.next()) {
+                String feedback = dataSet.getString("feedback");
+                if (feedback == null || feedback.isEmpty()) {
+                    feedback = "There is no feedback";
+                }
+
                 System.out.print(
                         "\nHelp ID: " + dataSet.getLong("hr_id") +
                                 "\nType: " + dataSet.getString("hr_type") +
                                 "\nDescription: " + dataSet.getString("hr_description") +
-                                "\nFeedback: " + dataSet.getString("feedback") +
+                                "\nFeedback: " + feedback +
                                 "\n────────────────────────────────────────────");
 
                 helpFound = true;
