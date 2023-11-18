@@ -77,8 +77,8 @@ public class Session extends User { // TODO: transfer session methods to this cl
             if (rs.next()) {
                 long userId = rs.getLong("user_id");
                 String sessionId = generateSessionID(sessionType);
-                long currentTimeInSeconds = System.currentTimeMillis() / 1000;
-                java.sql.Timestamp timeStamp = new java.sql.Timestamp(currentTimeInSeconds);
+                long currentTimeInMillis = System.currentTimeMillis();
+                java.sql.Timestamp timeStamp = new java.sql.Timestamp(currentTimeInMillis);
 
                 sql = "INSERT INTO sessions (session_id, timestamp, user_id) VALUES (?, ?, ?)";
                 pstmt = conn.prepareStatement(sql);
