@@ -87,7 +87,6 @@ public class Session extends User { // TODO: transfer session methods to this cl
                 pstmt.setLong(3, userId);
                 pstmt.executeUpdate();
 
-                BankSystem.saveDataToFile();
                 SecuritySystem.auditLog(true);
             } else {
                 SecuritySystem.auditLog(false);
