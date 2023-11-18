@@ -112,7 +112,7 @@ class CustomerService extends User {
                                 "\nType: " + dataSet.getString("hr_type") +
                                 "\nDescription: " + dataSet.getString("hr_description") +
                                 "\nFeedback: " + dataSet.getString("feedback") +
-                                "────────────────────────────────────────────");
+                                "\n────────────────────────────────────────────");
 
                 helpFound = true;
             }

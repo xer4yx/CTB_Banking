@@ -54,7 +54,7 @@ class Admin extends User {
                         ║  5. Exit                      ║
                         ╚═══════════════════════════════╝""");
 
-        System.out.print("Enter your choice: ");
+        System.out.print("\nEnter your choice: ");
         int choice = input.nextInt();
         input.nextLine();
         switch (choice) {
