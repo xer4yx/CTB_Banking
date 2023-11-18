@@ -50,7 +50,7 @@ public class Session extends User { // TODO: transfer session methods to this cl
     }
 
     /*----------------------Class Methods----------------------*/
-    protected static String generateSessionID(String sessionType) { // TODO: change structure String -> long
+    protected static String generateSessionID(String sessionType) {
         long time = calendar.getTimeInMillis();
         int randomNumber = rand.nextInt();
         String timeString = Long.toString(time);

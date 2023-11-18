@@ -64,6 +64,7 @@ public class Display {
             if (input.hasNextLine()) {
                 input.nextLine(); // Consume the newline character
             }
+            Session.saveSession(BankSystem.getCurrentLoggedInUser(), "Login");
             return true;
         } else {
             System.out.print(
@@ -124,6 +125,9 @@ public class Display {
                                 CustomerService.replyToHelp();
                                 break;
                             case 3:
+                                displayAnalytics(getCurrentLoggedInUser());
+                                break;
+                            case 4:
                                 logout(getCurrentLoggedInUser());
                                 System.out.print("\nPress Enter to continue...");
                                 input.nextLine();
@@ -139,6 +143,9 @@ public class Display {
                                 CustomerService.replyToHelp();
                                 break;
                             case 2:
+                                displayAnalytics(getCurrentLoggedInUser());
+                                break;
+                            case 3:
                                 logout(getCurrentLoggedInUser());
                                 setCurrentLoggedInUser("");
                                 System.out.print("Press Enter to continue...");
@@ -160,7 +167,7 @@ public class Display {
                                 displayAnalytics(getCurrentLoggedInUser());
                                 break;
                             case 4:
-                                handleHelpAndResources(getCurrentLoggedInUser());
+                                handleHelpAndResources();
                                 break;
                             case 5:
                                 logout(getCurrentLoggedInUser());
@@ -183,6 +190,29 @@ public class Display {
     }
 
     private static void displayAnalytics(String currentLoggedInUser) {
+        try {
+            Connection conn = BankSystem.getConnection();
+            String sql = "SELECT * FROM users WHERE username = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, currentLoggedInUser);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                if (rs.getBoolean("is_admin")) {
+                    Admin.displayAnalytics(currentLoggedInUser);
+                } else if (rs.getBoolean("is_customerservice")) {
+                    CustomerService.displayAnalytics(currentLoggedInUser);
+                } else {
+                    User.displayAnalytics(currentLoggedInUser);
+                }
+            }
+
+            rs.close();
+            pstmt.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void handleProductOptions(final String username) {
@@ -285,14 +315,14 @@ public class Display {
             switch (transactionChoice) {
                 case 1:
                     User.processPurchase(username);
-                    BankSystem.clearConsole(); // TODO: delete this
+                    BankSystem.clearConsole();
                     break;
                 case 2:
                     User.processBills(username);
-                    BankSystem.clearConsole(); // TODO: delete this
+                    BankSystem.clearConsole();
                     break;
                 case 3:
-                    BankSystem.clearConsole(); // TODO: delete this
+                    BankSystem.clearConsole();
                     displayTransaction(username);
                     System.out.print("Press Enter to continue...");
                     input.nextLine();
@@ -344,7 +374,7 @@ public class Display {
         }
     }
 
-    public static void handleHelpAndResources(final String username) { // TODO: delete parameter
+    public static void handleHelpAndResources() {
         BankSystem.clearConsole(); // TODO: delete this
         System.out.print(
                 """
