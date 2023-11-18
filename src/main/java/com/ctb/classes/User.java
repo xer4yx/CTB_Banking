@@ -405,8 +405,7 @@ public class User {
 
     public static void displayAnalytics(final String username) {
         try {
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/ctb_banking", "yourusername",
-                    "yourpassword");
+            Connection conn = BankSystem.getConnection();
             String sql = "SELECT * FROM users WHERE username = ?";
             PreparedStatement statement = conn.prepareStatement(sql);
             statement.setString(1, username);
@@ -431,8 +430,8 @@ public class User {
                                     "\nTotal Paid: " + calculateTotalPaid(username));
                 }
             }
-            rs.close();
-            pstmt.close();
+            dataSet.close();
+            statement.close();
             conn.close();
         } catch (SQLException e) {
             e.printStackTrace();
