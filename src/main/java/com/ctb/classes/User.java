@@ -73,11 +73,11 @@ public class User {
         try {
             Connection conn = BankSystem.getConnection();
             String sql = "SELECT user_id FROM users WHERE username = ?";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, username);
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                return rs.getLong("user_id");
+            PreparedStatement statement = conn.prepareStatement(sql);
+            statement.setString(1, username);
+            ResultSet dataSet = statement.executeQuery();
+            if (dataSet.next()) {
+                return dataSet.getLong("user_id");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -111,13 +111,13 @@ public class User {
             try {
                 Connection conn = BankSystem.getConnection();
                 String sql = "SELECT * FROM users WHERE username = ?";
-                PreparedStatement pstmt = conn.prepareStatement(sql);
-                pstmt.setString(1, username);
-                ResultSet rs = pstmt.executeQuery();
-                if (rs.next()) {
-                    if (rs.getBoolean("is_admin")) {
+                PreparedStatement statement = conn.prepareStatement(sql);
+                statement.setString(1, username);
+                ResultSet dataSet = statement.executeQuery();
+                if (dataSet.next()) {
+                    if (dataSet.getBoolean("is_admin")) {
                         Admin.displayDashboardMenu(username);
-                    } else if (rs.getBoolean("is_customerservice")) {
+                    } else if (dataSet.getBoolean("is_customerservice")) {
                         CustomerService.displayDashboardMenu();
                     } else {
                         System.out.print(
@@ -367,19 +367,19 @@ public class User {
         try {
             Connection conn = BankSystem.getConnection();
             String sql = "SELECT product_type FROM users WHERE username = ?";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, username);
-            ResultSet rs = pstmt.executeQuery();
+            PreparedStatement statement = conn.prepareStatement(sql);
+            statement.setString(1, username);
+            ResultSet dataSet = statement.executeQuery();
 
             String productType = null;
-            if (rs.next()) {
-                productType = rs.getString("product_type");
+            if (dataSet.next()) {
+                productType = dataSet.getString("product_type");
             }
 
             sql = "SELECT * FROM transactions WHERE user_id = (SELECT user_id FROM users WHERE username = ?)";
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, username);
-            rs = pstmt.executeQuery();
+            statement = conn.prepareStatement(sql);
+            statement.setString(1, username);
+            dataSet = statement.executeQuery();
 
             System.out.print(
                     """
@@ -390,23 +390,23 @@ public class User {
                     "User: " + username +
                             "\n───────────────────────────────────────");
 
-            while (rs.next()) {
+            while (dataSet.next()) {
                 SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-                Timestamp timestamp = rs.getTimestamp("timestamp");
+                Timestamp timestamp = dataSet.getTimestamp("timestamp");
                 String formattedDate = sdf.format(timestamp);
                 System.out.print(
-                        "\nTransaction ID: " + rs.getString("transaction_id") +
-                                "\nTransaction Type: " + rs.getString("transact_type") +
-                                "\nAmount: $" + rs.getDouble("amount") +
+                        "\nTransaction ID: " + dataSet.getString("transaction_id") +
+                                "\nTransaction Type: " + dataSet.getString("transact_type") +
+                                "\nAmount: $" + dataSet.getDouble("amount") +
                                 "\nTimestamp: " + formattedDate);
                 if (!"Savings Account".equals(productType)) {
-                    System.out.print("\nDescription: " + rs.getString("description"));
+                    System.out.print("\nDescription: " + dataSet.getString("description"));
                 }
                 System.out.print("\n───────────────────────────────────────");
             }
 
-            rs.close();
-            pstmt.close();
+            dataSet.close();
+            statement.close();
             conn.close();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -417,10 +417,10 @@ public class User {
         try {
             Connection conn = BankSystem.getConnection();
             String sql = "SELECT * FROM users WHERE username = ?";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, username);
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
+            PreparedStatement statement = conn.prepareStatement(sql);
+            statement.setString(1, username);
+            ResultSet dataSet = statement.executeQuery();
+            if (dataSet.next()) {
                 BankSystem.clearConsole();
                 System.out.print(
                         """
@@ -428,13 +428,13 @@ public class User {
                                 ║           Data Analytics            ║
                                 ╚═════════════════════════════════════╝""");
                 System.out.print(
-                        "\nName: " + rs.getString("name") +
+                        "\nName: " + dataSet.getString("name") +
                                 "\n───────────────────────────────────────");
-                if (Objects.equals(rs.getString("productType"), "Savings Account")) {
+                if (Objects.equals(dataSet.getString("productType"), "Savings Account")) {
                     System.out.print(
                             "\nTotal Net worth: " + BankSystem.calculateTotalNet() +
                                     "\nTotal Interest Earned: " + BankSystem.showInterestEarned());
-                } else if (Objects.equals(rs.getString("productType"), "Credit Account")) {
+                } else if (Objects.equals(dataSet.getString("productType"), "Credit Account")) {
                     System.out.print(
                             "\nTotal Spent: " + calculateTotalSpent() +
                                     "\nTotal Paid: " + calculateTotalPaid() +
@@ -607,10 +607,10 @@ public class User {
         try {
             Connection conn = BankSystem.getConnection();
             String sql = "SELECT * FROM users WHERE username = ?";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, username);
-            ResultSet rs = pstmt.executeQuery();
-            return rs.next();
+            PreparedStatement statement = conn.prepareStatement(sql);
+            statement.setString(1, username);
+            ResultSet dataSet = statement.executeQuery();
+            return dataSet.next();
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -621,11 +621,11 @@ public class User {
         try {
             Connection conn = BankSystem.getConnection();
             String sql = "SELECT * FROM users WHERE username = ?";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, username);
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                if (rs.getBoolean("is2fa")) {
+            PreparedStatement statement = conn.prepareStatement(sql);
+            statement.setString(1, username);
+            ResultSet dataSet = statement.executeQuery();
+            if (dataSet.next()) {
+                if (dataSet.getBoolean("is2fa")) {
                     SecuritySystem.sendOTP();
                     String inputOTP = input.nextLine();
                     input.nextLine();
@@ -640,10 +640,10 @@ public class User {
                 }
                 String encryptedPassword = SecuritySystem.encrypt(newPassword);
                 sql = "UPDATE users SET password = ? WHERE username = ?";
-                pstmt = conn.prepareStatement(sql);
-                pstmt.setString(1, encryptedPassword);
-                pstmt.setString(2, username);
-                pstmt.executeUpdate();
+                statement = conn.prepareStatement(sql);
+                statement.setString(1, encryptedPassword);
+                statement.setString(2, getCurrentLoggedInUser());
+                statement.executeUpdate();
                 System.out.print("Password changed to " + newPassword + " successfully.");
             }
         } catch (SQLException e) {
@@ -655,11 +655,11 @@ public class User {
         try {
             Connection conn = BankSystem.getConnection();
             String sql = "SELECT * FROM users WHERE username = ?";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, username);
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                if (rs.getBoolean("is2fa")) {
+            PreparedStatement statement = conn.prepareStatement(sql);
+            statement.setString(1, username);
+            ResultSet dataSet = statement.executeQuery();
+            if (dataSet.next()) {
+                if (dataSet.getBoolean("is2fa")) {
                     SecuritySystem.sendOTP();
                     String inputOTP = input.nextLine();
                     input.nextLine();
@@ -673,10 +673,10 @@ public class User {
                     }
                 }
                 sql = "UPDATE users SET email = ? WHERE username = ?";
-                pstmt = conn.prepareStatement(sql);
-                pstmt.setString(1, newEmail);
-                pstmt.setString(2, username);
-                pstmt.executeUpdate();
+                statement = conn.prepareStatement(sql);
+                statement.setString(1, newEmail);
+                statement.setString(2, username);
+                statement.executeUpdate();
                 System.out.print("Email changed to " + newEmail + " successfully.");
             }
         } catch (SQLException e) {
@@ -688,11 +688,11 @@ public class User {
         try {
             Connection conn = BankSystem.getConnection();
             String sql = "SELECT * FROM users WHERE username = ?";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, username);
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                if (rs.getBoolean("is2fa")) {
+            PreparedStatement statement = conn.prepareStatement(sql);
+            statement.setString(1, username);
+            ResultSet dataSet = statement.executeQuery();
+            if (dataSet.next()) {
+                if (dataSet.getBoolean("is2fa")) {
                     SecuritySystem.sendOTP();
                     String inputOTP = input.nextLine();
                     input.nextLine();
@@ -705,11 +705,11 @@ public class User {
                         return;
                     }
                 }
-                sql = "UPDATE users SET phone_number = ? WHERE username = ?";
-                pstmt = conn.prepareStatement(sql);
-                pstmt.setString(1, newPhoneNumber);
-                pstmt.setString(2, username);
-                pstmt.executeUpdate();
+                sql = "UPDATE users SET phone_number = ? WHERE username = ? AND user_id = ?";
+                statement = conn.prepareStatement(sql);
+                statement.setString(1, newPhoneNumber);
+                statement.setString(2, username);
+                statement.executeUpdate();
                 System.out.print("Phone number changed to " + newPhoneNumber + " successfully.");
             }
         } catch (SQLException e) {
@@ -721,11 +721,11 @@ public class User {
         try {
             Connection conn = BankSystem.getConnection();
             String sql = "SELECT is_admin FROM users WHERE username = ?";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, username);
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                return rs.getBoolean("is_admin");
+            PreparedStatement statement = conn.prepareStatement(sql);
+            statement.setString(1, username);
+            ResultSet dataSet = statement.executeQuery();
+            if (dataSet.next()) {
+                return dataSet.getBoolean("is_admin");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -737,15 +737,15 @@ public class User {
         try {
             Connection conn = BankSystem.getConnection();
             String sql = "SELECT * FROM users WHERE username = ?";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, username);
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
+            PreparedStatement statement = conn.prepareStatement(sql);
+            statement.setString(1, username);
+            ResultSet dataSet = statement.executeQuery();
+            if (dataSet.next()) {
                 sql = "UPDATE users SET username = ? WHERE username = ?";
-                pstmt = conn.prepareStatement(sql);
-                pstmt.setString(1, newUsername);
-                pstmt.setString(2, username);
-                pstmt.executeUpdate();
+                statement = conn.prepareStatement(sql);
+                statement.setString(1, newUsername);
+                statement.setString(2, username);
+                statement.executeUpdate();
                 System.out.print("Username changed to " + newUsername + " successfully.");
 
                 // Get the currently logged in user's username
@@ -777,11 +777,11 @@ public class User {
         try {
             Connection conn = BankSystem.getConnection();
             String sql = "SELECT * FROM users WHERE username = ?";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, username);
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                if (rs.getBoolean("is2fa")) { // Changed '2FAStatus' to 'is2fa'
+            PreparedStatement statement = conn.prepareStatement(sql);
+            statement.setString(1, username);
+            ResultSet dataSet = statement.executeQuery();
+            if (dataSet.next()) {
+                if (dataSet.getBoolean("is2fa")) { // Changed '2FAStatus' to 'is2fa'
                     SecuritySystem.sendOTP();
                     String inputOTP = input.nextLine();
                     input.nextLine();
@@ -798,10 +798,10 @@ public class User {
                 boolean new2FAStatus = SecuritySystem.enable2FA(new2FA);
 
                 sql = "UPDATE users SET is2fa = ? WHERE username = ?"; // Changed '2FAStatus' to 'is2fa'
-                pstmt = conn.prepareStatement(sql);
-                pstmt.setBoolean(1, new2FAStatus);
-                pstmt.setString(2, username);
-                pstmt.executeUpdate();
+                statement = conn.prepareStatement(sql);
+                statement.setBoolean(1, new2FAStatus);
+                statement.setString(2, username);
+                statement.executeUpdate();
 
                 String show2FAStatus = new2FAStatus ? "Enabled" : "Disabled";
                 System.out.print("Two Factor Authentication: " + show2FAStatus);
@@ -818,7 +818,7 @@ public class User {
         try {
             Connection conn = BankSystem.getConnection();
             String sql = "INSERT INTO help_resources (user_id, hr_type, hr_description) VALUES (?, 'Help', ?)";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
+            PreparedStatement statement = conn.prepareStatement(sql);
 
             // Get the user_id of the user
             long userId = User.getUserId(username);
@@ -827,16 +827,37 @@ public class User {
                 return;
             }
 
-            pstmt.setLong(1, userId);
-            pstmt.setString(2, message);
-            pstmt.executeUpdate();
+            statement.setLong(1, userId);
+            statement.setString(2, message);
+            statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     public static boolean isAdmin() { // CONVERT Database
-        return isAdmin;
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet dataSet = null;
+
+        try {
+            connection = DriverManager.getConnection(BankSystem.url, BankSystem.userDB, BankSystem.passwordDB);
+            String query = "SELECT is_admin FROM users WHERE user_id = ?";
+
+            statement = connection.prepareStatement(query);
+            statement.setLong(1, getCurrentUserID());
+
+            dataSet = statement.executeQuery();
+            if (dataSet.next()) {
+                return dataSet.getBoolean("is_admin");
+            }
+        } catch (SQLException e) {
+            System.err.print("Error in Data Retrieving: " + e.getMessage());
+        } finally {
+            BankSystem.closeResources(connection, statement, dataSet);
+        }
+
+        return false;
     }
 
     public void setAdmin(boolean admin) {
@@ -844,7 +865,28 @@ public class User {
     }
 
     public static boolean isCustomerService() { // CONVERT Database
-        return isCustomerService;
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet dataSet = null;
+
+        try {
+            connection = DriverManager.getConnection(BankSystem.url, BankSystem.userDB, BankSystem.passwordDB);
+            String query = "SELECT is_customerservice FROM users WHERE user_id = ?";
+
+            statement = connection.prepareStatement(query);
+            statement.setLong(1, getCurrentUserID());
+
+            dataSet = statement.executeQuery();
+            if (dataSet.next()) {
+                return dataSet.getBoolean("is_customerservice");
+            }
+        } catch (SQLException e) {
+            System.err.print("Error in Data Retrieving: " + e.getMessage());
+        } finally {
+            BankSystem.closeResources(connection, statement, dataSet);
+        }
+
+        return false;
     }
 
     public void setCustomerService(boolean customerService) {

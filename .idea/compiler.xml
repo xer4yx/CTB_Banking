@@ -12,7 +12,7 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="CTBBanking" options="--add-exports java.xml/com.sun.org.apache.xalan.internal.lib=ALL-UNNAMED" />
+      <module name="CTBBanking" options="" />
     </option>
   </component>
 </project>
