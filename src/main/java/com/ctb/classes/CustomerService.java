@@ -28,63 +28,6 @@ class CustomerService extends User {
                         Enter your choice:\s""");
     }
 
-    protected static void displayHelpHistory(long userID) { // TODO: Transfer to User
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet dataSet = null;
-        boolean helpFound = false;
-
-        try {
-            connection = DriverManager.getConnection(BankSystem.url, BankSystem.userDB, BankSystem.passwordDB);
-            String query = "SELECT * FROM help_resources WHERE user_id = ?";
-
-            statement = connection.prepareStatement(query);
-            statement.setLong(1, userID);
-
-            dataSet = statement.executeQuery();
-
-            if (dataSet.next()) {
-                long user_id = dataSet.getLong("user_id");
-                if (Objects.equals(user_id, userID)) {
-                    System.out.print(
-                            """
-
-                                    ╔═════════════════════════════════════════════════════════════╗
-                                    ║                        Help History                         ║
-                                    ╚═════════════════════════════════════════════════════════════╝
-                                    ───────────────────────────────────────────────────────────────""");
-                    System.out.print(
-                            "\nHelp ID: " + dataSet.getLong("hr_id") +
-                                    "\nType: " + dataSet.getString("hr_type") +
-                                    "\nDescription: " + dataSet.getString("hr_description"));
-                    if (!Objects.equals(dataSet.getString("feedback"), null)) {
-                        System.out.print(
-                                "\nFeedback: " + dataSet.getString("feedback") +
-                                        "\n───────────────────────────────────────────────────────────────");
-
-                    } else {
-                        System.out.print(
-                                """
-                                        Feedback: No feedback yet.
-                                        ───────────────────────────────────────────────────────────────""");
-
-                    }
-                    helpFound = true;
-                }
-            } else {
-                throw new DataRetrievalException("User ID does not exist");
-            }
-        } catch (SQLException e) {
-            System.out.print("\nError on Data Retrieval: " + e.getMessage());
-        } finally {
-            if (!helpFound) {
-                System.out.print("No help history available for the user.");
-            }
-
-            BankSystem.closeResources(connection, statement, dataSet);
-        }
-    }
-
     protected static void displayAllHR() {
         Connection connection = null;
         PreparedStatement statement = null;
@@ -214,6 +157,9 @@ class CustomerService extends User {
             if (rs.next()) {
                 System.out.println("Number of active sessions: " + rs.getInt(1));
             }
+
+            // Prompt user to press enter to continue
+            System.out.println("\n\nPress Enter to continue...");
 
             // Close resources
             rs.close();
