@@ -209,7 +209,7 @@ public class BankSystem {
         try {
             connection = DriverManager.getConnection(url, userDB, passwordDB);
 
-            String query = "SELECT amount FROM transactions WHERE user_id = ? AND transact_type = ?";
+            String query = "SELECT amount, timestamp FROM transactions WHERE user_id = ? AND transact_type = ?";
 
             statement = connection.prepareStatement(query);
             statement.setLong(1, getCurrentUserID());
@@ -218,7 +218,7 @@ public class BankSystem {
             dataSet = statement.executeQuery();
             while (dataSet.next()) {
                 principal += dataSet.getDouble("amount");
-                Date transactionDate = dataSet.getDate("timestamp");
+                Timestamp transactionDate = dataSet.getTimestamp("timestamp");
                 long diffInMillis = Math.abs(now.getTime() - transactionDate.getTime());
                 long years = TimeUnit.DAYS.convert(diffInMillis, TimeUnit.MILLISECONDS) / 365;
                 double amount = principal * Math.pow(1 + interestRate, years);
@@ -471,6 +471,4 @@ public class BankSystem {
 
     }
 
-    public static void saveDataToFile() {
-    }
 }

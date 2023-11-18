@@ -418,13 +418,13 @@ public class User {
                                 ║           User Analytics            ║
                                 ╚═════════════════════════════════════╝""");
                 System.out.print(
-                        "\nName: " + dataSet.getString("name") +
+                        "\nName: " + dataSet.getString("fname") +
                                 "\n───────────────────────────────────────");
-                if (Objects.equals(dataSet.getString("productType"), "Savings Account")) {
+                if (Objects.equals(dataSet.getString("product_type"), "Savings Account")) {
                     System.out.print(
                             "\nTotal Net worth: " + BankSystem.calculateTotalNet() +
                                     "\nTotal Interest Earned: " + BankSystem.showInterestEarned());
-                } else if (Objects.equals(dataSet.getString("productType"), "Credit Account")) {
+                } else if (Objects.equals(dataSet.getString("product_type"), "Credit Account")) {
                     System.out.print(
                             "\nTotal Spent: " + calculateTotalSpent(username) +
                                     "\nTotal Paid: " + calculateTotalPaid(username));
