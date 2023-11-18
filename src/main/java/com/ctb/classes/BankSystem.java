@@ -18,15 +18,7 @@ public class BankSystem {
     private static final Scanner input = new Scanner(System.in);
     private static long currentUserID;
     private static String currentLoggedInUser;
-    private static String currentProductType;
-    private static long currentBalance;
-    private static String dataFilePath;
-
     public static final List<User> users = new LinkedList<>();
-    public static final List<Profile> profiles = new LinkedList<>();
-    private static final List<Transaction> transactionHistory = new LinkedList<>();
-    private static final List<ProductApplication> productApplications = new LinkedList<>();
-    private static final List<Session> sessions = new LinkedList<>();
 
     /*----------------------Setter Methods----------------------*/
     protected static void setCurrentUserID(long currentUserID) {
@@ -42,8 +34,6 @@ public class BankSystem {
             if (!isValidProductType(productType)) {
                 throw new InvalidProductTypeException("Invalid Product Type");
             }
-
-            currentProductType = productType;
         } catch (InvalidProductTypeException e) {
             System.err.println("Error: " + e.getMessage());
         }
@@ -126,7 +116,6 @@ public class BankSystem {
                         ╭────────────────────────────────────────────────────────────╮
                         │                     Forgot Password                        │
                         ╰────────────────────────────────────────────────────────────╯""");
-        char choice;
         System.out.print("\nEnter your email: ");
         String email = input.nextLine();
 

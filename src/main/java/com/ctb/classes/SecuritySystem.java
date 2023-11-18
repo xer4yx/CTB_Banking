@@ -14,15 +14,13 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.*;
 
 import static java.lang.Character.toUpperCase;
 
 class SecuritySystem {
-    private static final Scanner input = new Scanner(System.in);
+
     static int attempts;
     static long lastAttempt;
     static String OTP;
@@ -161,9 +159,17 @@ class SecuritySystem {
         sendOTP();
 
         String inputOTP;
-        Scanner scanner = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in); //
         System.out.print("\nEnter your OTP: ");
-        inputOTP = scanner.nextLine();
+        try {
+            inputOTP = scanner.nextLine();
+        } catch (NoSuchElementException e) {
+            // Ignore NoSuchElementException. This exception is thrown when the end of the
+            // input is reached.
+            // In this case, we're reading from System.in, so the end of the input is
+            // reached when the user doesn't enter anything and just presses Enter.
+            inputOTP = "";
+        }
         // scanner.close(); // Removed this line to prevent NoSuchElementException
 
         if (!verifyOTP(inputOTP)) {
