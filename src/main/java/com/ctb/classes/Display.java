@@ -34,7 +34,6 @@ public class Display {
     }
 
     public static boolean loginUser() {
-        BankSystem.clearConsole(); // TODO: delete this
         System.out.print(
                 """
 
@@ -285,14 +284,11 @@ public class Display {
             switch (transactionChoice) {
                 case 1:
                     User.processPurchase(username);
-                    BankSystem.clearConsole(); // TODO: delete this
                     break;
                 case 2:
                     User.processBills(username);
-                    BankSystem.clearConsole(); // TODO: delete this
                     break;
                 case 3:
-                    BankSystem.clearConsole(); // TODO: delete this
                     displayTransaction(username);
                     System.out.print("Press Enter to continue...");
                     input.nextLine();
@@ -345,7 +341,6 @@ public class Display {
     }
 
     public static void handleHelpAndResources(final String username) { // TODO: delete parameter
-        BankSystem.clearConsole(); // TODO: delete this
         System.out.print(
                 """
                         ╔═════════════════════════════════════╗

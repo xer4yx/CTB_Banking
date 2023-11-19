@@ -13,7 +13,7 @@ import java.util.Scanner;
 public class BankSystem {
     static String url = "jdbc:mysql://localhost:3306/ctb_banking";
     static String userDB = "root";
-    static String passwordDB = "password";
+    static String passwordDB = "Vertig@6925";
     private static String driver = "com.mysql.cj.jdbc.Driver";
     private static final Scanner input = new Scanner(System.in);
     private static long currentUserID;
