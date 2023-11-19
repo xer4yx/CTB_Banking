@@ -560,13 +560,10 @@ public class User {
     public static void processPurchase(String username) {
         System.out.print("\nEnter the purchase amount: $");
         double purchaseAmount = input.nextDouble();
+        input.nextLine(); // Consume leftover newline
+
         System.out.print("\nEnter the purchase description: ");
         String purchaseDescription = input.nextLine();
-        if (input.hasNextDouble()) {
-            input.nextDouble();
-            System.out.print("*Invalid amount. Please enter a valid number.");
-        }
-        input.nextLine();
 
         if (purchaseAmount <= 0.0) {
             System.out.print("*Invalid transaction amount. Please enter a positive amount.");
@@ -582,6 +579,7 @@ public class User {
     public static void processBills(String username) {
         System.out.print("\nEnter the bill amount: $");
         double billAmount = input.nextDouble();
+        input.nextLine(); // Consume leftover newline
 
         System.out.print("\nEnter the bill description: ");
         String billDescription = input.nextLine();
