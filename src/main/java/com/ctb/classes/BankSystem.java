@@ -120,11 +120,12 @@ public class BankSystem {
 
     /*----------------------Class Methods----------------------*/
     public static void forgotPassword() {
+        BankSystem.clearConsole(); // clear console
         System.out.print(
                 """
-                        ╭────────────────────────────────────────────────────────────╮
+                        ┌────────────────────────────────────────────────────────────┐
                         │                     Forgot Password                        │
-                        ╰────────────────────────────────────────────────────────────╯""");
+                        └────────────────────────────────────────────────────────────┘""");
         System.out.print("\nEnter your email: ");
         String email = input.nextLine();
 
