@@ -778,10 +778,12 @@ public class User {
                         return;
                     }
                 }
+                long userId = dataSet.getLong("user_id");
                 sql = "UPDATE users SET phone_number = ? WHERE username = ? AND user_id = ?";
                 statement = conn.prepareStatement(sql);
                 statement.setString(1, newPhoneNumber);
                 statement.setString(2, username);
+                statement.setLong(3, userId);
                 statement.executeUpdate();
                 System.out.print("Phone number changed to " + newPhoneNumber + " successfully.");
             }
