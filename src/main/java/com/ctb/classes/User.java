@@ -110,12 +110,13 @@ public class User {
                     } else if (dataSet.getBoolean("is_customerservice")) {
                         CustomerService.displayDashboardMenu();
                     } else {
+                        BankSystem.clearConsole(); // clear console
                         System.out.print(
                                 """
 
-                                        ╭─────────────────────────────────────╮
+                                        ┌─────────────────────────────────────┐
                                         │         CENTRAL TRUST BANK          │
-                                        ╰─────────────────────────────────────╯
+                                        └─────────────────────────────────────┘
                                         """);
                         System.out.print("Welcome " + BankSystem.getCurrentLoggedInUser() + "!");
                         System.out.print("\nCurrent Balance: $"
@@ -159,8 +160,9 @@ public class User {
                 String user = dataSet.getString("username");
                 if (Objects.equals(user, BankSystem.getCurrentLoggedInUser())) {
                     String show2FAStatus = dataSet.getBoolean("is2fa") ? "Enabled" : "Disabled";
+                    BankSystem.clearConsole(); // clear console
                     System.out.print(
-                            "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" +
+                            "\n══════════════════════════════════════════════════════════════" +
                                     "\n                      User Profile                            " +
                                     "\n══════════════════════════════════════════════════════════════" +
                                     "\n  Name: " + dataSet.getString("fname") +
@@ -188,12 +190,12 @@ public class User {
             System.out.print(
                     """
 
-                            ╭────────────────────────╮
+                            ┌────────────────────────┐
                             │     User Settings      │
                             ├────────────────────────┤
                             │ 1. Manage Account      │
                             │ 2. Back to Dashboard   │
-                            ╰────────────────────────╯
+                            └────────────────────────┘
                             """);
             System.out.print("Enter: ");
             int settingChoice = input.nextInt();
@@ -214,22 +216,24 @@ public class User {
         System.out.print(
                 """
 
-                        ╭───────────────────────────╮
+                        ┌───────────────────────────┐
                         │      Activity Log         │
                         ├───────────────────────────┤
                         │ 1. Transaction History    │
                         │ 2. Session History        │
                         │ 3. Help History           │
-                        ╰───────────────────────────╯""");
+                        └───────────────────────────┘""");
 
         System.out.print("\nEnter: ");
         int choice = input.nextInt();
 
         switch (choice) {
             case 1:
+                BankSystem.clearConsole(); // clear console
                 displayTransaction(username);
                 break;
             case 2:
+                BankSystem.clearConsole(); // clear console
                 displaySessions();
                 break;
             case 3:
@@ -285,7 +289,7 @@ public class User {
     }
 
     public static void handleSettings() {
-
+        BankSystem.clearConsole(); // clear console
         System.out.print(
                 """
 
@@ -377,7 +381,7 @@ public class User {
                             ║        Transaction History          ║
                             ╚═════════════════════════════════════╝""");
             System.out.print(
-                    "User: " + username +
+                    "\nUser: " + username +
                             "\n───────────────────────────────────────");
 
             while (dataSet.next()) {
@@ -600,6 +604,7 @@ public class User {
         int acctype;
         char enable2FA;
         while (true) {
+            BankSystem.clearConsole(); // clear console
             System.out.print(
                     """
 
@@ -638,7 +643,7 @@ public class User {
                             Pick account type:
                             1. Savings Account
                             2. Credit Account""");
-            System.out.print("\nChoose your account type: ");
+            System.out.print("\n\nChoose your account type: ");
             acctype = input.nextInt();
 
             switch (acctype) {
@@ -1004,7 +1009,7 @@ public class User {
                     helpFound = true;
                 }
             } else {
-                throw new DataRetrievalException("User ID does not exist");
+                throw new DataRetrievalException("User ID does not exist. ");
             }
         } catch (SQLException e) {
             System.out.print("\nError on Data Retrieval: " + e.getMessage());
