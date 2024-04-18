@@ -123,9 +123,9 @@ public class BankSystem {
         BankSystem.clearConsole(); // clear console
         System.out.print(
                 """
-                        ┌────────────────────────────────────────────────────────────┐
-                        │                     Forgot Password                        │
-                        └────────────────────────────────────────────────────────────┘""");
+                    ┌────────────────────────────────────────────────────────────┐
+                    │                     Forgot Password                        │
+                    └────────────────────────────────────────────────────────────┘""");
         System.out.print("\nEnter your email: ");
         String email = input.nextLine();
 

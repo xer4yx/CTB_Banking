@@ -110,7 +110,7 @@ public class User {
                     } else if (dataSet.getBoolean("is_customerservice")) {
                         CustomerService.displayDashboardMenu();
                     } else {
-                        BankSystem.clearConsole(); // TODO: delete this
+                        BankSystem.clearConsole(); // clear console
                         System.out.print(
                                 """
 
@@ -560,13 +560,10 @@ public class User {
     public static void processPurchase(String username) {
         System.out.print("\nEnter the purchase amount: $");
         double purchaseAmount = input.nextDouble();
+        input.nextLine(); // Consume leftover newline
+
         System.out.print("\nEnter the purchase description: ");
         String purchaseDescription = input.nextLine();
-        if (input.hasNextDouble()) {
-            input.nextDouble();
-            System.out.print("*Invalid amount. Please enter a valid number.");
-        }
-        input.nextLine();
 
         if (purchaseAmount <= 0.0) {
             System.out.print("*Invalid transaction amount. Please enter a positive amount.");
@@ -582,6 +579,7 @@ public class User {
     public static void processBills(String username) {
         System.out.print("\nEnter the bill amount: $");
         double billAmount = input.nextDouble();
+        input.nextLine(); // Consume leftover newline
 
         System.out.print("\nEnter the bill description: ");
         String billDescription = input.nextLine();
@@ -783,10 +781,12 @@ public class User {
                         return;
                     }
                 }
+                long userId = dataSet.getLong("user_id");
                 sql = "UPDATE users SET phone_number = ? WHERE username = ? AND user_id = ?";
                 statement = conn.prepareStatement(sql);
                 statement.setString(1, newPhoneNumber);
                 statement.setString(2, username);
+                statement.setLong(3, userId);
                 statement.executeUpdate();
                 System.out.print("Phone number changed to " + newPhoneNumber + " successfully.");
             }

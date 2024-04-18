@@ -10,6 +10,7 @@ class CustomerService extends User {
     private static final Scanner input = new Scanner(System.in);
 
     protected static void displayDashboardMenu() {
+        BankSystem.clearConsole(); // clear console
         System.out.print(
                 """
                         ╔═════════════════════════════════════╗
@@ -40,12 +41,13 @@ class CustomerService extends User {
             statement = connection.prepareStatement(query);
             dataSet = statement.executeQuery();
 
+            BankSystem.clearConsole(); // clear console
             System.out.print(
                     """
 
-                            ╭───────────────────────────────────────────╮
+                            ┌───────────────────────────────────────────┐
                             │             Help & Resources              │
-                            ╰───────────────────────────────────────────╯
+                            └───────────────────────────────────────────┘
                             ────────────────────────────────────────────""");
 
             while (dataSet.next()) {
@@ -142,7 +144,7 @@ class CustomerService extends User {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM help_resources");
             if (rs.next()) {
-                System.out.println("Total number of help resources: " + rs.getInt(1));
+                System.out.println("\nTotal number of help resources: " + rs.getInt(1));
             }
 
             // Display number of users with 2FA enabled
@@ -170,6 +172,7 @@ class CustomerService extends User {
     }
 
     protected static void handleManageUsers() {
+        BankSystem.clearConsole(); // clear console
         System.out.print(
                 """
 
@@ -193,9 +196,11 @@ class CustomerService extends User {
                 displayUserData(username);
                 break;
             case 2:
+                BankSystem.clearConsole(); // clear console
                 User.applyProduct();
                 break;
             case 3:
+                BankSystem.clearConsole(); // clear console
                 deleteUser();
                 break;
             case 4:
@@ -241,9 +246,9 @@ class CustomerService extends User {
         System.out.print(
                 """
 
-                        ╭────────────────────────────────────────────────────────────────╮
+                        ┌────────────────────────────────────────────────────────────────┐
                         │                         Delete User                            │
-                        ╰────────────────────────────────────────────────────────────────╯""");
+                        └────────────────────────────────────────────────────────────────┘""");
         System.out.print("\nEnter the username of the user to delete: ");
         String user = input.nextLine();
         input.nextLine();
@@ -264,6 +269,7 @@ class CustomerService extends User {
 
             dataSet = statement.executeQuery();
             if (dataSet.next()) {
+                System.out.println("\n");
                 System.out.println("User ID: " + dataSet.getLong("user_id"));
                 System.out.println("First Name: " + dataSet.getString("fname"));
                 System.out.println("Middle Name: " + dataSet.getString("mname"));
@@ -307,6 +313,7 @@ class CustomerService extends User {
         }
         while (true) {
             displayUserData(username);
+            System.out.println("\n");
             System.out.print(
                     """
                             ╔═════════════════════════════════════╗
@@ -319,7 +326,7 @@ class CustomerService extends User {
                             ║  5. Enable/Disable 2FA              ║
                             ║  6. Show Activity Log               ║
                             ║  7. Back to Profile                 ║
-                            ╚═════════════════════════════════════╝""");
+                            ╚═════════════════════════════════════╝\n""");
             System.out.print("Enter: ");
             int choice = input.nextInt();
             input.nextLine(); // Move cursor to next line

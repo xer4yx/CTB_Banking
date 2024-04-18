@@ -41,6 +41,7 @@ class Admin extends User {
     }
 
     protected static void handleManageUsers() {
+        BankSystem.clearConsole(); // clear console
         System.out.print(
                 """
 
@@ -59,15 +60,19 @@ class Admin extends User {
         input.nextLine();
         switch (choice) {
             case 1:
+            BankSystem.clearConsole(); // clear console
                 displayAllUserData();
                 break;
             case 2:
+            BankSystem.clearConsole(); // clear console
                 User.applyProduct();
                 break;
             case 3:
+            BankSystem.clearConsole(); // clear console
                 deleteUser();
                 break;
             case 4:
+            BankSystem.clearConsole(); // clear console
                 updateUser();
                 break;
             case 5:
@@ -108,9 +113,9 @@ class Admin extends User {
         System.out.print(
                 """
 
-                        ╭────────────────────────────────────────────────────────────────╮
+                        ┌────────────────────────────────────────────────────────────────┐
                         │                         Delete User                            │
-                        ╰────────────────────────────────────────────────────────────────╯""");
+                        └────────────────────────────────────────────────────────────────┘""");
         System.out.print("\nEnter the username of the user to delete: ");
         String user = input.nextLine();
         input.nextLine();
@@ -158,13 +163,12 @@ class Admin extends User {
                             ║  11. Make a Purchase(Credit Only)   ║
                             ║  12. Bills Payment(Credit Only)     ║
                             ║  13. Back to Profile                ║
-                            ╚═════════════════════════════════════╝""");
+                            ╚═════════════════════════════════════╝\n""");
             System.out.print("Enter: ");
             int choice = input.nextInt();
             input.nextLine(); // Move cursor to next line
             switch (choice) {
                 case 1:
-
                     System.out.print("Enter new password: ");
                     String newPassword = input.nextLine();
                     Admin.changePassword(username, newPassword);
@@ -232,9 +236,9 @@ class Admin extends User {
         System.out.print(
                 """
 
-                        ╭────────────────────────────────────────────────────────────────╮
+                        ┌────────────────────────────────────────────────────────────────┐
                         │                         Update User                            │
-                        ╰────────────────────────────────────────────────────────────────╯""");
+                        └────────────────────────────────────────────────────────────────┘""");
         System.out.print("\nEnter the username of the user you want to update: ");
         String pickedUsername = input.nextLine();
         input.nextLine();

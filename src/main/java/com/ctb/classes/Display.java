@@ -350,7 +350,7 @@ public class Display {
             pstmt.setString(1, username);
             ResultSet rs = pstmt.executeQuery();
 
-            BankSystem.clearConsole(); // TODO: delete this
+            BankSystem.clearConsole(); // clear console
             System.out.print(
                     """
                             ╔═════════════════════════════════════╗
@@ -399,11 +399,12 @@ public class Display {
         input.nextLine();
         switch (jhchoice) { // TODO: modularize
             case 1:
-            System.out.println("\nHi! I'm your AI Assistant. How may I help you?");
+                System.out.println("\nHi! I'm your AI Assistant. How may I help you?");
                 System.out.print(
                         """
                                 \nEnter inquiry\\s: """);
                 String message = input.nextLine();
+                System.out.println("\n───────────────────────────");
                 HelpAndResources.chatBot(message, BankSystem.getCurrentLoggedInUser());
                 System.out.println("\n───────────────────────────");
                 System.out.print("Press Enter to continue...");
@@ -413,17 +414,17 @@ public class Display {
                 BankSystem.clearConsole(); // TODO: delete this
                 System.out.print(
                         """
-                                ┌────────────────────────────────────────────────┐
-                                │                  Contact Us                    │
-                                ├────────────────────────────────────────────────┤
-                                │  Email: Uniportal@proton.me                    │
-                                │  Phone: 1-800-123-4567                         │
-                                │  Address: 123 Main St, New York, NY 10001      │
-                                └────────────────────────────────────────────────┘
-                                ┌────────────────────────────────────────────────┐
-                                │  1. Send a message                             │
-                                │  2. Back to Dashboard                          │
-                                └────────────────────────────────────────────────┘
+                            ┌────────────────────────────────────────────────┐
+                            │                  Contact Us                    │
+                            ├────────────────────────────────────────────────┤
+                            │  Email: Uniportal@proton.me                    │
+                            │  Phone: 1-800-123-4567                         │
+                            │  Address: 123 Main St, New York, NY 10001      │
+                            └────────────────────────────────────────────────┘
+                            ┌────────────────────────────────────────────────┐
+                            │  1. Send a message                             │
+                            │  2. Back to Dashboard                          │
+                            └────────────────────────────────────────────────┘
                                 Enter your choice:\s""");
 
                 int schoice = input.nextInt();
