@@ -218,7 +218,7 @@ class SecuritySystem {
 
             // Write the updated JSONArray to the audit log file
             try (FileWriter file = new FileWriter("audit_log.json")) {
-                file.write(auditLogs.toString());
+                file.write(auditLogs.toString(4));
                 file.flush();
             }
         } catch (IOException | org.json.JSONException e) {
