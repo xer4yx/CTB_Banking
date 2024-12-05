@@ -32,3 +32,4 @@ bin/
 ### Files ###
 *.yaml
 *.json
+*.iml
